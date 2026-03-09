@@ -67,7 +67,7 @@ const organizationSchema = new Schema<IOrganization>(
     {
         id: { type: String, required: true, unique: true },
         name: { type: String, required: true },
-        description: { type: String, required: false, default: '' },
+        description: { type: String, required: true },
         elementFields: { type: [fieldSchema], default: [] },
         agreementFields: { type: [fieldSchema], default: [] },
         roles: { type: [roleSchema], default: [] },
