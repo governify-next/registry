@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import * as organizationController from '../controllers/organization.controller.js';
-import { validateOrganization, validateRole } from '../middlewares/organization.validator.js';
+import {
+    validateOrganization,
+    validateRole,
+    validateField,
+} from '../middlewares/organization.validator.js';
 
 export const organizationRoutes = Router();
 
@@ -23,3 +27,35 @@ organizationRoutes.put(
     organizationController.updateRole,
 );
 organizationRoutes.delete('/:orgName/roles/:roleName', organizationController.deleteRole);
+
+// ElementFields
+organizationRoutes.post(
+    '/:orgName/elementFields',
+    validateField,
+    organizationController.addElementField,
+);
+organizationRoutes.put(
+    '/:orgName/elementFields/:fieldName',
+    validateField,
+    organizationController.updateElementField,
+);
+organizationRoutes.delete(
+    '/:orgName/elementFields/:fieldName',
+    organizationController.deleteElementField,
+);
+
+// AgreementFields
+organizationRoutes.post(
+    '/:orgName/agreementFields',
+    validateField,
+    organizationController.addAgreementField,
+);
+organizationRoutes.put(
+    '/:orgName/agreementFields/:fieldName',
+    validateField,
+    organizationController.updateAgreementField,
+);
+organizationRoutes.delete(
+    '/:orgName/agreementFields/:fieldName',
+    organizationController.deleteAgreementField,
+);

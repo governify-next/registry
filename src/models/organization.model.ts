@@ -2,22 +2,31 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 // Subdocumentos
 
-const fieldSchema = new Schema({
-    name: { type: String, required: true },
-    description: { type: String, required: true },
-    type: { type: String, required: true },
-    value: { type: Schema.Types.Mixed }, // acepta cualquier valor
-});
+const fieldSchema = new Schema(
+    {
+        name: { type: String, required: true },
+        description: { type: String, required: true },
+        type: { type: String, required: true },
+        value: { type: Schema.Types.Mixed }, // acepta cualquier valor
+    },
+    { _id: false },
+);
 
-const roleSchema = new Schema({
-    name: { type: String, required: true },
-    description: { type: String, required: true },
-});
+const roleSchema = new Schema(
+    {
+        name: { type: String, required: true },
+        description: { type: String, required: true },
+    },
+    { _id: false },
+);
 
-const userByRoleSchema = new Schema({
-    userName: { type: String, required: true },
-    rolesName: { type: [String], required: true },
-});
+const userByRoleSchema = new Schema(
+    {
+        userName: { type: String, required: true },
+        rolesName: { type: [String], required: true },
+    },
+    { _id: false },
+);
 
 // Interfaz para TypeScript
 

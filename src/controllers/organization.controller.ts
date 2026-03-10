@@ -87,3 +87,91 @@ export const deleteRole = async (req: Request, res: Response, next: NextFunction
         next(err);
     }
 };
+
+export const addElementField = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.addField(
+            'elementFields',
+            req.params.orgName,
+            req.body,
+        );
+        return sendSuccess(res, {
+            data: organization,
+            httpStatus: 201,
+            message: 'ElementField added',
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const updateElementField = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.updateField(
+            'elementFields',
+            req.params.orgName,
+            req.params.fieldName,
+            req.body,
+        );
+        return sendSuccess(res, { data: organization, message: 'ElementField updated' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const deleteElementField = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.deleteField(
+            'elementFields',
+            req.params.orgName,
+            req.params.fieldName,
+        );
+        return sendSuccess(res, { data: organization, message: 'ElementField deleted' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const addAgreementField = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.addField(
+            'agreementFields',
+            req.params.orgName,
+            req.body,
+        );
+        return sendSuccess(res, {
+            data: organization,
+            httpStatus: 201,
+            message: 'AgreementField added',
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const updateAgreementField = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.updateField(
+            'agreementFields',
+            req.params.orgName,
+            req.params.fieldName,
+            req.body,
+        );
+        return sendSuccess(res, { data: organization, message: 'AgreementField updated' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const deleteAgreementField = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.deleteField(
+            'agreementFields',
+            req.params.orgName,
+            req.params.fieldName,
+        );
+        return sendSuccess(res, { data: organization, message: 'AgreementField deleted' });
+    } catch (err) {
+        next(err);
+    }
+};

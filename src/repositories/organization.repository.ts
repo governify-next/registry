@@ -90,21 +90,64 @@ export const updateRole = async (
 };
 
 export const deleteRole = async (orgName: string, roleName: string) => {
-    // Elimina el rol del array roles y el nombre del rol de todos los rolesName en usersByRole
-    await Organization.updateOne(
+    // 1. Elimina el rol del array de roles
+    await Organization.updateOne({ name: orgName }, { $pull: { roles: { name: roleName } } });
+    // 2. Elimina el roleName de todos los rolesName usando el arrayFilters
+    await Organization.updateMany(
         { name: orgName },
-        {
-            $pull: {
-                // borra todo lo que cumpla
-                roles: { name: roleName },
-                'usersByRole.$[].rolesName': roleName, //Si un usuario solo tenía ese error, la entrada queda vacía: ana -> ["admin"] ; ana -> []
-            },
-        },
+        { $pull: { 'usersByRole.$[elem].rolesName': roleName } },
+        { arrayFilters: [{ 'elem.rolesName': roleName }] }, // ana -> ["admin"] ; ana -> []
     );
-    // Elimina las entradas de usersByRole que quedaron sin ningún rol
+    // 3. Limpia las entradas huérfanas (los usuarios que se quedaron sin roles)
     return await Organization.findOneAndUpdate(
         { name: orgName },
-        { $pull: { usersByRole: { rolesName: { $size: 0 } } } }, // ana -> [] se elimina
+        { $pull: { usersByRole: { rolesName: { $size: 0 } } } },
+        { new: true },
+    );
+};
+
+// Fields genéricos para que elementFields y agreementFields compartan la misma lógica
+
+export type FieldArrayName = 'elementFields' | 'agreementFields';
+type FieldData = { name: string; description: string; type: string; value?: unknown };
+
+export const addField = async (orgName: string, arrayName: FieldArrayName, field: FieldData) => {
+    return await Organization.findOneAndUpdate(
+        { name: orgName },
+        { $push: { [arrayName]: field } },
+        { new: true },
+    );
+};
+
+export const updateField = async (
+    orgName: string,
+    arrayName: FieldArrayName,
+    oldFieldName: string,
+    data: FieldData,
+) => {
+    const setClause: Record<string, unknown> = {
+        [`${arrayName}.$[fieldElem].name`]: data.name,
+        [`${arrayName}.$[fieldElem].description`]: data.description,
+        [`${arrayName}.$[fieldElem].type`]: data.type,
+    };
+    // Solo se actualiza value si fue enviado en el body
+    if ('value' in data) setClause[`${arrayName}.$[fieldElem].value`] = data.value;
+
+    return await Organization.findOneAndUpdate(
+        { name: orgName },
+        { $set: setClause },
+        { arrayFilters: [{ 'fieldElem.name': oldFieldName }], new: true },
+    );
+};
+
+export const deleteField = async (
+    orgName: string,
+    arrayName: FieldArrayName,
+    fieldName: string,
+) => {
+    return await Organization.findOneAndUpdate(
+        { name: orgName },
+        { $pull: { [arrayName]: { name: fieldName } } },
         { new: true },
     );
 };
