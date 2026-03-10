@@ -8,7 +8,7 @@ const validateElementFields = async (req: Request, res: Response, next: NextFunc
         const { fields } = req.body;
         const organization = res.locals.organization as IOrganization;
 
-        if (!fields || typeof fields !== 'object') {
+        if (!fields || !Array.isArray(fields)) {
             return next();
         }
 
@@ -16,15 +16,28 @@ const validateElementFields = async (req: Request, res: Response, next: NextFunc
 
         const errors = [];
 
-        for (const fieldName of Object.keys(fields)) {
-            const orgField = elementFieldsMap.get(fieldName);
+        // Validate each object in the fields array
+        for (let i = 0; i < fields.length; i++) {
+            const fieldObj = fields[i];
 
-            if (!orgField) {
+            if (!fieldObj || typeof fieldObj !== 'object' || Array.isArray(fieldObj)) {
                 errors.push({
-                    msg: `Field '${fieldName}' is not defined in organization's elementFields`,
-                    path: `fields.${fieldName}`,
+                    msg: `fields[${i}] must be an object`,
+                    path: `fields[${i}]`,
                 });
                 continue;
+            }
+
+            // Check each key in the field object
+            for (const fieldName of Object.keys(fieldObj)) {
+                const orgField = elementFieldsMap.get(fieldName);
+
+                if (!orgField) {
+                    errors.push({
+                        msg: `Field '${fieldName}' is not defined in organization's elementFields`,
+                        path: `fields[${i}].${fieldName}`,
+                    });
+                }
             }
         }
 
@@ -114,7 +127,7 @@ export const validateElement = [
         .withMessage('description must be a string')
         .isLength({ max: 500 })
         .withMessage('description must be at most 500 characters'),
-    body('fields').exists({ checkNull: true }).isObject().withMessage('fields must be an object'),
+    body('fields').exists({ checkNull: true }).isArray().withMessage('fields must be an array'),
     body('permissions')
         .exists({ checkNull: true })
         .isObject()

@@ -23,7 +23,7 @@ export interface IElement extends Document {
     name: string;
     description: string;
     organizationId: Types.ObjectId; // Reference by _id, not name
-    fields: Record<string, unknown>;
+    fields: Record<string, unknown>[];
     permissions: {
         view?: string[];
         edit?: string[];
@@ -45,7 +45,7 @@ const elementSchema = new Schema<IElement>(
         name: { type: String, required: true },
         description: { type: String, required: true },
         organizationId: { type: Schema.Types.ObjectId, ref: 'Organization', required: true },
-        fields: { type: Schema.Types.Mixed, default: {} },
+        fields: [{ type: Schema.Types.Mixed }],
         permissions: { type: permissionsSchema, default: {} },
         auditConfig: { type: Schema.Types.Mixed, default: {} },
         parts: { type: [partSchema], default: [] },
