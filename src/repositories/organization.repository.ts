@@ -53,3 +53,11 @@ export const updateOrganization = async (orgName: string, data: Partial<IOrganiz
 export const deleteOrganization = async (orgName: string) => {
     return await Organization.findOneAndDelete({ name: orgName });
 };
+
+export const addRole = async (orgName: string, role: { name: string; description: string }) => {
+    return await Organization.findOneAndUpdate(
+        { name: orgName },
+        { $push: { roles: role } },
+        { new: true },
+    );
+};

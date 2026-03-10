@@ -53,3 +53,12 @@ export const deleteOrganization = async (req: Request, res: Response, next: Next
         next(err);
     }
 };
+
+export const addRole = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.addRole(req.params.orgName, req.body);
+        return sendSuccess(res, { data: organization, httpStatus: 201, message: 'Role added' });
+    } catch (err) {
+        next(err);
+    }
+};

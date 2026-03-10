@@ -94,3 +94,14 @@ export const validateOrganization = [
         next();
     },
 ];
+
+export const validateRole = [
+    subNameValidation('name'),
+    subDescriptionValidation('description'),
+    (req: Request, res: Response, next: NextFunction) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty())
+            return next(new ValidationError('Validation failed', errors.array()));
+        next();
+    },
+];
