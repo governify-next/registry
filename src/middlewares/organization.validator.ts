@@ -4,15 +4,6 @@ import { ValidationError } from '../utils/customErrors.js';
 
 // Primitivos para los subcampos
 
-const subIdValidation = (field: string) =>
-    body(field)
-        .isString()
-        .withMessage(`${field} must be a string`)
-        .notEmpty()
-        .withMessage(`${field} must not be empty`)
-        .isLength({ max: 100 })
-        .withMessage(`${field} must be at most 100 characters`);
-
 const subNameValidation = (field: string) =>
     body(field)
         .isString()
@@ -34,32 +25,22 @@ const subDescriptionValidation = (field: string) =>
 // Validaciones para los arrays de subdocumentos
 
 const fieldValidation = (arrayName: string) => [
-    subIdValidation(`${arrayName}.*.id`),
     subNameValidation(`${arrayName}.*.name`),
     subDescriptionValidation(`${arrayName}.*.description`),
     body(`${arrayName}.*.type`)
         .isString()
         .withMessage(`${arrayName}[].type must be a string`)
+        .notEmpty()
         .isLength({ max: 50 })
         .withMessage(`${arrayName}[].type must be at most 50 characters`),
 ];
 
 const roleValidation = () => [
-    subIdValidation('roles.*.id'),
     subNameValidation('roles.*.name'),
     subDescriptionValidation('roles.*.description'),
 ];
 
 export const validateOrganization = [
-    body('id')
-        .exists({ checkNull: true })
-        .withMessage('id is required')
-        .isString()
-        .withMessage('id must be a string')
-        .notEmpty()
-        .withMessage('id must not be empty')
-        .isLength({ max: 100 })
-        .withMessage('id must be at most 100 characters'),
     body('name')
         .exists({ checkNull: true })
         .withMessage('name is required')
@@ -89,20 +70,23 @@ export const validateOrganization = [
 
     // UsersByRole
     body('usersByRole').optional().isArray().withMessage('usersByRole must be an array'),
-    body('usersByRole.*.userId')
+    body('usersByRole.*.userName')
         .isString()
-        .withMessage('usersByRole[].userId must be a string')
+        .withMessage('usersByRole[].userName must be a string')
         .notEmpty()
-        .withMessage('usersByRole[].userId must not be empty')
+        .withMessage('usersByRole[].userName must not be empty')
         .isLength({ max: 100 })
-        .withMessage('usersByRole[].userId must be at most 100 characters'),
-    body('usersByRole.*.rolesId')
+        .withMessage('usersByRole[].userName must be at most 100 characters'),
+    body('usersByRole.*.rolesName')
         .isArray({ min: 1 }) // Actúa en cada entrada de usersByRole. Si llega aquí es porque hay entrada, entonces mínimo tiene que haber un rol definido
-        .withMessage('usersByRole[].rolesId must be a non-empty array'),
-    body('usersByRole.*.rolesId.*')
+        .withMessage('usersByRole[].rolesName must be a non-empty array'),
+    body('usersByRole.*.rolesName.*')
         .isString()
-        .withMessage('usersByRole[].rolesId elements must be strings'),
-
+        .withMessage('usersByRole[].rolesName elements must be strings')
+        .notEmpty()
+        .withMessage('usersByRole[].rolesName elements must not be empty')
+        .isLength({ max: 100 })
+        .withMessage('usersByRole[].rolesName elements must be at most 100 characters'),
     (req: Request, res: Response, next: NextFunction) => {
         const errors = validationResult(req);
         if (!errors.isEmpty())

@@ -6,6 +6,10 @@ export const organizationRoutes = Router();
 
 organizationRoutes.post('/', validateOrganization, organizationController.createOrganization);
 organizationRoutes.get('/', organizationController.getOrganizations);
-organizationRoutes.get('/:orgId', organizationController.getOrganizationById);
-organizationRoutes.put('/:orgId', validateOrganization, organizationController.updateOrganization);
-organizationRoutes.delete('/:orgId', organizationController.deleteOrganization);
+organizationRoutes.get('/:orgName', organizationController.getOrganizationByName);
+organizationRoutes.put(
+    '/:orgName',
+    validateOrganization,
+    organizationController.updateOrganization,
+);
+organizationRoutes.delete('/:orgName', organizationController.deleteOrganization);

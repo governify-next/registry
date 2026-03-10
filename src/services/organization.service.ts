@@ -10,20 +10,20 @@ export const getOrganizations = async () => {
     return await organizationRepository.getOrganizations();
 };
 
-export const getOrganizationById = async (orgId: string) => {
-    const organization = await organizationRepository.getOrganizationById(orgId);
-    if (!organization) throw new NotFoundError(`Organization with id '${orgId}' not found`);
+export const getOrganizationByName = async (orgName: string) => {
+    const organization = await organizationRepository.getOrganizationByName(orgName);
+    if (!organization) throw new NotFoundError(`Organization with name '${orgName}' not found`);
     return organization;
 };
 
-export const updateOrganization = async (orgId: string, data: Partial<IOrganization>) => {
-    const organization = await organizationRepository.updateOrganization(orgId, data);
-    if (!organization) throw new NotFoundError(`Organization with id '${orgId}' not found`);
+export const updateOrganization = async (orgName: string, data: Partial<IOrganization>) => {
+    const organization = await organizationRepository.updateOrganization(orgName, data);
+    if (!organization) throw new NotFoundError(`Organization with name '${orgName}' not found`);
     return organization;
 };
 
-export const deleteOrganization = async (orgId: string) => {
-    const organization = await organizationRepository.deleteOrganization(orgId);
-    if (!organization) throw new NotFoundError(`Organization with id '${orgId}' not found`);
+export const deleteOrganization = async (orgName: string) => {
+    const organization = await organizationRepository.deleteOrganization(orgName);
+    if (!organization) throw new NotFoundError(`Organization with name '${orgName}' not found`);
     return organization;
 };

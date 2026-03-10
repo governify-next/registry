@@ -1,5 +1,4 @@
 import Organization, { IOrganization } from '../models/organization.model.js';
-
 import { DuplicateKeyError } from '../utils/customErrors.js';
 
 export const createOrganization = async (data: Partial<IOrganization>) => {
@@ -9,13 +8,13 @@ export const createOrganization = async (data: Partial<IOrganization>) => {
     } catch (err) {
         const e = err as {
             code?: number;
-            keyPattern?: { id?: number };
+            keyPattern?: { name?: number };
             keyValue?: unknown;
             message?: string;
         };
-        if (e.code === 11000 && e.keyPattern?.id) {
+        if (e.code === 11000 && e.keyPattern?.name) {
             throw new DuplicateKeyError(
-                'An organization with that id already exists',
+                'An organization with that name already exists',
                 e.keyValue || e.message,
             );
         }
@@ -27,23 +26,23 @@ export const getOrganizations = async () => {
     return await Organization.find();
 };
 
-export const getOrganizationById = async (orgId: string) => {
-    return await Organization.findOne({ id: orgId }); // findById busca por _id, por eso siempre usamos findOne, porque usamos el id externo
+export const getOrganizationByName = async (orgName: string) => {
+    return await Organization.findOne({ name: orgName });
 };
 
-export const updateOrganization = async (orgId: string, data: Partial<IOrganization>) => {
+export const updateOrganization = async (orgName: string, data: Partial<IOrganization>) => {
     try {
-        return await Organization.findOneAndUpdate({ id: orgId }, data, { new: true }); // new: true devuelve el doc tras actualización
+        return await Organization.findOneAndUpdate({ name: orgName }, data, { new: true });
     } catch (err) {
         const e = err as {
             code?: number;
-            keyPattern?: { id?: number };
+            keyPattern?: { name?: number };
             keyValue?: unknown;
             message?: string;
         };
-        if (e.code === 11000 && e.keyPattern?.id) {
+        if (e.code === 11000 && e.keyPattern?.name) {
             throw new DuplicateKeyError(
-                'An organization with that id already exists',
+                'An organization with that name already exists',
                 e.keyValue || e.message,
             );
         }
@@ -51,6 +50,6 @@ export const updateOrganization = async (orgId: string, data: Partial<IOrganizat
     }
 };
 
-export const deleteOrganization = async (orgId: string) => {
-    return await Organization.findOneAndDelete({ id: orgId });
+export const deleteOrganization = async (orgName: string) => {
+    return await Organization.findOneAndDelete({ name: orgName });
 };

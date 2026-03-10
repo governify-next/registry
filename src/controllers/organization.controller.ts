@@ -24,9 +24,9 @@ export const getOrganizations = async (req: Request, res: Response, next: NextFu
     }
 };
 
-export const getOrganizationById = async (req: Request, res: Response, next: NextFunction) => {
+export const getOrganizationByName = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const organization = await organizationService.getOrganizationById(req.params.orgId);
+        const organization = await organizationService.getOrganizationByName(req.params.orgName);
         return sendSuccess(res, { data: organization });
     } catch (err) {
         next(err);
@@ -36,7 +36,7 @@ export const getOrganizationById = async (req: Request, res: Response, next: Nex
 export const updateOrganization = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const organization = await organizationService.updateOrganization(
-            req.params.orgId,
+            req.params.orgName,
             req.body,
         );
         return sendSuccess(res, { data: organization, message: 'Organization updated' });
@@ -47,7 +47,7 @@ export const updateOrganization = async (req: Request, res: Response, next: Next
 
 export const deleteOrganization = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        await organizationService.deleteOrganization(req.params.orgId);
+        await organizationService.deleteOrganization(req.params.orgName);
         return sendSuccess(res, { data: null, message: 'Organization deleted' });
     } catch (err) {
         next(err);
