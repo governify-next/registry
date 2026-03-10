@@ -62,3 +62,28 @@ export const addRole = async (req: Request, res: Response, next: NextFunction) =
         next(err);
     }
 };
+
+export const updateRole = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.updateRole(
+            req.params.orgName,
+            req.params.roleName,
+            req.body,
+        );
+        return sendSuccess(res, { data: organization, message: 'Role updated' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const deleteRole = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.deleteRole(
+            req.params.orgName,
+            req.params.roleName,
+        );
+        return sendSuccess(res, { data: organization, message: 'Role deleted' });
+    } catch (err) {
+        next(err);
+    }
+};

@@ -17,3 +17,9 @@ organizationRoutes.delete('/:orgName', organizationController.deleteOrganization
 
 // Roles
 organizationRoutes.post('/:orgName/roles', validateRole, organizationController.addRole);
+organizationRoutes.put(
+    '/:orgName/roles/:roleName',
+    validateRole,
+    organizationController.updateRole,
+);
+organizationRoutes.delete('/:orgName/roles/:roleName', organizationController.deleteRole);
