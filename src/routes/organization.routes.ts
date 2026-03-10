@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import * as organizationController from '../controllers/organization.controller.js';
-import { validateOrganization } from '../middlewares/organization.validator.js';
+import {
+    validateOrganization,
+    existingOrganization,
+} from '../middlewares/organization.validator.js';
+import { elementRoutes } from './element.routes.js';
 
 export const organizationRoutes = Router();
 
@@ -13,3 +17,5 @@ organizationRoutes.put(
     organizationController.updateOrganization,
 );
 organizationRoutes.delete('/:orgName', organizationController.deleteOrganization);
+
+organizationRoutes.use('/:orgName/elements', existingOrganization, elementRoutes);

@@ -1,6 +1,7 @@
 import { body, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError } from '../utils/customErrors.js';
+import { getOrganizationByName } from '../services/organization.service.js';
 
 // Primitivos para los subcampos
 
@@ -94,3 +95,20 @@ export const validateOrganization = [
         next();
     },
 ];
+
+export const existingOrganization = async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.params.orgName) return next();
+
+    try {
+        const organization = await getOrganizationByName(req.params.orgName);
+        if (!organization) {
+            return next(
+                new ValidationError(`Organization with name ${req.params.orgName} does not exist`),
+            );
+        }
+        res.locals.organization = organization; // save organization for downstream use
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
