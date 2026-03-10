@@ -27,17 +27,13 @@ const validateElementFields = async (req: Request, res: Response, next: NextFunc
                 });
                 continue;
             }
+            const orgField = elementFieldsMap.get(fieldObj.name);
 
-            // Check each key in the field object
-            for (const fieldName of Object.keys(fieldObj)) {
-                const orgField = elementFieldsMap.get(fieldName);
-
-                if (!orgField) {
-                    errors.push({
-                        msg: `Field '${fieldName}' is not defined in organization's elementFields`,
-                        path: `fields[${i}].${fieldName}`,
-                    });
-                }
+            if (!orgField) {
+                errors.push({
+                    msg: `Field named '${fieldObj.name}' is not defined in organization's elementFields`,
+                    path: `fields[${i}]`,
+                });
             }
         }
 
