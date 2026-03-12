@@ -2,9 +2,7 @@ import { body, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError } from '../utils/customErrors.js';
 
-// Primitivos para los subcampos
-
-const subNameValidation = (field: string) =>
+const nameValidation = (field: string) =>
     body(field)
         .exists({ checkNull: true })
         .withMessage(`${field} is required`)
@@ -15,7 +13,7 @@ const subNameValidation = (field: string) =>
         .isLength({ max: 100 })
         .withMessage(`${field} must be at most 100 characters`);
 
-const subDescriptionValidation = (field: string) =>
+const descriptionValidation = (field: string) =>
     body(field)
         .exists({ checkNull: true })
         .withMessage(`${field} is required`)
@@ -24,7 +22,7 @@ const subDescriptionValidation = (field: string) =>
         .isLength({ max: 500 })
         .withMessage(`${field} must be at most 500 characters`);
 
-const subTypeValidation = (field: string) =>
+const typeValidation = (field: string) =>
     body(field)
         .exists({ checkNull: true })
         .withMessage(`${field} is required`)
@@ -35,9 +33,33 @@ const subTypeValidation = (field: string) =>
         .isLength({ max: 50 })
         .withMessage(`${field} must be at most 50 characters`);
 
+const valueValidation = (field: string) => {
+    // Extraemos el valor de field 'value'
+    return body(field).custom((value, meta) => {
+        // Si type es enum
+        if (meta.req.body.type === 'enum') {
+            // Debe existir value
+            if (value === undefined) {
+                throw new Error("El campo 'value' debe definirse si 'type' es 'enum'");
+            }
+            // Debe ser Array
+            if (!Array.isArray(value)) {
+                throw new Error(
+                    "El campo 'value' debe definirse como una lista si 'type' es 'enum'",
+                );
+            }
+        } else {
+            if (value !== undefined) {
+                throw new Error("El campo 'value' solo puede definirse si 'type' es 'enum'");
+            }
+        }
+        return true;
+    });
+};
+
 export const validateOrganization = [
-    subNameValidation('name'),
-    subDescriptionValidation('description'),
+    nameValidation('name'),
+    descriptionValidation('description'),
     (req: Request, res: Response, next: NextFunction) => {
         const errors = validationResult(req);
         if (!errors.isEmpty())
@@ -47,8 +69,8 @@ export const validateOrganization = [
 ];
 
 export const validateRole = [
-    subNameValidation('name'),
-    subDescriptionValidation('description'),
+    nameValidation('name'),
+    descriptionValidation('description'),
     (req: Request, res: Response, next: NextFunction) => {
         const errors = validationResult(req);
         if (!errors.isEmpty())
@@ -58,9 +80,10 @@ export const validateRole = [
 ];
 
 export const validateField = [
-    subNameValidation('name'),
-    subDescriptionValidation('description'),
-    subTypeValidation('type'),
+    nameValidation('name'),
+    descriptionValidation('description'),
+    typeValidation('type'),
+    valueValidation('value'),
     (req: Request, res: Response, next: NextFunction) => {
         const errors = validationResult(req);
         if (!errors.isEmpty())
