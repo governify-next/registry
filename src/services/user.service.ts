@@ -9,14 +9,14 @@ export const getUsers = async () => {
     return await userRepository.getUsers();
 };
 
-export const getUserById = async (id: string) => {
-    return await userRepository.getUserById(id);
+export const getUserByUsername = async (username: string) => {
+    return await userRepository.getUserByUsername(username);
 };
 
-export const updateUser = async (id: string, data: Partial<IUser>) => {
-    return await userRepository.updateUser(id, data);
+export const updateUser = async (username: string, data: Partial<IUser>) => {
+    return await userRepository.updateUser(username, data);
 };
 
-export const deleteUser = async (id: string) => {
-    return await userRepository.deleteUser(id);
+export const deleteUser = async (username: string) => {
+    return await userRepository.deleteUser(username);
 };
