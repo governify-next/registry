@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as userController from '../controllers/user.controller.js';
-import { validateCreateUser } from '../middlewares/user.validator.js';
+import { validateCreateUser, validateLogin } from '../middlewares/user.validator.js';
 
 export const userRoutes = Router();
 
@@ -9,3 +9,4 @@ userRoutes.get('/:username', userController.getUserByUsername);
 userRoutes.post('/', validateCreateUser, userController.createUser);
 userRoutes.put('/:username', validateCreateUser, userController.updateUser);
 userRoutes.delete('/:username', userController.deleteUser);
+userRoutes.post('/login', validateLogin, userController.login);

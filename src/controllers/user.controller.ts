@@ -50,3 +50,12 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
         next(err);
     }
 };
+
+export const login = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const token = await userService.login(req.body.username, req.body.password);
+        return sendSuccess(res, { data: token });
+    } catch (err) {
+        next(err);
+    }
+};

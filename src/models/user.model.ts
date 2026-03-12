@@ -7,6 +7,7 @@ export interface IUser extends Document {
     name: string;
     surname: string;
     systemRole: 'ADMIN' | 'USER';
+    validatePassword(password: string): Promise<boolean>;
 }
 
 const userSchema = new Schema<IUser>(
@@ -20,6 +21,10 @@ const userSchema = new Schema<IUser>(
     },
     { timestamps: true },
 );
+
+userSchema.methods.validatePassword = async function (this: IUser, password: string) {
+    return this.password === password; // TODO: hashing implementation
+};
 
 const User = mongoose.model<IUser>('User', userSchema);
 export default User;

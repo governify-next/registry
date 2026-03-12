@@ -1,6 +1,6 @@
 import User, { IUser } from '../models/user.model.js';
 
-import { DuplicateKeyError } from '../utils/customErrors.js';
+import { DuplicateKeyError, UnauthorizedError } from '../utils/customErrors.js';
 
 export const createUser = async (data: Partial<IUser>) => {
     try {
@@ -68,4 +68,14 @@ export const updateUser = async (username: string, data: Partial<IUser>) => {
 
 export const deleteUser = async (username: string) => {
     return await User.findOneAndDelete({ username });
+};
+
+export const login = async (username: string, password: string) => {
+    const user = await User.findOne({ username });
+    if (!user) throw new UnauthorizedError('Invalid username or password');
+
+    const isMatch = await user.validatePassword(password);
+    if (!isMatch) throw new UnauthorizedError('Invalid username or password');
+
+    return true; // TODO: return JWT token
 };

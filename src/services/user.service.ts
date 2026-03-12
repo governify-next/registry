@@ -20,3 +20,7 @@ export const updateUser = async (username: string, data: Partial<IUser>) => {
 export const deleteUser = async (username: string) => {
     return await userRepository.deleteUser(username);
 };
+
+export const login = async (username: string, password: string) => {
+    return await userRepository.login(username, password);
+};
