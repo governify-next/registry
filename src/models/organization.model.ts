@@ -33,14 +33,10 @@ const fieldSchema = new Schema(
     { _id: false },
 );
 
-const roleSchema = new Schema(
-    {
-        name: { type: String, required: true },
-        description: { type: String, required: true },
-        assignedUsers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-    },
-    { _id: false },
-);
+const roleSchema = new Schema({
+    name: { type: String, required: true },
+    description: { type: String, required: true },
+});
 
 // Interfaz para TypeScript
 
@@ -59,12 +55,11 @@ export interface IOrganization extends Document {
         type: string;
         value?: unknown;
     }[];
-    roleAssignments: {
+    roles: {
+        _id: Types.ObjectId;
         name: string;
         description: string;
-        assignedUsers: Types.ObjectId[];
     }[];
-    users: Types.ObjectId[];
 }
 
 // Esquema principal
@@ -75,8 +70,7 @@ const organizationSchema = new Schema<IOrganization>(
         description: { type: String, required: true },
         elementFields: { type: [fieldSchema], default: [] },
         agreementFields: { type: [fieldSchema], default: [] },
-        roleAssignments: { type: [roleSchema], default: [] },
-        users: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+        roles: { type: [roleSchema], default: [] },
     },
     {
         timestamps: true, // createdAt y updatedAt
