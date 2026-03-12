@@ -57,15 +57,15 @@ export const validateCreateUser = [
 ];
 
 export const validateLogin = [
-    body('username')
+    body('login')
         .exists({ checkNull: true })
-        .withMessage('Username is required')
+        .withMessage('Login identifier (username or email) is required')
         .isString()
-        .withMessage('Username must be a string')
+        .withMessage('Login identifier (username or email) must be a string')
         .isLength({ min: 3 })
-        .withMessage('Username must be at least 3 characters long')
-        .isLength({ max: 50 })
-        .withMessage('Username must be at most 50 characters long'),
+        .withMessage('Login identifier (username or email) must be at least 3 characters long')
+        .isLength({ max: 100 })
+        .withMessage('Login identifier (username or email) must be at most 100 characters long'),
     body('password')
         .exists({ checkNull: true })
         .withMessage('Password is required')
