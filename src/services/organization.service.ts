@@ -3,6 +3,20 @@ import { IOrganization } from '../models/organization.model.js';
 import { NotFoundError, DuplicateKeyError } from '../utils/customErrors.js';
 import type { FieldArrayName } from '../repositories/organization.repository.js';
 
+// Para trabajar en módulos como elementos
+export const getOrganizationIdByName = async (orgName: string) => {
+    const organizationId = await organizationRepository.getOrganizationIdByName(orgName);
+    if (!organizationId) throw new NotFoundError(`Organization with name '${orgName}' not found`);
+    return organizationId;
+};
+
+// Para trabajo interno en la organización
+export const getOrganizationByName = async (orgName: string) => {
+    const organization = await organizationRepository.getOrganizationByName(orgName);
+    if (!organization) throw new NotFoundError(`Organization with name '${orgName}' not found`);
+    return organization;
+};
+
 export const createOrganization = async (data: Partial<IOrganization>) => {
     const { name, description } = data;
     return await organizationRepository.createOrganization({ name, description });
@@ -10,12 +24,6 @@ export const createOrganization = async (data: Partial<IOrganization>) => {
 
 export const getOrganizations = async () => {
     return await organizationRepository.getOrganizations();
-};
-
-export const getOrganizationByName = async (orgName: string) => {
-    const organization = await organizationRepository.getOrganizationByName(orgName);
-    if (!organization) throw new NotFoundError(`Organization with name '${orgName}' not found`);
-    return organization;
 };
 
 export const updateOrganization = async (orgName: string, data: Partial<IOrganization>) => {
@@ -36,7 +44,7 @@ export const deleteOrganization = async (orgName: string) => {
 
 export const addRole = async (orgName: string, role: { name: string; description: string }) => {
     const org = await getOrganizationByName(orgName);
-    if (org.roles.some((r) => r.name === role.name)) {
+    if (org.roleAssignments.some((r) => r.name === role.name)) {
         throw new DuplicateKeyError(
             `Role '${role.name}' already exists in organization '${orgName}'`,
             {},
@@ -51,10 +59,10 @@ export const updateRole = async (
     data: { name: string; description: string },
 ) => {
     const org = await getOrganizationByName(orgName);
-    if (!org.roles.some((r) => r.name === roleName))
+    if (!org.roleAssignments.some((r) => r.name === roleName))
         throw new NotFoundError(`Role '${roleName}' not found in organization '${orgName}'`);
     // Si hay nombre nuevo aseguramos que no coincida con otro creado en la organización
-    if (data.name !== roleName && org.roles.some((r) => r.name === data.name))
+    if (data.name !== roleName && org.roleAssignments.some((r) => r.name === data.name))
         throw new DuplicateKeyError(
             `Role '${data.name}' already exists in organization '${orgName}'`,
             {},
@@ -64,7 +72,7 @@ export const updateRole = async (
 
 export const deleteRole = async (orgName: string, roleName: string) => {
     const org = await getOrganizationByName(orgName);
-    if (!org.roles.some((r) => r.name === roleName))
+    if (!org.roleAssignments.some((r) => r.name === roleName))
         throw new NotFoundError(`Role '${roleName}' not found in organization '${orgName}'`);
     return await organizationRepository.deleteRole(orgName, roleName);
 };

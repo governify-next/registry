@@ -26,8 +26,14 @@ export const getOrganizations = async () => {
     return await Organization.find();
 };
 
+// Para trabajo interno en la organización
 export const getOrganizationByName = async (orgName: string) => {
     return await Organization.findOne({ name: orgName });
+};
+
+// Para trabajar con ids en módulos como elementos
+export const getOrganizationIdByName = async (orgName: string) => {
+    return await Organization.findOne({ name: orgName }).select('_id').lean(); // lean hace que no se devuelvan funciones pesadas de Mongoose;
 };
 
 export const updateOrganization = async (orgName: string, data: Partial<IOrganization>) => {
@@ -57,7 +63,7 @@ export const deleteOrganization = async (orgName: string) => {
 export const addRole = async (orgName: string, role: { name: string; description: string }) => {
     return await Organization.findOneAndUpdate(
         { name: orgName },
-        { $push: { roles: role } },
+        { $push: { roleAssignments: role } },
         { new: true },
     );
 };
@@ -67,41 +73,22 @@ export const updateRole = async (
     oldRoleName: string,
     data: { name: string; description: string },
 ) => {
-    // Definimos qué valores escribir (name y description) y dónde (roles...)
-    const setClause: Record<string, unknown> = {
-        'roles.$[roleElem].name': data.name,
-        'roles.$[roleElem].description': data.description,
-    };
-
-    // Definimos que es roleElem
-    const arrayFilters: Record<string, unknown>[] = [{ 'roleElem.name': oldRoleName }];
-
-    // Solo propagamos el cambio a usersByRole si el nombre cambia (actualizamos referencias)
-    if (data.name !== oldRoleName) {
-        setClause['usersByRole.$[].rolesName.$[roleRef]'] = data.name;
-        arrayFilters.push({ roleRef: oldRoleName });
-    }
-
     return await Organization.findOneAndUpdate(
-        { name: orgName },
-        { $set: setClause },
-        { arrayFilters, new: true },
+        { name: orgName, 'roleAssignments.name': oldRoleName },
+        {
+            $set: {
+                'roleAssignments.$.name': data.name, // $ nos dice el elemento del array que ha hecho "match" a lo puesto arriba
+                'roleAssignments.$.description': data.description,
+            },
+        },
+        { new: true },
     );
 };
 
 export const deleteRole = async (orgName: string, roleName: string) => {
-    // 1. Elimina el rol del array de roles
-    await Organization.updateOne({ name: orgName }, { $pull: { roles: { name: roleName } } });
-    // 2. Elimina el roleName de todos los rolesName usando el arrayFilters
-    await Organization.updateMany(
-        { name: orgName },
-        { $pull: { 'usersByRole.$[elem].rolesName': roleName } },
-        { arrayFilters: [{ 'elem.rolesName': roleName }] }, // ana -> ["admin"] ; ana -> []
-    );
-    // 3. Limpia las entradas huérfanas (los usuarios que se quedaron sin roles)
     return await Organization.findOneAndUpdate(
         { name: orgName },
-        { $pull: { usersByRole: { rolesName: { $size: 0 } } } },
+        { $pull: { roleAssignments: { name: roleName } } },
         { new: true },
     );
 };

@@ -1,44 +1,46 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 
 // Subdocumentos
 
-const fieldSchema = new Schema({
-    name: { type: String, required: true },
-    description: { type: String, required: true },
-    type: { type: String, required: true },
-    value: {
-        type: Schema.Types.Mixed, // acepta cualquier valor
-        required: function () {
-            return this.type === 'enum';
-        },
-        validate: {
-            // 2a puerta de seguridad para value
-            validator: function (value: unknown) {
-                if (this.type === 'enum') {
-                    if (value === undefined || !Array.isArray(value)) {
-                        return false;
-                    }
-                } else {
-                    if (value !== undefined) {
-                        return false;
-                    }
-                }
-                return true;
+const fieldSchema = new Schema(
+    {
+        name: { type: String, required: true },
+        description: { type: String, required: true },
+        type: { type: String, required: true },
+        value: {
+            type: Schema.Types.Mixed, // acepta cualquier valor
+            required: function () {
+                return this.type === 'enum';
             },
-            message: 'El campo value solo debe existir y ser una lista si el tipo es enum',
+            validate: {
+                // 2a puerta de seguridad para value
+                validator: function (value: unknown) {
+                    if (this.type === 'enum') {
+                        if (value === undefined || !Array.isArray(value)) {
+                            return false;
+                        }
+                    } else {
+                        if (value !== undefined) {
+                            return false;
+                        }
+                    }
+                    return true;
+                },
+                message: 'El campo value solo debe existir y ser una lista si el tipo es enum',
+            },
         },
     },
-});
+    { _id: false },
+);
 
-const roleSchema = new Schema({
-    name: { type: String, required: true },
-    description: { type: String, required: true },
-});
-
-const userByRoleSchema = new Schema({
-    userName: { type: String, required: true },
-    rolesName: { type: [String], required: true },
-});
+const roleSchema = new Schema(
+    {
+        name: { type: String, required: true },
+        description: { type: String, required: true },
+        assignedUsers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    },
+    { _id: false },
+);
 
 // Interfaz para TypeScript
 
@@ -57,14 +59,12 @@ export interface IOrganization extends Document {
         type: string;
         value?: unknown;
     }[];
-    roles: {
+    roleAssignments: {
         name: string;
         description: string;
+        assignedUsers: Types.ObjectId[];
     }[];
-    usersByRole: {
-        userName: string;
-        rolesName: string[];
-    }[];
+    users: Types.ObjectId[];
 }
 
 // Esquema principal
@@ -75,8 +75,8 @@ const organizationSchema = new Schema<IOrganization>(
         description: { type: String, required: true },
         elementFields: { type: [fieldSchema], default: [] },
         agreementFields: { type: [fieldSchema], default: [] },
-        roles: { type: [roleSchema], default: [] },
-        usersByRole: { type: [userByRoleSchema], default: [] },
+        roleAssignments: { type: [roleSchema], default: [] },
+        users: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     },
     {
         timestamps: true, // createdAt y updatedAt
