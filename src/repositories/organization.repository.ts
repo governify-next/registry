@@ -63,7 +63,7 @@ export const deleteOrganization = async (orgName: string) => {
 export const addRole = async (orgName: string, role: { name: string; description: string }) => {
     return await Organization.findOneAndUpdate(
         { name: orgName },
-        { $push: { roleAssignments: role } },
+        { $push: { roles: role } },
         { new: true },
     );
 };
@@ -74,11 +74,11 @@ export const updateRole = async (
     data: { name: string; description: string },
 ) => {
     return await Organization.findOneAndUpdate(
-        { name: orgName, 'roleAssignments.name': oldRoleName },
+        { name: orgName, 'roles.name': oldRoleName },
         {
             $set: {
-                'roleAssignments.$.name': data.name, // $ nos dice el elemento del array que ha hecho "match" a lo puesto arriba
-                'roleAssignments.$.description': data.description,
+                'roles.$.name': data.name, // $ nos dice el elemento del array que ha hecho "match" a lo puesto arriba
+                'roles.$.description': data.description,
             },
         },
         { new: true },
@@ -88,7 +88,7 @@ export const updateRole = async (
 export const deleteRole = async (orgName: string, roleName: string) => {
     return await Organization.findOneAndUpdate(
         { name: orgName },
-        { $pull: { roleAssignments: { name: roleName } } },
+        { $pull: { roles: { name: roleName } } },
         { new: true },
     );
 };

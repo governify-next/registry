@@ -44,7 +44,7 @@ export const deleteOrganization = async (orgName: string) => {
 
 export const addRole = async (orgName: string, role: { name: string; description: string }) => {
     const org = await getOrganizationByName(orgName);
-    if (org.roleAssignments.some((r) => r.name === role.name)) {
+    if (org.roles.some((r) => r.name === role.name)) {
         throw new DuplicateKeyError(
             `Role '${role.name}' already exists in organization '${orgName}'`,
             {},
@@ -59,10 +59,10 @@ export const updateRole = async (
     data: { name: string; description: string },
 ) => {
     const org = await getOrganizationByName(orgName);
-    if (!org.roleAssignments.some((r) => r.name === roleName))
+    if (!org.roles.some((r) => r.name === roleName))
         throw new NotFoundError(`Role '${roleName}' not found in organization '${orgName}'`);
     // Si hay nombre nuevo aseguramos que no coincida con otro creado en la organización
-    if (data.name !== roleName && org.roleAssignments.some((r) => r.name === data.name))
+    if (data.name !== roleName && org.roles.some((r) => r.name === data.name))
         throw new DuplicateKeyError(
             `Role '${data.name}' already exists in organization '${orgName}'`,
             {},
@@ -72,7 +72,7 @@ export const updateRole = async (
 
 export const deleteRole = async (orgName: string, roleName: string) => {
     const org = await getOrganizationByName(orgName);
-    if (!org.roleAssignments.some((r) => r.name === roleName))
+    if (!org.roles.some((r) => r.name === roleName))
         throw new NotFoundError(`Role '${roleName}' not found in organization '${orgName}'`);
     return await organizationRepository.deleteRole(orgName, roleName);
 };
