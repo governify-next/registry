@@ -45,8 +45,8 @@ export const validateCreateUser = [
     body('systemRole')
         .exists({ checkNull: true })
         .withMessage('System role is required')
-        .isString()
-        .withMessage('System role must be a string'),
+        .isIn(['ADMIN', 'USER'])
+        .withMessage('System role must be one of: ADMIN, USER'),
     (req: Request, res: Response, next: NextFunction) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {

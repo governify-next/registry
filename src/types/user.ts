@@ -4,5 +4,5 @@ export type User = {
     password: string;
     name: string;
     surname: string;
-    systemRole: string;
+    systemRole: 'ADMIN' | 'USER';
 };
