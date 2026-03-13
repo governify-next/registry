@@ -73,7 +73,7 @@ export const deleteUser = async (username: string) => {
 export const login = async (login: string, password: string) => {
     const user = await User.findOne({
         $or: [{ username: login }, { email: login }],
-    });
+    }).select('+password');
     if (!user) throw new UnauthorizedError('Invalid login identifier');
 
     const isMatch = await user.validatePassword(password);

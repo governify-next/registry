@@ -15,7 +15,7 @@ const userSchema = new Schema<IUser>(
     {
         username: { type: String, required: true, unique: true },
         email: { type: String, required: true, unique: true },
-        password: { type: String, required: true },
+        password: { type: String, required: true, select: false },
         name: { type: String, required: true },
         surname: { type: String, required: true },
         systemRole: { type: String, required: true, enum: ['ADMIN', 'USER'] },
