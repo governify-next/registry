@@ -2,6 +2,7 @@ import * as organizationRepository from '../repositories/organization.repository
 import { IOrganization } from '../models/organization.model.js';
 import { NotFoundError, DuplicateKeyError } from '../utils/customErrors.js';
 import type { FieldArrayName } from '../repositories/organization.repository.js';
+import * as membershipService from '../services/membership.service.js';
 
 // Para trabajar en módulos como elementos
 export const getOrganizationIdByName = async (orgName: string) => {
@@ -72,10 +73,12 @@ export const updateRole = async (
 
 export const deleteRole = async (orgName: string, roleName: string) => {
     const org = await getOrganizationByName(orgName);
-    // Como obtenemos la org, pasamos ya el id del rol para no tener que buscar de nuevo
+    // Como obtenemos la org, pasamos ya el id del rol para el borrado en Membership
     const roleToDelete = org.roles.find((r) => r.name === roleName);
     if (!roleToDelete)
         throw new NotFoundError(`Role '${roleName}' not found in organization '${orgName}'`);
+    // Llamamos a Membership para que borre el rol de las asignaciones
+    await membershipService.removeRoleFromMemberships(roleToDelete._id.toString());
     // TODO: llamar al service de Membership para borrar la asignación antes de borrar rol de Org con roleToDelete._id.toString()
     return await organizationRepository.deleteRole(orgName, roleName);
 };
