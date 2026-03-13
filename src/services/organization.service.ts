@@ -78,8 +78,7 @@ export const deleteRole = async (orgName: string, roleName: string) => {
     if (!roleToDelete)
         throw new NotFoundError(`Role '${roleName}' not found in organization '${orgName}'`);
     // Llamamos a Membership para que borre el rol de las asignaciones
-    await membershipService.removeRoleFromMemberships(roleToDelete._id.toString());
-    // TODO: llamar al service de Membership para borrar la asignación antes de borrar rol de Org con roleToDelete._id.toString()
+    await membershipService.removeRoleFromMemberships(roleToDelete._id);
     return await organizationRepository.deleteRole(orgName, roleName);
 };
 
