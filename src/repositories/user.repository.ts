@@ -70,14 +70,8 @@ export const deleteUser = async (username: string) => {
     return await User.findOneAndDelete({ username });
 };
 
-export const login = async (login: string, password: string) => {
-    const user = await User.findOne({
-        $or: [{ username: login }, { email: login }],
-    }).select('+password');
-    if (!user) throw new UnauthorizedError('Invalid login identifier');
-
-    const isMatch = await user.validatePassword(password);
-    if (!isMatch) throw new UnauthorizedError('Invalid password');
-
-    return true; // TODO: return JWT token
+export const findUserByLoginHandle = async (loginHandle: string) => {
+    return User.findOne({
+        $or: [{ username: loginHandle }, { email: loginHandle }],
+    }).select('+password'); // IMPORTANT: Don't use this function for any purposes other than logging in.
 };
