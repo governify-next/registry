@@ -1,6 +1,6 @@
 import * as organizationRepository from '../repositories/organization.repository.js';
 import { IOrganization } from '../models/organization.model.js';
-import { NotFoundError, DuplicateKeyError } from '../utils/customErrors.js';
+import { NotFoundError, DuplicateKeyError, LimitError } from '../utils/customErrors.js';
 import type { FieldArrayName } from '../repositories/organization.repository.js';
 import * as membershipService from '../services/membership.service.js';
 
@@ -45,10 +45,18 @@ export const deleteOrganization = async (orgName: string) => {
 
 export const addRole = async (orgName: string, role: { name: string; description: string }) => {
     const org = await getOrganizationByName(orgName);
+    // Comprobamos que no exista ya un rol con ese nombre
     if (org.roles.some((r) => r.name === role.name)) {
         throw new DuplicateKeyError(
             `Role '${role.name}' already exists in organization '${orgName}'`,
             {},
+        );
+    }
+    // Comprobamos que no supere el límite de roles por org
+    const maxRoles = parseInt(process.env.MAX_ROLES_PER_ORGANIZATION || '100', 10); // 10 asegura base10
+    if (org.roles.length >= maxRoles) {
+        throw new LimitError(
+            `Organization '${orgName}' has reached the maximum limit of ${maxRoles} roles.`,
         );
     }
     return await organizationRepository.addRole(orgName, role);
