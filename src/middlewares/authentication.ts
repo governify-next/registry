@@ -6,8 +6,10 @@ import { getLogger } from '../utils/logger.js';
 
 const logger = getLogger().setTag('authentication.ts');
 
-export interface AuthenticatedRequest extends Request {
-    auth: UserJwtPayload;
+declare module 'express' {
+    interface Request {
+        auth?: UserJwtPayload;
+    }
 }
 
 export interface UserJwtPayload {
@@ -16,7 +18,7 @@ export interface UserJwtPayload {
     systemRole: 'ADMIN' | 'USER';
 }
 
-export const isAuthenticated = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return next(new UnauthorizedError('Authorization header missing or malformed'));
@@ -26,7 +28,7 @@ export const isAuthenticated = (req: AuthenticatedRequest, res: Response, next: 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as UserJwtPayload;
 
-        req.auth = decoded; // Attach UserJwtPayload to AuthenticatedRequest
+        req.auth = decoded; // Attach UserJwtPayload to the Request for downstream use
         next();
     } catch (err) {
         logger.debug('JWT verification failed', err);
@@ -35,7 +37,7 @@ export const isAuthenticated = (req: AuthenticatedRequest, res: Response, next: 
 };
 
 export const hasRole = (requiredRole: 'ADMIN' | 'USER') => {
-    return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    return (req: Request, res: Response, next: NextFunction) => {
         if (!req.auth) {
             return next(new UnauthorizedError('User not authenticated'));
         }
