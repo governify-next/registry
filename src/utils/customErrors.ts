@@ -37,6 +37,17 @@ export class ValidationError extends StdError {
     }
 }
 
+export class LimitError extends StdError {
+    constructor(message: string = 'Resource limit exceeded', details?: unknown) {
+        super({
+            message,
+            httpStatus: 403, // forbidden
+            appCode: 'LIMIT_EXCEEDED',
+            details,
+        });
+    }
+}
+
 export class NotFoundError extends StdError {
     constructor(message: string = 'Resource not found', details?: unknown) {
         super({
