@@ -1142,12 +1142,9 @@ components:
                     maxLength: 500
                     example: Organization administrator
 
-        # ── ElementField ─────────────────────────
-        ElementField:
+        # ── Base field properties (shared) ──────
+        FieldBase:
             type: object
-            description: |
-                Field that defines part of the structure of an organization's elements.
-                If `type` is `enum`, `value` contains the array of allowed values.
             required:
                 - name
                 - description
@@ -1155,124 +1152,170 @@ components:
             properties:
                 name:
                     type: string
-                    description: Field name (unique within elementFields)
+                    description: Field name (unique within its array)
                     maxLength: 100
-                    example: class
                 description:
                     type: string
                     description: Field description
                     maxLength: 500
-                    example: Project class
                 type:
                     type: string
                     description: Field type (string, number, enum, etc.)
                     maxLength: 50
-                    example: enum
-                value:
-                    description: |
-                        Allowed values for the field. Only present when `type` is `enum`.
-                        In that case, it must be an array.
-                    example:
-                        - PSG1
-                        - PSG2
-                        - PSG3
+
+        # ── ElementField ─────────────────────────
+        ElementField:
+            description: |
+                Field that defines part of the structure of an organization's elements.
+                If `type` is `enum`, `value` contains the array of allowed values.
+                For any other type, `value` is not present.
+            oneOf:
+                - title: Enum element field
+                  allOf:
+                      - $ref: '#/components/schemas/FieldBase'
+                      - type: object
+                        required:
+                            - value
+                        properties:
+                            value:
+                                type: array
+                                description: Allowed values for the enum field
+                                items:
+                                    type: string
+                                example:
+                                    - PSG1
+                                    - PSG2
+                                    - PSG3
+                  example:
+                      name: class
+                      description: Project class
+                      type: enum
+                      value:
+                          - PSG1
+                          - PSG2
+                          - PSG3
+                - title: Non-enum element field
+                  allOf:
+                      - $ref: '#/components/schemas/FieldBase'
+                  example:
+                      name: title
+                      description: Element title
+                      type: string
 
         ElementFieldInput:
-            type: object
             description: |
                 Data to create or update an element field.
                 If `type` is `enum`, `value` is required and must be an array.
                 For any other type, `value` must not be sent.
-            required:
-                - name
-                - description
-                - type
-            properties:
-                name:
-                    type: string
-                    description: Field name
-                    maxLength: 100
-                    example: class
-                description:
-                    type: string
-                    description: Field description
-                    maxLength: 500
-                    example: Project class
-                type:
-                    type: string
-                    description: Field type (string, number, enum, etc.)
-                    maxLength: 50
-                    example: enum
-                value:
-                    description: |
-                        Required only if `type` is `enum`. Must be an array with the
-                        allowed values. Must not be sent for other types.
-                    example:
-                        - PSG1
-                        - PSG2
-                        - PSG3
+            oneOf:
+                - title: Enum element field
+                  allOf:
+                      - $ref: '#/components/schemas/FieldBase'
+                      - type: object
+                        required:
+                            - value
+                        properties:
+                            value:
+                                type: array
+                                description: Allowed values for the enum field
+                                items:
+                                    type: string
+                                example:
+                                    - PSG1
+                                    - PSG2
+                                    - PSG3
+                  example:
+                      name: class
+                      description: Project class
+                      type: enum
+                      value:
+                          - PSG1
+                          - PSG2
+                          - PSG3
+                - title: Non-enum element field
+                  allOf:
+                      - $ref: '#/components/schemas/FieldBase'
+                  example:
+                      name: title
+                      description: Element title
+                      type: string
 
         # ── AgreementField ──────────────────────
         AgreementField:
-            type: object
             description: |
                 Field that defines part of the structure of an organization's agreements.
                 If `type` is `enum`, `value` contains the array of allowed values.
-            required:
-                - name
-                - description
-                - type
-            properties:
-                name:
-                    type: string
-                    description: Field name (unique within agreementFields)
-                    maxLength: 100
-                    example: minResponseTime
-                description:
-                    type: string
-                    description: Field description
-                    maxLength: 500
-                    example: Minimum response time in hours
-                type:
-                    type: string
-                    description: Field type (string, number, enum, etc.)
-                    maxLength: 50
-                    example: number
-                value:
-                    description: |
-                        Allowed values for the field. Only present when `type` is `enum`.
-                        In that case, it must be an array.
+                For any other type, `value` is not present.
+            oneOf:
+                - title: Enum agreement field
+                  allOf:
+                      - $ref: '#/components/schemas/FieldBase'
+                      - type: object
+                        required:
+                            - value
+                        properties:
+                            value:
+                                type: array
+                                description: Allowed values for the enum field
+                                items:
+                                    type: string
+                                example:
+                                    - gold
+                                    - silver
+                                    - bronze
+                  example:
+                      name: guaranteeLevel
+                      description: Service level guarantee tier
+                      type: enum
+                      value:
+                          - gold
+                          - silver
+                          - bronze
+                - title: Non-enum agreement field
+                  allOf:
+                      - $ref: '#/components/schemas/FieldBase'
+                  example:
+                      name: minResponseTime
+                      description: Minimum response time in hours
+                      type: number
 
         AgreementFieldInput:
-            type: object
             description: |
                 Data to create or update an agreement field.
                 If `type` is `enum`, `value` is required and must be an array.
                 For any other type, `value` must not be sent.
-            required:
-                - name
-                - description
-                - type
-            properties:
-                name:
-                    type: string
-                    description: Field name
-                    maxLength: 100
-                    example: minResponseTime
-                description:
-                    type: string
-                    description: Field description
-                    maxLength: 500
-                    example: Minimum response time in hours
-                type:
-                    type: string
-                    description: Field type (string, number, enum, etc.)
-                    maxLength: 50
-                    example: number
-                value:
-                    description: |
-                        Required only if `type` is `enum`. Must be an array with the
-                        allowed values. Must not be sent for other types.
+            oneOf:
+                - title: Enum agreement field
+                  allOf:
+                      - $ref: '#/components/schemas/FieldBase'
+                      - type: object
+                        required:
+                            - value
+                        properties:
+                            value:
+                                type: array
+                                description: Allowed values for the enum field
+                                items:
+                                    type: string
+                                example:
+                                    - gold
+                                    - silver
+                                    - bronze
+                  example:
+                      name: guaranteeLevel
+                      description: Service level guarantee tier
+                      type: enum
+                      value:
+                          - gold
+                          - silver
+                          - bronze
+                - title: Non-enum agreement field
+                  allOf:
+                      - $ref: '#/components/schemas/FieldBase'
+                  example:
+                      name: minResponseTime
+                      description: Minimum response time in hours
+                      type: number
 
         # ── User ─────────────────────
         User:

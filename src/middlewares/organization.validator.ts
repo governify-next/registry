@@ -31,7 +31,8 @@ const typeValidation = (field: string) =>
         .notEmpty()
         .withMessage(`${field} must not be empty`)
         .isLength({ max: 50 })
-        .withMessage(`${field} must be at most 50 characters`);
+        .withMessage(`${field} must be at most 50 characters`)
+        .toLowerCase();
 
 const valueValidation = (field: string) => {
     // Extraemos el valor de field 'value'
