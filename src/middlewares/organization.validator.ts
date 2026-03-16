@@ -40,17 +40,15 @@ const valueValidation = (field: string) => {
         if (meta.req.body.type === 'enum') {
             // Debe existir value
             if (value === undefined) {
-                throw new Error("El campo 'value' debe definirse si 'type' es 'enum'");
+                throw new Error("The 'value' field should be defined if 'type' is 'enum'");
             }
             // Debe ser Array
             if (!Array.isArray(value)) {
-                throw new Error(
-                    "El campo 'value' debe definirse como una lista si 'type' es 'enum'",
-                );
+                throw new Error("The 'value' field must be defined as a list if 'type' is 'enum'");
             }
         } else {
             if (value !== undefined) {
-                throw new Error("El campo 'value' solo puede definirse si 'type' es 'enum'");
+                throw new Error("The 'value' field should only be defined if 'type' is 'enum'");
             }
         }
         return true;
