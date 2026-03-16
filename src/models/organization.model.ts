@@ -26,7 +26,7 @@ const fieldSchema = new Schema(
                     }
                     return true;
                 },
-                message: 'El campo value solo debe existir y ser una lista si el tipo es enum',
+                message: 'The value field must exist and be a list only if the type is an enum',
             },
         },
     },

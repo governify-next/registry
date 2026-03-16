@@ -1,11 +1,34 @@
 openapi: 3.0.0
 info:
-    title: Express API Boilerplatesss
+    title: Scope Manager API
     version: 1.0.0
-    description: A simple Express API with TypeScript
+    description: |
+        REST API for managing organizations, their roles, element fields
+        and agreement fields within Scope Manager.
+
+        Each organization is the main container in the system: it groups elements,
+        defines the vocabulary they must follow and establishes the available roles.
 servers:
     - url: /
+
+tags:
+    - name: Health
+      description: Server health check
+    - name: Users
+      description: User management
+    - name: Organizations
+      description: Organization management
+    - name: Roles
+      description: Role management within an organization
+    - name: ElementFields
+      description: Fields that define the structure of an organization's elements
+    - name: AgreementFields
+      description: Fields that define the structure of an organization's agreements
+
 paths:
+    # ──────────────────────────────────────────────
+    # Health
+    # ──────────────────────────────────────────────
     /health:
         get:
             tags:
@@ -21,6 +44,10 @@ paths:
                                 properties:
                                     status:
                                         type: string
+
+    # ──────────────────────────────────────────────
+    # Users
+    # ──────────────────────────────────────────────
     /api/v1/users:
         get:
             tags:
@@ -32,16 +59,14 @@ paths:
                     content:
                         application/json:
                             schema:
-                                type: object
-                                properties:
-                                    data:
-                                        type: array
-                                        items:
-                                            $ref: '#/components/schemas/User'
-                                    message:
-                                        type: string
-                                    success:
-                                        type: boolean
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/User'
         post:
             tags:
                 - Users
@@ -58,26 +83,17 @@ paths:
                     content:
                         application/json:
                             schema:
-                                type: object
-                                properties:
-                                    data:
-                                        $ref: '#/components/schemas/User'
-                                    message:
-                                        type: string
-                                    success:
-                                        type: boolean
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/User'
                 '409':
-                    description: Email already exists
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
+                    $ref: '#/components/responses/Conflict'
                 '500':
-                    description: Internal server error
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
+                    $ref: '#/components/responses/InternalError'
+
     /api/v1/users/{id}:
         get:
             tags:
@@ -89,27 +105,21 @@ paths:
                   required: true
                   schema:
                       type: string
-                  description: User ID (Mongo ObjectId)
+                  description: User ID (MongoDB ObjectId)
             responses:
                 '200':
                     description: User found
                     content:
                         application/json:
                             schema:
-                                type: object
-                                properties:
-                                    data:
-                                        $ref: '#/components/schemas/User'
-                                    message:
-                                        type: string
-                                    success:
-                                        type: boolean
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/User'
                 '404':
-                    description: User not found
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
+                    $ref: '#/components/responses/NotFound'
         put:
             tags:
                 - Users
@@ -120,7 +130,7 @@ paths:
                   required: true
                   schema:
                       type: string
-                  description: User ID (Mongo ObjectId)
+                  description: User ID (MongoDB ObjectId)
             requestBody:
                 required: true
                 content:
@@ -133,20 +143,14 @@ paths:
                     content:
                         application/json:
                             schema:
-                                type: object
-                                properties:
-                                    data:
-                                        $ref: '#/components/schemas/User'
-                                    message:
-                                        type: string
-                                    success:
-                                        type: boolean
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/User'
                 '404':
-                    description: User not found
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
+                    $ref: '#/components/responses/NotFound'
         delete:
             tags:
                 - Users
@@ -157,30 +161,1163 @@ paths:
                   required: true
                   schema:
                       type: string
-                  description: User ID (Mongo ObjectId)
+                  description: User ID (MongoDB ObjectId)
             responses:
                 '200':
                     description: User deleted
                     content:
                         application/json:
                             schema:
-                                type: object
-                                properties:
-                                    data:
-                                        type: 'null'
-                                    message:
-                                        type: string
-                                    success:
-                                        type: boolean
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: object
+                                              nullable: true
+                                              example: null
                 '404':
-                    description: User not found
+                    $ref: '#/components/responses/NotFound'
+
+    # ──────────────────────────────────────────────
+    # Organizations
+    # ──────────────────────────────────────────────
+    /api/v1/organizations:
+        get:
+            tags:
+                - Organizations
+            summary: List all organizations
+            operationId: getOrganizations
+            description: |
+                Returns an array with all organizations registered in the system.
+                Each organization includes its roles, element fields and agreement fields.
+            responses:
+                '200':
+                    description: List of organizations retrieved successfully
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/Error'
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/Organization'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - _id: 665a1b2c3d4e5f6a7b8c9d0e
+                                      name: universidad-sevilla
+                                      description: Organization for Universidad de Sevilla
+                                      elementFields: []
+                                      agreementFields: []
+                                      roles: []
+                                      createdAt: '2025-06-01T10:00:00.000Z'
+                                      updatedAt: '2025-06-01T10:00:00.000Z'
+                                      __v: 0
+                                error: null
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        post:
+            tags:
+                - Organizations
+            summary: Create an organization
+            operationId: createOrganization
+            description: |
+                Creates a new organization with a unique name and a description.
+                The roles, elementFields and agreementFields arrays are initialized empty.
+            requestBody:
+                $ref: '#/components/requestBodies/OrganizationBody'
+            responses:
+                '201':
+                    description: Organization created successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Organization'
+                            example:
+                                success: true
+                                message: Organization created
+                                httpStatus: 201
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665a1b2c3d4e5f6a7b8c9d0e
+                                    name: universidad-sevilla
+                                    description: Organization for Universidad de Sevilla
+                                    elementFields: []
+                                    agreementFields: []
+                                    roles: []
+                                    createdAt: '2025-06-01T10:00:00.000Z'
+                                    updatedAt: '2025-06-01T10:00:00.000Z'
+                                    __v: 0
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '409':
+                    $ref: '#/components/responses/OrganizationConflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
 
+    /api/v1/organizations/{orgName}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+        get:
+            tags:
+                - Organizations
+            summary: Get an organization by name
+            operationId: getOrganizationByName
+            description: |
+                Returns the full organization identified by its unique name,
+                including its roles, element fields and agreement fields.
+            responses:
+                '200':
+                    description: Organization found
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Organization'
+                '404':
+                    $ref: '#/components/responses/OrganizationNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        put:
+            tags:
+                - Organizations
+            summary: Update an organization
+            operationId: updateOrganization
+            description: |
+                Updates the name and/or description of an existing organization.
+                If the name is changed, the new name must be unique in the system.
+            requestBody:
+                $ref: '#/components/requestBodies/OrganizationBody'
+            responses:
+                '200':
+                    description: Organization updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Organization'
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/OrganizationNotFound'
+                '409':
+                    $ref: '#/components/responses/OrganizationConflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        delete:
+            tags:
+                - Organizations
+            summary: Delete an organization
+            operationId: deleteOrganization
+            description: |
+                Permanently deletes the organization and all its associated data.
+            responses:
+                '200':
+                    description: Organization deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: object
+                                              nullable: true
+                                              example: null
+                            example:
+                                success: true
+                                message: Organization deleted
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data: null
+                                error: null
+                '404':
+                    $ref: '#/components/responses/OrganizationNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    # ──────────────────────────────────────────────
+    # Roles
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/roles:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+        post:
+            tags:
+                - Roles
+            summary: Add a role to the organization
+            operationId: addRole
+            description: |
+                Adds a new role to the specified organization.
+                The role name must be unique within the organization.
+                There is a maximum role limit per organization (default 100).
+            requestBody:
+                $ref: '#/components/requestBodies/RoleBody'
+            responses:
+                '201':
+                    description: Role added successfully. Returns the updated organization.
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Organization'
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/LimitExceeded'
+                '404':
+                    $ref: '#/components/responses/OrganizationNotFound'
+                '409':
+                    $ref: '#/components/responses/RoleConflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/roles/{roleName}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/roleName'
+        put:
+            tags:
+                - Roles
+            summary: Update a role
+            operationId: updateRole
+            description: |
+                Updates the name and/or description of an existing role.
+                If the name is changed, the new name must be unique within the organization.
+            requestBody:
+                $ref: '#/components/requestBodies/RoleBody'
+            responses:
+                '200':
+                    description: Role updated successfully. Returns the updated organization.
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Organization'
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/RoleNotFound'
+                '409':
+                    $ref: '#/components/responses/RoleConflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        delete:
+            tags:
+                - Roles
+            summary: Delete a role
+            operationId: deleteRole
+            description: |
+                Removes a role from the organization. This operation also cascade-deletes
+                all references to this role in the associated user memberships.
+            responses:
+                '200':
+                    description: Role deleted successfully. Returns the updated organization.
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Organization'
+                '404':
+                    $ref: '#/components/responses/RoleNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    # ──────────────────────────────────────────────
+    # Element Fields
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/elementFields:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+        post:
+            tags:
+                - ElementFields
+            summary: Add an element field
+            operationId: addElementField
+            description: |
+                Adds a new field to the organization's element definition.
+                This field becomes part of the structure that elements belonging
+                to this organization must follow.
+            requestBody:
+                $ref: '#/components/requestBodies/FieldBody'
+            responses:
+                '201':
+                    description: Element field added. Returns the updated organization.
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Organization'
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/OrganizationNotFound'
+                '409':
+                    $ref: '#/components/responses/ElementFieldConflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/elementFields/{fieldName}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementFieldName'
+        put:
+            tags:
+                - ElementFields
+            summary: Update an element field
+            operationId: updateElementField
+            description: |
+                Updates an existing element field. If the name is changed,
+                the new name must be unique within the organization's elementFields.
+            requestBody:
+                $ref: '#/components/requestBodies/FieldBody'
+            responses:
+                '200':
+                    description: Element field updated. Returns the updated organization.
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Organization'
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/ElementFieldNotFound'
+                '409':
+                    $ref: '#/components/responses/ElementFieldConflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        delete:
+            tags:
+                - ElementFields
+            summary: Delete an element field
+            operationId: deleteElementField
+            description: Removes a field from the organization's element definition.
+            responses:
+                '200':
+                    description: Element field deleted. Returns the updated organization.
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Organization'
+                '404':
+                    $ref: '#/components/responses/ElementFieldNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    # ──────────────────────────────────────────────
+    # Agreement Fields
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/agreementFields:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+        post:
+            tags:
+                - AgreementFields
+            summary: Add an agreement field
+            operationId: addAgreementField
+            description: |
+                Adds a new field to the organization's agreement definition.
+                This field becomes part of the structure that agreements associated
+                with this organization's elements must follow.
+            requestBody:
+                $ref: '#/components/requestBodies/AgreementFieldBody'
+            responses:
+                '201':
+                    description: Agreement field added. Returns the updated organization.
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Organization'
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/OrganizationNotFound'
+                '409':
+                    $ref: '#/components/responses/AgreementFieldConflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/agreementFields/{fieldName}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/agreementFieldName'
+        put:
+            tags:
+                - AgreementFields
+            summary: Update an agreement field
+            operationId: updateAgreementField
+            description: |
+                Updates an existing agreement field. If the name is changed,
+                the new name must be unique within the organization's agreementFields.
+            requestBody:
+                $ref: '#/components/requestBodies/AgreementFieldBody'
+            responses:
+                '200':
+                    description: Agreement field updated. Returns the updated organization.
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Organization'
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/AgreementFieldNotFound'
+                '409':
+                    $ref: '#/components/responses/AgreementFieldConflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        delete:
+            tags:
+                - AgreementFields
+            summary: Delete an agreement field
+            operationId: deleteAgreementField
+            description: Removes a field from the organization's agreement definition.
+            responses:
+                '200':
+                    description: Agreement field deleted. Returns the updated organization.
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Organization'
+                '404':
+                    $ref: '#/components/responses/AgreementFieldNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+# ──────────────────────────────────────────────
+# Reusable components
+# ──────────────────────────────────────────────
 components:
+    # ── Parameters ────────────────────────────────
+    parameters:
+        orgName:
+            name: orgName
+            in: path
+            required: true
+            description: Unique name of the organization
+            schema:
+                type: string
+            example: universidad-sevilla
+        roleName:
+            name: roleName
+            in: path
+            required: true
+            description: Name of the role within the organization
+            schema:
+                type: string
+            example: admin
+        elementFieldName:
+            name: fieldName
+            in: path
+            required: true
+            description: Name of the element field
+            schema:
+                type: string
+            example: class
+        agreementFieldName:
+            name: fieldName
+            in: path
+            required: true
+            description: Name of the agreement field
+            schema:
+                type: string
+            example: minResponseTime
+
+    # ── Request Bodies ────────────────────────────
+    requestBodies:
+        OrganizationBody:
+            description: Data to create or update an organization
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/OrganizationInput'
+                    example:
+                        name: universidad-sevilla
+                        description: Organization for Universidad de Sevilla
+        RoleBody:
+            description: Data to create or update a role
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/RoleInput'
+                    example:
+                        name: admin
+                        description: Organization administrator
+        FieldBody:
+            description: |
+                Data to create or update an element field.
+                If `type` is `enum`, the `value` field is required and must be an array.
+                For any other type, `value` must not be sent.
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ElementFieldInput'
+                    examples:
+                        enumField:
+                            summary: Enum type field
+                            value:
+                                name: class
+                                description: Project class
+                                type: enum
+                                value:
+                                    - PSG1
+                                    - PSG2
+                                    - PSG3
+                        stringField:
+                            summary: String type field
+                            value:
+                                name: title
+                                description: Element title
+                                type: string
+        AgreementFieldBody:
+            description: |
+                Data to create or update an agreement field.
+                If `type` is `enum`, the `value` field is required and must be an array.
+                For any other type, `value` must not be sent.
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/AgreementFieldInput'
+                    examples:
+                        numericField:
+                            summary: Numeric guarantee field
+                            value:
+                                name: minResponseTime
+                                description: Minimum response time in hours
+                                type: number
+                        enumField:
+                            summary: Enum guarantee level field
+                            value:
+                                name: guaranteeLevel
+                                description: Service level guarantee tier
+                                type: enum
+                                value:
+                                    - gold
+                                    - silver
+                                    - bronze
+
+    # ── Reusable responses ────────────────────────
+    responses:
+        ValidationError:
+            description: Validation error in the submitted data
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: Validation error
+                        httpStatus: 400
+                        appCode: VALIDATION_ERROR
+                        data: null
+                        error:
+                            message: Validation error
+                            details: null
+        NotFound:
+            description: The requested resource does not exist
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: Resource not found
+                        httpStatus: 404
+                        appCode: NOT_FOUND
+                        data: null
+                        error:
+                            message: Resource not found
+                            details: null
+        Conflict:
+            description: A resource with that identifier already exists
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: Duplicate key error
+                        httpStatus: 409
+                        appCode: DUPLICATE_KEY
+                        data: null
+                        error:
+                            message: Duplicate key error
+                            details: null
+        OrganizationNotFound:
+            description: The organization does not exist
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: "Organization with name 'universidad-sevilla' not found"
+                        httpStatus: 404
+                        appCode: NOT_FOUND
+                        data: null
+                        error:
+                            message: "Organization with name 'universidad-sevilla' not found"
+                            details: null
+        OrganizationConflict:
+            description: An organization with that name already exists
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: An organization with that name already exists
+                        httpStatus: 409
+                        appCode: DUPLICATE_KEY
+                        data: null
+                        error:
+                            message: An organization with that name already exists
+                            details: null
+        RoleNotFound:
+            description: The role does not exist in the organization
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: "Role 'editor' not found in organization 'universidad-sevilla'"
+                        httpStatus: 404
+                        appCode: NOT_FOUND
+                        data: null
+                        error:
+                            message: "Role 'editor' not found in organization 'universidad-sevilla'"
+                            details: null
+        RoleConflict:
+            description: A role with that name already exists in the organization
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: "Role 'admin' already exists in organization 'universidad-sevilla'"
+                        httpStatus: 409
+                        appCode: DUPLICATE_KEY
+                        data: null
+                        error:
+                            message: "Role 'admin' already exists in organization 'universidad-sevilla'"
+                            details: null
+        ElementFieldNotFound:
+            description: The element field does not exist in the organization
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: "elementFields 'class' not found in organization 'universidad-sevilla'"
+                        httpStatus: 404
+                        appCode: NOT_FOUND
+                        data: null
+                        error:
+                            message: "elementFields 'class' not found in organization 'universidad-sevilla'"
+                            details: null
+        ElementFieldConflict:
+            description: An element field with that name already exists in the organization
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: "elementFields 'class' already exists in organization 'universidad-sevilla'"
+                        httpStatus: 409
+                        appCode: DUPLICATE_KEY
+                        data: null
+                        error:
+                            message: "elementFields 'class' already exists in organization 'universidad-sevilla'"
+                            details: null
+        AgreementFieldNotFound:
+            description: The agreement field does not exist in the organization
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: "agreementFields 'minResponseTime' not found in organization 'universidad-sevilla'"
+                        httpStatus: 404
+                        appCode: NOT_FOUND
+                        data: null
+                        error:
+                            message: "agreementFields 'minResponseTime' not found in organization 'universidad-sevilla'"
+                            details: null
+        AgreementFieldConflict:
+            description: An agreement field with that name already exists in the organization
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: "agreementFields 'minResponseTime' already exists in organization 'universidad-sevilla'"
+                        httpStatus: 409
+                        appCode: DUPLICATE_KEY
+                        data: null
+                        error:
+                            message: "agreementFields 'minResponseTime' already exists in organization 'universidad-sevilla'"
+                            details: null
+        LimitExceeded:
+            description: The maximum allowed limit has been reached
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: "Organization 'universidad-sevilla' has reached the maximum limit of 100 roles."
+                        httpStatus: 403
+                        appCode: LIMIT_EXCEEDED
+                        data: null
+                        error:
+                            message: "Organization 'universidad-sevilla' has reached the maximum limit of 100 roles."
+                            details: null
+        InternalError:
+            description: Internal server error
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: Internal server error
+                        httpStatus: 500
+                        appCode: UNKNOWN_ERROR
+                        data: null
+                        error:
+                            message: Internal server error
+                            details: null
+
+    # ── Schemas ───────────────────────────────────
     schemas:
+        # ── Standard response ────────────────────
+        SuccessResponse:
+            type: object
+            description: Standard wrapper for all successful API responses
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                message:
+                    type: string
+                    example: OK
+                httpStatus:
+                    type: integer
+                    example: 200
+                appCode:
+                    type: string
+                    example: SUCCESS
+                error:
+                    type: object
+                    nullable: true
+                    example: null
+            required:
+                - success
+                - message
+                - httpStatus
+                - appCode
+                - data
+                - error
+
+        ErrorResponse:
+            type: object
+            description: Standard wrapper for all error API responses
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                message:
+                    type: string
+                httpStatus:
+                    type: integer
+                appCode:
+                    type: string
+                data:
+                    type: object
+                    nullable: true
+                    example: null
+                error:
+                    type: object
+                    properties:
+                        message:
+                            type: string
+                        details:
+                            description: Additional error information (may be null)
+                            type: object
+                            nullable: true
+            required:
+                - success
+                - message
+                - httpStatus
+                - appCode
+                - data
+                - error
+
+        # ── Organization ─────────────────────────
+        Organization:
+            type: object
+            description: |
+                Main container of the system. Defines the structure of its elements,
+                the structure of its agreements and the available roles.
+            required:
+                - _id
+                - name
+                - description
+                - elementFields
+                - agreementFields
+                - roles
+            properties:
+                _id:
+                    type: string
+                    description: MongoDB internal identifier (ObjectId)
+                    example: 665a1b2c3d4e5f6a7b8c9d0e
+                name:
+                    type: string
+                    description: Unique organization name (used as identifier in the API)
+                    maxLength: 100
+                    example: universidad-sevilla
+                description:
+                    type: string
+                    description: Organization description
+                    maxLength: 500
+                    example: Organization for Universidad de Sevilla
+                elementFields:
+                    type: array
+                    description: Fields that define the structure of elements
+                    items:
+                        $ref: '#/components/schemas/ElementField'
+                agreementFields:
+                    type: array
+                    description: Fields that define the structure of agreements
+                    items:
+                        $ref: '#/components/schemas/AgreementField'
+                roles:
+                    type: array
+                    description: Available roles within the organization
+                    items:
+                        $ref: '#/components/schemas/Role'
+                createdAt:
+                    type: string
+                    format: date-time
+                    description: Creation date (auto-generated by Mongoose)
+                updatedAt:
+                    type: string
+                    format: date-time
+                    description: Last update date (auto-generated by Mongoose)
+                __v:
+                    type: integer
+                    description: Mongoose version key
+                    example: 0
+
+        OrganizationInput:
+            type: object
+            description: Data required to create or update an organization
+            required:
+                - name
+                - description
+            properties:
+                name:
+                    type: string
+                    description: Unique organization name
+                    maxLength: 100
+                    example: universidad-sevilla
+                description:
+                    type: string
+                    description: Organization description
+                    maxLength: 500
+                    example: Organization for Universidad de Sevilla
+
+        # ── Role ─────────────────────────────────
+        Role:
+            type: object
+            description: Role within an organization (e.g. admin, teacher, student)
+            required:
+                - _id
+                - name
+                - description
+            properties:
+                _id:
+                    type: string
+                    description: MongoDB internal identifier (subdocument ObjectId)
+                    example: 665b2c3d4e5f6a7b8c9d0e1f
+                name:
+                    type: string
+                    description: Role name (unique within the organization)
+                    maxLength: 100
+                    example: admin
+                description:
+                    type: string
+                    description: Role description
+                    maxLength: 500
+                    example: Organization administrator
+
+        RoleInput:
+            type: object
+            description: Data required to create or update a role
+            required:
+                - name
+                - description
+            properties:
+                name:
+                    type: string
+                    description: Role name (unique within the organization)
+                    maxLength: 100
+                    example: admin
+                description:
+                    type: string
+                    description: Role description
+                    maxLength: 500
+                    example: Organization administrator
+
+        # ── Base field properties (shared) ──────
+        FieldBase:
+            type: object
+            required:
+                - name
+                - description
+                - type
+            properties:
+                name:
+                    type: string
+                    description: Field name (unique within its array)
+                    maxLength: 100
+                description:
+                    type: string
+                    description: Field description
+                    maxLength: 500
+                type:
+                    type: string
+                    description: Field type (string, number, enum, etc.)
+                    maxLength: 50
+
+        # ── ElementField ─────────────────────────
+        ElementField:
+            description: |
+                Field that defines part of the structure of an organization's elements.
+                If `type` is `enum`, `value` contains the array of allowed values.
+                For any other type, `value` is not present.
+            oneOf:
+                - title: Enum element field
+                  allOf:
+                      - $ref: '#/components/schemas/FieldBase'
+                      - type: object
+                        required:
+                            - value
+                        properties:
+                            value:
+                                type: array
+                                description: Allowed values for the enum field
+                                items:
+                                    type: string
+                                example:
+                                    - PSG1
+                                    - PSG2
+                                    - PSG3
+                  example:
+                      name: class
+                      description: Project class
+                      type: enum
+                      value:
+                          - PSG1
+                          - PSG2
+                          - PSG3
+                - title: Non-enum element field
+                  allOf:
+                      - $ref: '#/components/schemas/FieldBase'
+                  example:
+                      name: title
+                      description: Element title
+                      type: string
+
+        ElementFieldInput:
+            description: |
+                Data to create or update an element field.
+                If `type` is `enum`, `value` is required and must be an array.
+                For any other type, `value` must not be sent.
+            oneOf:
+                - title: Enum element field
+                  allOf:
+                      - $ref: '#/components/schemas/FieldBase'
+                      - type: object
+                        required:
+                            - value
+                        properties:
+                            value:
+                                type: array
+                                description: Allowed values for the enum field
+                                items:
+                                    type: string
+                                example:
+                                    - PSG1
+                                    - PSG2
+                                    - PSG3
+                  example:
+                      name: class
+                      description: Project class
+                      type: enum
+                      value:
+                          - PSG1
+                          - PSG2
+                          - PSG3
+                - title: Non-enum element field
+                  allOf:
+                      - $ref: '#/components/schemas/FieldBase'
+                  example:
+                      name: title
+                      description: Element title
+                      type: string
+
+        # ── AgreementField ──────────────────────
+        AgreementField:
+            description: |
+                Field that defines part of the structure of an organization's agreements.
+                If `type` is `enum`, `value` contains the array of allowed values.
+                For any other type, `value` is not present.
+            oneOf:
+                - title: Enum agreement field
+                  allOf:
+                      - $ref: '#/components/schemas/FieldBase'
+                      - type: object
+                        required:
+                            - value
+                        properties:
+                            value:
+                                type: array
+                                description: Allowed values for the enum field
+                                items:
+                                    type: string
+                                example:
+                                    - gold
+                                    - silver
+                                    - bronze
+                  example:
+                      name: guaranteeLevel
+                      description: Service level guarantee tier
+                      type: enum
+                      value:
+                          - gold
+                          - silver
+                          - bronze
+                - title: Non-enum agreement field
+                  allOf:
+                      - $ref: '#/components/schemas/FieldBase'
+                  example:
+                      name: minResponseTime
+                      description: Minimum response time in hours
+                      type: number
+
+        AgreementFieldInput:
+            description: |
+                Data to create or update an agreement field.
+                If `type` is `enum`, `value` is required and must be an array.
+                For any other type, `value` must not be sent.
+            oneOf:
+                - title: Enum agreement field
+                  allOf:
+                      - $ref: '#/components/schemas/FieldBase'
+                      - type: object
+                        required:
+                            - value
+                        properties:
+                            value:
+                                type: array
+                                description: Allowed values for the enum field
+                                items:
+                                    type: string
+                                example:
+                                    - gold
+                                    - silver
+                                    - bronze
+                  example:
+                      name: guaranteeLevel
+                      description: Service level guarantee tier
+                      type: enum
+                      value:
+                          - gold
+                          - silver
+                          - bronze
+                - title: Non-enum agreement field
+                  allOf:
+                      - $ref: '#/components/schemas/FieldBase'
+                  example:
+                      name: minResponseTime
+                      description: Minimum response time in hours
+                      type: number
+
+        # ── User ─────────────────────
         User:
             type: object
             required:
@@ -203,6 +1340,7 @@ components:
                 updatedAt:
                     type: string
                     format: date-time
+
         UserInput:
             type: object
             required:
@@ -215,11 +1353,4 @@ components:
                 email:
                     type: string
                 password:
-                    type: string
-        Error:
-            type: object
-            properties:
-                error:
-                    type: string
-                message:
                     type: string
