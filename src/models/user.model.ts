@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcrypt';
+import { SystemRole } from '../types/systemRole.js';
 
 export interface IUser extends Document {
     username: string;
@@ -7,7 +8,7 @@ export interface IUser extends Document {
     password: string;
     name: string;
     surname: string;
-    systemRole: 'ADMIN' | 'USER';
+    systemRole: SystemRole;
     validatePassword(password: string): Promise<boolean>;
 }
 
@@ -18,7 +19,7 @@ const userSchema = new Schema<IUser>(
         password: { type: String, required: true, select: false },
         name: { type: String, required: true },
         surname: { type: String, required: true },
-        systemRole: { type: String, required: true, enum: ['ADMIN', 'USER'] },
+        systemRole: { type: String, required: true, enum: Object.values(SystemRole) },
     },
     { timestamps: true },
 );

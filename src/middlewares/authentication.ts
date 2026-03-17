@@ -3,6 +3,7 @@ import { ForbiddenError, UnauthorizedError } from '../utils/customErrors.js';
 import { type Request, type Response, type NextFunction } from 'express';
 import { Types } from 'mongoose';
 import { getLogger } from '../utils/logger.js';
+import { SystemRole } from '../types/systemRole.js';
 
 const logger = getLogger().setTag('authentication.ts');
 
@@ -15,7 +16,7 @@ declare module 'express' {
 export interface UserJwtPayload {
     userId: Types.ObjectId;
     username: string;
-    systemRole: 'ADMIN' | 'USER';
+    systemRole: SystemRole;
 }
 
 export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
@@ -36,7 +37,7 @@ export const isAuthenticated = (req: Request, res: Response, next: NextFunction)
     }
 };
 
-export const hasRole = (requiredRole: 'ADMIN' | 'USER') => {
+export const hasRole = (requiredRole: SystemRole) => {
     return (req: Request, res: Response, next: NextFunction) => {
         if (!req.auth) {
             return next(new UnauthorizedError('User not authenticated'));

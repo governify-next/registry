@@ -1,6 +1,7 @@
 import { body, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError } from '../utils/customErrors.js';
+import { SystemRole } from '../types/systemRole.js';
 
 export const validateCreateUser = [
     body('username')
@@ -45,8 +46,8 @@ export const validateCreateUser = [
     body('systemRole')
         .exists({ checkNull: true })
         .withMessage('System role is required')
-        .isIn(['ADMIN', 'USER'])
-        .withMessage('System role must be one of: ADMIN, USER'),
+        .isIn(Object.values(SystemRole))
+        .withMessage(`System role must be one of: ${Object.values(SystemRole).join(', ')}`),
     (req: Request, res: Response, next: NextFunction) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
