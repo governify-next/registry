@@ -1,11 +1,16 @@
 import User, { IUser } from '../models/user.model.js';
 
-import { DuplicateKeyError, UnauthorizedError } from '../utils/customErrors.js';
+import { DuplicateKeyError } from '../utils/customErrors.js';
 
 export const createUser = async (data: Partial<IUser>) => {
     try {
         const user = new User(data);
-        return await user.save();
+        const savedUser = await user.save();
+
+        // exclude password from the returned user object (edge case, as select: false)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password, ...userWithoutPassword } = savedUser.toObject();
+        return userWithoutPassword;
     } catch (err) {
         const e = err as {
             code?: number;
