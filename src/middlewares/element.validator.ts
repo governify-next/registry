@@ -1,12 +1,12 @@
 import { body, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError } from '../utils/customErrors.js';
-import { IOrganization } from '../models/organization.model.js';
+import * as organizationService from '../services/organization.service.js';
 
 const validateElementFields = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { fields } = req.body;
-        const organization = res.locals.organization as IOrganization;
+        const organization = await organizationService.getOrganizationByName(req.params.orgName);
 
         if (!fields || !Array.isArray(fields)) {
             return next();
@@ -50,11 +50,7 @@ const validateElementFields = async (req: Request, res: Response, next: NextFunc
 const validateElementPermissions = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { permissions } = req.body;
-        const organization = res.locals.organization as IOrganization | undefined;
-
-        if (!organization) {
-            return next(new ValidationError('Organization not found in context'));
-        }
+        const organization = await organizationService.getOrganizationByName(req.params.orgName);
 
         if (!permissions || typeof permissions !== 'object') {
             return next();

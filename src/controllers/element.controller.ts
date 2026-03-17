@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import * as elementService from '../services/element.service.js';
+import * as organizationService from '../services/organization.service.js';
 import { sendSuccess } from '../utils/standardResponse.js';
-import { IOrganization } from '../models/organization.model.js';
 
 export const createElement = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const organization = res.locals.organization as IOrganization;
+        const organization = await organizationService.getOrganizationByName(req.params.orgName);
         const element = await elementService.createElement(organization._id, req.body);
         return sendSuccess(res, {
             data: element,
@@ -23,7 +23,7 @@ export const getElementsByOrganization = async (
     next: NextFunction,
 ) => {
     try {
-        const organization = res.locals.organization as IOrganization;
+        const organization = await organizationService.getOrganizationByName(req.params.orgName);
         const elements = await elementService.getElementsByOrganization(organization._id);
         return sendSuccess(res, { data: elements });
     } catch (err) {
@@ -33,7 +33,7 @@ export const getElementsByOrganization = async (
 
 export const getElementByName = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const organization = res.locals.organization as IOrganization;
+        const organization = await organizationService.getOrganizationByName(req.params.orgName);
         const element = await elementService.getElementByName(
             organization._id,
             req.params.elementName,
@@ -46,7 +46,7 @@ export const getElementByName = async (req: Request, res: Response, next: NextFu
 
 export const updateElement = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const organization = res.locals.organization as IOrganization;
+        const organization = await organizationService.getOrganizationByName(req.params.orgName);
         const element = await elementService.updateElement(
             organization._id,
             req.params.elementName,
@@ -60,7 +60,7 @@ export const updateElement = async (req: Request, res: Response, next: NextFunct
 
 export const deleteElement = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const organization = res.locals.organization as IOrganization;
+        const organization = await organizationService.getOrganizationByName(req.params.orgName);
         await elementService.deleteElement(organization._id, req.params.elementName);
         return sendSuccess(res, { data: null, message: 'Element deleted' });
     } catch (err) {

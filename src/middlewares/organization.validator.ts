@@ -106,7 +106,6 @@ export const existingOrganization = async (req: Request, res: Response, next: Ne
                 new ValidationError(`Organization with name ${req.params.orgName} does not exist`),
             );
         }
-        res.locals.organization = organization; // save organization for downstream use
         next();
     } catch (err) {
         next(err);
