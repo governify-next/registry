@@ -246,3 +246,13 @@ export const hasOrgRole = (roleName: string) => {
         }
     };
 };
+
+export const notAdminRole = async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.params.roleName) return next();
+    if (req.params.roleName === 'admin')
+        return next(
+            new ForbiddenError(`Admin role can not be removed/modified from organizations`),
+        );
+
+    next();
+};

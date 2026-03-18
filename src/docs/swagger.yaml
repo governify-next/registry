@@ -24,6 +24,8 @@ tags:
       description: Fields that define the structure of an organization's elements
     - name: AgreementFields
       description: Fields that define the structure of an organization's agreements
+    - name: Members
+      description: Member management within an organization
 
 paths:
     # ──────────────────────────────────────────────
@@ -453,6 +455,7 @@ paths:
             description: |
                 Updates the name and/or description of an existing role.
                 Requires organization admin role.
+                The built-in 'admin' role cannot be modified.
                 If the name is changed, the new name must be unique within the organization.
             requestBody:
                 $ref: '#/components/requestBodies/RoleBody'
@@ -489,6 +492,7 @@ paths:
                 - BearerAuth: []
             description: |
                 Removes a role from the organization. Requires organization admin role.
+                The built-in 'admin' role cannot be deleted.
                 This operation also cascade-deletes all references to this role
                 in the associated user memberships.
             responses:
@@ -746,6 +750,113 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
+    # ──────────────────────────────────────────────
+    # Members
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/members:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+        post:
+            tags:
+                - Members
+            summary: Add a user to the organization
+            operationId: addUserToOrganization
+            security:
+                - BearerAuth: []
+            description: |
+                Adds an existing user as a member of the specified organization.
+                Requires organization admin role.
+                The user must exist in the system and must not already be a member.
+                There is a maximum member limit per organization (default 1000).
+            requestBody:
+                $ref: '#/components/requestBodies/MemberBody'
+            responses:
+                '200':
+                    description: User added to the organization successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Membership'
+                            example:
+                                success: true
+                                message: User added to organization
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665c3d4e5f6a7b8c9d0e1f2a
+                                    organizationId: 665a1b2c3d4e5f6a7b8c9d0e
+                                    userId: 665d4e5f6a7b8c9d0e1f2a3b
+                                    rolesId: []
+                                    createdAt: '2025-06-01T12:00:00.000Z'
+                                    updatedAt: '2025-06-01T12:00:00.000Z'
+                                    __v: 0
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
+                '404':
+                    $ref: '#/components/responses/OrganizationNotFound'
+                '409':
+                    $ref: '#/components/responses/MemberConflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/members/{username}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/memberUsername'
+        delete:
+            tags:
+                - Members
+            summary: Remove a user from the organization
+            operationId: removeUserFromOrganization
+            security:
+                - BearerAuth: []
+            description: |
+                Removes a user from the specified organization, deleting
+                the associated membership. Requires organization admin role.
+                The user must be a current member of the organization.
+                An admin cannot remove themselves from the organization.
+            responses:
+                '200':
+                    description: User removed from the organization successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: object
+                                              nullable: true
+                                              example: null
+                            example:
+                                success: true
+                                message: User removed from organization
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data: null
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
+                '404':
+                    $ref: '#/components/responses/MemberNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
 # ──────────────────────────────────────────────
 # Reusable components
 # ──────────────────────────────────────────────
@@ -792,6 +903,14 @@ components:
             schema:
                 type: string
             example: minResponseTime
+        memberUsername:
+            name: username
+            in: path
+            required: true
+            description: Username of the member to remove
+            schema:
+                type: string
+            example: johndoe
 
     # ── Request Bodies ────────────────────────────
     requestBodies:
@@ -869,6 +988,16 @@ components:
                                     - gold
                                     - silver
                                     - bronze
+
+        MemberBody:
+            description: Data to add a user to an organization
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/MemberInput'
+                    example:
+                        username: johndoe
 
     # ── Reusable responses ────────────────────────
     responses:
@@ -1051,6 +1180,36 @@ components:
                         data: null
                         error:
                             message: "Organization 'universidad-sevilla' has reached the maximum limit of 100 roles."
+                            details: null
+        MemberConflict:
+            description: The user is already a member of the organization
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: "The user 'johndoe' already exists in organization 'universidad-sevilla'"
+                        httpStatus: 400
+                        appCode: VALIDATION_ERROR
+                        data: null
+                        error:
+                            message: "The user 'johndoe' already exists in organization 'universidad-sevilla'"
+                            details: null
+        MemberNotFound:
+            description: The user is not a member of the organization
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: "The user 'johndoe' does not exist in organization 'universidad-sevilla'"
+                        httpStatus: 400
+                        appCode: VALIDATION_ERROR
+                        data: null
+                        error:
+                            message: "The user 'johndoe' does not exist in organization 'universidad-sevilla'"
                             details: null
         Unauthorized:
             description: Missing or invalid authentication token
@@ -1278,6 +1437,58 @@ components:
                     description: Role description
                     maxLength: 500
                     example: Organization administrator
+
+        # ── Membership ──────────────────────────
+        Membership:
+            type: object
+            description: Represents the relationship between a user and an organization
+            required:
+                - _id
+                - organizationId
+                - userId
+                - rolesId
+            properties:
+                _id:
+                    type: string
+                    description: MongoDB internal identifier (ObjectId)
+                    example: 665c3d4e5f6a7b8c9d0e1f2a
+                organizationId:
+                    type: string
+                    description: Organization ObjectId reference
+                    example: 665a1b2c3d4e5f6a7b8c9d0e
+                userId:
+                    type: string
+                    description: User ObjectId reference
+                    example: 665d4e5f6a7b8c9d0e1f2a3b
+                rolesId:
+                    type: array
+                    description: Array of Role ObjectId references assigned to the user
+                    items:
+                        type: string
+                    example: []
+                createdAt:
+                    type: string
+                    format: date-time
+                    description: Creation date (auto-generated by Mongoose)
+                updatedAt:
+                    type: string
+                    format: date-time
+                    description: Last update date (auto-generated by Mongoose)
+                __v:
+                    type: integer
+                    description: Mongoose version key
+                    example: 0
+
+        MemberInput:
+            type: object
+            description: Data required to add a user to an organization
+            required:
+                - username
+            properties:
+                username:
+                    type: string
+                    description: Username of the user to add
+                    example: johndoe
 
         # ── Base field properties (shared) ──────
         FieldBase:

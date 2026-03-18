@@ -11,6 +11,7 @@ import {
     maxRoles,
     uniqueField,
     hasOrgRole,
+    notAdminRole,
 } from '../middlewares/organization.validator.js';
 import { hasRole, isAuthenticated } from '../middlewares/authentication.js';
 import { existingUser, validateUsername } from '../middlewares/user.validator.js';
@@ -71,6 +72,7 @@ router.put(
     isAuthenticated,
     existingOrganization,
     hasOrgRole('admin'),
+    notAdminRole,
     existingRole,
     validateRole,
     uniqueRole,
@@ -81,6 +83,7 @@ router.delete(
     isAuthenticated,
     existingOrganization,
     hasOrgRole('admin'),
+    notAdminRole,
     existingRole,
     organizationController.deleteRole,
 );
