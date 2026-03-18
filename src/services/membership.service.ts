@@ -34,3 +34,7 @@ export const findEspecificRole = async (
 ) => {
     return await membershipRepository.findEspecificRole(orgId, userId, roleId);
 };
+
+export const removeMembershipsByOrganization = async (orgId: Types.ObjectId) => {
+    return await membershipRepository.removeMembershipsByOrganization(orgId);
+};

@@ -48,3 +48,7 @@ export const assignRole = async (
         { upsert: true, new: true },
     );
 };
+
+export const removeMembershipsByOrganization = async (orgId: Types.ObjectId) => {
+    return await Membership.deleteMany({ organizationId: orgId });
+};

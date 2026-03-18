@@ -39,8 +39,11 @@ export const updateOrganization = async (orgName: string, data: Partial<IOrganiz
 };
 
 export const deleteOrganization = async (orgName: string) => {
-    const organization = await organizationRepository.deleteOrganization(orgName);
-    return organization;
+    const organization = await getOrganizationByName(orgName);
+    // Borramos las memberships asociadas
+    await membershipService.removeMembershipsByOrganization(organization!._id);
+    // Borramos la organización
+    return await organizationRepository.deleteOrganization(orgName);
 };
 
 export const addRole = async (orgName: string, role: { name: string; description: string }) => {
