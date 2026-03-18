@@ -56,7 +56,7 @@ export interface IOrganization extends Document {
         value?: unknown;
     }[];
     roles: {
-        _id: Types.ObjectId;
+        _id?: Types.ObjectId;
         name: string;
         description: string;
     }[];
@@ -70,7 +70,10 @@ const organizationSchema = new Schema<IOrganization>(
         description: { type: String, required: true },
         elementFields: { type: [fieldSchema], default: [] },
         agreementFields: { type: [fieldSchema], default: [] },
-        roles: { type: [roleSchema], default: [] },
+        roles: {
+            type: [roleSchema],
+            default: [],
+        },
     },
     {
         timestamps: true, // createdAt y updatedAt

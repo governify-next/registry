@@ -1,26 +1,29 @@
 import * as organizationRepository from '../repositories/organization.repository.js';
 import { IOrganization } from '../models/organization.model.js';
-import { NotFoundError, DuplicateKeyError, LimitError } from '../utils/customErrors.js';
 import type { FieldArrayName } from '../repositories/organization.repository.js';
 import * as membershipService from '../services/membership.service.js';
-
-// Para trabajar en módulos como elementos
-export const getOrganizationIdByName = async (orgName: string) => {
-    const organizationId = await organizationRepository.getOrganizationIdByName(orgName);
-    if (!organizationId) throw new NotFoundError(`Organization with name '${orgName}' not found`);
-    return organizationId;
-};
+import { Types } from 'mongoose';
+import { getUserByUsername } from './user.service.js';
 
 // Para trabajo interno en la organización
 export const getOrganizationByName = async (orgName: string) => {
-    const organization = await organizationRepository.getOrganizationByName(orgName);
-    if (!organization) throw new NotFoundError(`Organization with name '${orgName}' not found`);
-    return organization;
+    return await organizationRepository.getOrganizationByName(orgName);
 };
 
-export const createOrganization = async (data: Partial<IOrganization>) => {
+export const createOrganization = async (data: Partial<IOrganization>, userId: Types.ObjectId) => {
     const { name, description } = data;
-    return await organizationRepository.createOrganization({ name, description });
+    // Creamos la organización con el rol base
+    const createdOrganization = await organizationRepository.createOrganization({
+        name,
+        description,
+        roles: [{ name: 'admin', description: 'Organization Administrator' }],
+    });
+    // Obtenemos el id del rol admin generado por mongoose
+    const adminRole = createdOrganization.roles.find((r) => r.name === 'admin')!;
+    // Asignamos el rol admin al creador de la organización
+    await membershipService.assignRole(userId, createdOrganization._id, adminRole._id!);
+    // Devolvemos la organización creada
+    return createdOrganization;
 };
 
 export const getOrganizations = async () => {
@@ -29,36 +32,18 @@ export const getOrganizations = async () => {
 
 export const updateOrganization = async (orgName: string, data: Partial<IOrganization>) => {
     const { name, description } = data;
-    const organization = await organizationRepository.updateOrganization(orgName, {
+    return await organizationRepository.updateOrganization(orgName, {
         name,
         description,
     });
-    if (!organization) throw new NotFoundError(`Organization with name '${orgName}' not found`);
-    return organization;
 };
 
 export const deleteOrganization = async (orgName: string) => {
     const organization = await organizationRepository.deleteOrganization(orgName);
-    if (!organization) throw new NotFoundError(`Organization with name '${orgName}' not found`);
     return organization;
 };
 
 export const addRole = async (orgName: string, role: { name: string; description: string }) => {
-    const org = await getOrganizationByName(orgName);
-    // Comprobamos que no exista ya un rol con ese nombre
-    if (org.roles.some((r) => r.name === role.name)) {
-        throw new DuplicateKeyError(
-            `Role '${role.name}' already exists in organization '${orgName}'`,
-            {},
-        );
-    }
-    // Comprobamos que no supere el límite de roles por org
-    const maxRoles = parseInt(process.env.MAX_ROLES_PER_ORGANIZATION || '100', 10); // 10 asegura base10
-    if (org.roles.length >= maxRoles) {
-        throw new LimitError(
-            `Organization '${orgName}' has reached the maximum limit of ${maxRoles} roles.`,
-        );
-    }
     return await organizationRepository.addRole(orgName, role);
 };
 
@@ -67,26 +52,15 @@ export const updateRole = async (
     roleName: string,
     data: { name: string; description: string },
 ) => {
-    const org = await getOrganizationByName(orgName);
-    if (!org.roles.some((r) => r.name === roleName))
-        throw new NotFoundError(`Role '${roleName}' not found in organization '${orgName}'`);
-    // Si hay nombre nuevo aseguramos que no coincida con otro creado en la organización
-    if (data.name !== roleName && org.roles.some((r) => r.name === data.name))
-        throw new DuplicateKeyError(
-            `Role '${data.name}' already exists in organization '${orgName}'`,
-            {},
-        );
     return await organizationRepository.updateRole(orgName, roleName, data);
 };
 
 export const deleteRole = async (orgName: string, roleName: string) => {
     const org = await getOrganizationByName(orgName);
     // Como obtenemos la org, pasamos ya el id del rol para el borrado en Membership
-    const roleToDelete = org.roles.find((r) => r.name === roleName);
-    if (!roleToDelete)
-        throw new NotFoundError(`Role '${roleName}' not found in organization '${orgName}'`);
+    const roleToDelete = org!.roles.find((r) => r.name === roleName);
     // Llamamos a Membership para que borre el rol de las asignaciones
-    await membershipService.removeRoleFromMemberships(roleToDelete._id);
+    await membershipService.removeRoleFromMemberships(roleToDelete!._id!); // ! garantiza a Ts no nulo ahora que tenemos id? en interfaz
     // Borramos el rol de la organización
     return await organizationRepository.deleteRole(orgName, roleName);
 };
@@ -96,12 +70,6 @@ export const addField = async (
     orgName: string,
     field: { name: string; description: string; type: string; value?: unknown },
 ) => {
-    const org = await getOrganizationByName(orgName);
-    if (org[arrayName].some((f) => f.name === field.name))
-        throw new DuplicateKeyError(
-            `${arrayName} '${field.name}' already exists in organization '${orgName}'`,
-            {},
-        );
     return await organizationRepository.addField(orgName, arrayName, field);
 };
 
@@ -111,16 +79,6 @@ export const updateField = async (
     fieldName: string,
     data: { name: string; description: string; type: string; value?: unknown },
 ) => {
-    const org = await getOrganizationByName(orgName);
-    if (!org[arrayName].some((f) => f.name === fieldName))
-        throw new NotFoundError(
-            `${arrayName} '${fieldName}' not found in organization '${orgName}'`,
-        );
-    if (data.name !== fieldName && org[arrayName].some((f) => f.name === data.name))
-        throw new DuplicateKeyError(
-            `${arrayName} '${data.name}' already exists in organization '${orgName}'`,
-            {},
-        );
     return await organizationRepository.updateField(orgName, arrayName, fieldName, data);
 };
 
@@ -129,10 +87,24 @@ export const deleteField = async (
     orgName: string,
     fieldName: string,
 ) => {
-    const org = await getOrganizationByName(orgName);
-    if (!org[arrayName].some((f) => f.name === fieldName))
-        throw new NotFoundError(
-            `${arrayName} '${fieldName}' not found in organization '${orgName}'`,
-        );
     return await organizationRepository.deleteField(orgName, arrayName, fieldName);
+};
+
+export const addUserToOrganization = async (orgName: string, username: string) => {
+    // Obtenemos id de usuario
+    const user = await getUserByUsername(username);
+    const userId = user!._id;
+    // Obtenemos id de la organización
+    const organization = await getOrganizationByName(orgName);
+    const organizationId = organization!._id;
+    // Creamos la membership
+    return await membershipService.createMembership(organizationId, userId);
+};
+
+export const removeUserFromOrganization = async (orgName: string, username: string) => {
+    const organization = await getOrganizationByName(orgName);
+    const user = await getUserByUsername(username);
+    const organizationId = organization!._id;
+    const userId = user!._id;
+    return await membershipService.removeMembership(organizationId, userId);
 };

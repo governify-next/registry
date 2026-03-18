@@ -1,6 +1,22 @@
 import { body, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
-import { ValidationError } from '../utils/customErrors.js';
+import {
+    ValidationError,
+    DuplicateKeyError,
+    LimitError,
+    ForbiddenError,
+} from '../utils/customErrors.js';
+import { getOrganizationByName } from '../services/organization.service.js';
+import { findEspecificRole } from '../services/membership.service.js';
+import { IOrganization } from '../models/organization.model.js';
+import { IUser } from '../models/user.model.js';
+
+// Para reutilizar la organización en los middleware únicamente
+declare module 'express' {
+    interface Request {
+        organization?: IOrganization;
+    }
+}
 
 const nameValidation = (field: string) =>
     body(field)
@@ -90,3 +106,143 @@ export const validateField = [
         next();
     },
 ];
+
+export const existingOrganization = async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.params.orgName) return next();
+
+    try {
+        const organization = await getOrganizationByName(req.params.orgName);
+        if (!organization) {
+            return next(
+                new ValidationError(`Organization with name ${req.params.orgName} does not exist`),
+            );
+        }
+        req.organization = organization;
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const existingRole = async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.params.roleName) return next();
+
+    try {
+        const role = req.organization!.roles.find((r) => r.name === req.params.roleName);
+
+        if (!role)
+            return next(
+                new ValidationError(
+                    `Role '${req.params.roleName}' not found in organization '${req.organization!.name}'`,
+                ),
+            );
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const existingField = (arrayName: 'elementFields' | 'agreementFields') => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        if (!req.params.fieldName) return next();
+
+        try {
+            const field = req.organization![arrayName].find((f) => f.name === req.params.fieldName);
+
+            if (!field)
+                return next(
+                    new ValidationError(
+                        `${arrayName} '${req.params.fieldName}' not found in organization '${req.organization!.name}'`,
+                    ),
+                );
+            next();
+        } catch (err) {
+            next(err);
+        }
+    };
+};
+
+export const uniqueRole = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { roleName } = req.params;
+        const newName = req.body.name;
+        // Si es update y el nombre no cambió, no hay conflicto
+        if (roleName && newName === roleName) return next();
+        if (req.organization!.roles.some((r) => r.name === newName))
+            return next(
+                new DuplicateKeyError(
+                    `Role '${newName}' already exists in organization '${req.organization!.name}'`,
+                    {},
+                ),
+            );
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const maxRoles = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const max = parseInt(process.env.MAX_ROLES_PER_ORGANIZATION || '100', 10);
+        if (req.organization!.roles.length >= max)
+            return next(
+                new LimitError(
+                    `Organization '${req.organization!.name}' has reached the maximum limit of ${max} roles.`,
+                ),
+            );
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const uniqueField = (arrayName: 'elementFields' | 'agreementFields') => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { fieldName } = req.params;
+            const newName = req.body.name;
+            // Si es update y el nombre no cambió, no hay conflicto
+            if (fieldName && newName === fieldName) return next();
+            if (req.organization![arrayName].some((f) => f.name === newName))
+                return next(
+                    new DuplicateKeyError(
+                        `${arrayName} '${newName}' already exists in organization '${req.organization!.name}'`,
+                        {},
+                    ),
+                );
+            next();
+        } catch (err) {
+            next(err);
+        }
+    };
+};
+
+export const hasOrgRole = (roleName: string) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const roleId = req.organization!.roles.find((r) => r.name === roleName)?._id;
+
+            if (!roleId)
+                return next(
+                    new ValidationError(
+                        `Role '${roleName}' not found in organization '${req.organization!.name}'`,
+                    ),
+                );
+
+            // Buscamos si el usuario tiene ese rol en la organización
+            const hasRole = await findEspecificRole(
+                req.organization!._id,
+                req.auth!.userId,
+                roleId,
+            );
+
+            if (!hasRole)
+                return next(
+                    new ForbiddenError(`You do not have permission to perform that action`),
+                );
+            next();
+        } catch (err) {
+            next(err);
+        }
+    };
+};

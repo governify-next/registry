@@ -188,6 +188,8 @@ paths:
                 - Organizations
             summary: List all organizations
             operationId: getOrganizations
+            security:
+                - BearerAuth: []
             description: |
                 Returns an array with all organizations registered in the system.
                 Each organization includes its roles, element fields and agreement fields.
@@ -216,11 +218,16 @@ paths:
                                       description: Organization for Universidad de Sevilla
                                       elementFields: []
                                       agreementFields: []
-                                      roles: []
+                                      roles:
+                                          - _id: 665b2c3d4e5f6a7b8c9d0e1f
+                                            name: admin
+                                            description: Organization Administrator
                                       createdAt: '2025-06-01T10:00:00.000Z'
                                       updatedAt: '2025-06-01T10:00:00.000Z'
                                       __v: 0
                                 error: null
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
                 '500':
                     $ref: '#/components/responses/InternalError'
         post:
@@ -228,9 +235,13 @@ paths:
                 - Organizations
             summary: Create an organization
             operationId: createOrganization
+            security:
+                - BearerAuth: []
             description: |
                 Creates a new organization with a unique name and a description.
-                The roles, elementFields and agreementFields arrays are initialized empty.
+                Requires system ADMIN role. The organization is created with a default
+                'admin' role and the creator is automatically assigned as admin.
+                The elementFields and agreementFields arrays are initialized empty.
             requestBody:
                 $ref: '#/components/requestBodies/OrganizationBody'
             responses:
@@ -256,13 +267,20 @@ paths:
                                     description: Organization for Universidad de Sevilla
                                     elementFields: []
                                     agreementFields: []
-                                    roles: []
+                                    roles:
+                                        - _id: 665b2c3d4e5f6a7b8c9d0e1f
+                                          name: admin
+                                          description: Organization Administrator
                                     createdAt: '2025-06-01T10:00:00.000Z'
                                     updatedAt: '2025-06-01T10:00:00.000Z'
                                     __v: 0
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '409':
                     $ref: '#/components/responses/OrganizationConflict'
                 '500':
@@ -276,6 +294,8 @@ paths:
                 - Organizations
             summary: Get an organization by name
             operationId: getOrganizationByName
+            security:
+                - BearerAuth: []
             description: |
                 Returns the full organization identified by its unique name,
                 including its roles, element fields and agreement fields.
@@ -291,6 +311,8 @@ paths:
                                       properties:
                                           data:
                                               $ref: '#/components/schemas/Organization'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
                 '404':
                     $ref: '#/components/responses/OrganizationNotFound'
                 '500':
@@ -300,8 +322,11 @@ paths:
                 - Organizations
             summary: Update an organization
             operationId: updateOrganization
+            security:
+                - BearerAuth: []
             description: |
                 Updates the name and/or description of an existing organization.
+                Requires organization admin role.
                 If the name is changed, the new name must be unique in the system.
             requestBody:
                 $ref: '#/components/requestBodies/OrganizationBody'
@@ -319,6 +344,10 @@ paths:
                                               $ref: '#/components/schemas/Organization'
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/OrganizationNotFound'
                 '409':
@@ -330,8 +359,11 @@ paths:
                 - Organizations
             summary: Delete an organization
             operationId: deleteOrganization
+            security:
+                - BearerAuth: []
             description: |
                 Permanently deletes the organization and all its associated data.
+                Requires organization admin role.
             responses:
                 '200':
                     description: Organization deleted successfully
@@ -353,6 +385,10 @@ paths:
                                 appCode: SUCCESS
                                 data: null
                                 error: null
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/OrganizationNotFound'
                 '500':
@@ -369,8 +405,11 @@ paths:
                 - Roles
             summary: Add a role to the organization
             operationId: addRole
+            security:
+                - BearerAuth: []
             description: |
                 Adds a new role to the specified organization.
+                Requires organization admin role.
                 The role name must be unique within the organization.
                 There is a maximum role limit per organization (default 100).
             requestBody:
@@ -389,8 +428,10 @@ paths:
                                               $ref: '#/components/schemas/Organization'
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
                 '403':
-                    $ref: '#/components/responses/LimitExceeded'
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/OrganizationNotFound'
                 '409':
@@ -407,8 +448,11 @@ paths:
                 - Roles
             summary: Update a role
             operationId: updateRole
+            security:
+                - BearerAuth: []
             description: |
                 Updates the name and/or description of an existing role.
+                Requires organization admin role.
                 If the name is changed, the new name must be unique within the organization.
             requestBody:
                 $ref: '#/components/requestBodies/RoleBody'
@@ -426,6 +470,10 @@ paths:
                                               $ref: '#/components/schemas/Organization'
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/RoleNotFound'
                 '409':
@@ -437,9 +485,12 @@ paths:
                 - Roles
             summary: Delete a role
             operationId: deleteRole
+            security:
+                - BearerAuth: []
             description: |
-                Removes a role from the organization. This operation also cascade-deletes
-                all references to this role in the associated user memberships.
+                Removes a role from the organization. Requires organization admin role.
+                This operation also cascade-deletes all references to this role
+                in the associated user memberships.
             responses:
                 '200':
                     description: Role deleted successfully. Returns the updated organization.
@@ -452,6 +503,10 @@ paths:
                                       properties:
                                           data:
                                               $ref: '#/components/schemas/Organization'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/RoleNotFound'
                 '500':
@@ -468,8 +523,11 @@ paths:
                 - ElementFields
             summary: Add an element field
             operationId: addElementField
+            security:
+                - BearerAuth: []
             description: |
                 Adds a new field to the organization's element definition.
+                Requires organization admin role.
                 This field becomes part of the structure that elements belonging
                 to this organization must follow.
             requestBody:
@@ -488,6 +546,10 @@ paths:
                                               $ref: '#/components/schemas/Organization'
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/OrganizationNotFound'
                 '409':
@@ -504,9 +566,12 @@ paths:
                 - ElementFields
             summary: Update an element field
             operationId: updateElementField
+            security:
+                - BearerAuth: []
             description: |
-                Updates an existing element field. If the name is changed,
-                the new name must be unique within the organization's elementFields.
+                Updates an existing element field. Requires organization admin role.
+                If the name is changed, the new name must be unique within the
+                organization's elementFields.
             requestBody:
                 $ref: '#/components/requestBodies/FieldBody'
             responses:
@@ -523,6 +588,10 @@ paths:
                                               $ref: '#/components/schemas/Organization'
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/ElementFieldNotFound'
                 '409':
@@ -534,7 +603,11 @@ paths:
                 - ElementFields
             summary: Delete an element field
             operationId: deleteElementField
-            description: Removes a field from the organization's element definition.
+            security:
+                - BearerAuth: []
+            description: |
+                Removes a field from the organization's element definition.
+                Requires organization admin role.
             responses:
                 '200':
                     description: Element field deleted. Returns the updated organization.
@@ -547,6 +620,10 @@ paths:
                                       properties:
                                           data:
                                               $ref: '#/components/schemas/Organization'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/ElementFieldNotFound'
                 '500':
@@ -563,8 +640,11 @@ paths:
                 - AgreementFields
             summary: Add an agreement field
             operationId: addAgreementField
+            security:
+                - BearerAuth: []
             description: |
                 Adds a new field to the organization's agreement definition.
+                Requires organization admin role.
                 This field becomes part of the structure that agreements associated
                 with this organization's elements must follow.
             requestBody:
@@ -583,6 +663,10 @@ paths:
                                               $ref: '#/components/schemas/Organization'
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/OrganizationNotFound'
                 '409':
@@ -599,9 +683,12 @@ paths:
                 - AgreementFields
             summary: Update an agreement field
             operationId: updateAgreementField
+            security:
+                - BearerAuth: []
             description: |
-                Updates an existing agreement field. If the name is changed,
-                the new name must be unique within the organization's agreementFields.
+                Updates an existing agreement field. Requires organization admin role.
+                If the name is changed, the new name must be unique within the
+                organization's agreementFields.
             requestBody:
                 $ref: '#/components/requestBodies/AgreementFieldBody'
             responses:
@@ -618,6 +705,10 @@ paths:
                                               $ref: '#/components/schemas/Organization'
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/AgreementFieldNotFound'
                 '409':
@@ -629,7 +720,11 @@ paths:
                 - AgreementFields
             summary: Delete an agreement field
             operationId: deleteAgreementField
-            description: Removes a field from the organization's agreement definition.
+            security:
+                - BearerAuth: []
+            description: |
+                Removes a field from the organization's agreement definition.
+                Requires organization admin role.
             responses:
                 '200':
                     description: Agreement field deleted. Returns the updated organization.
@@ -642,6 +737,10 @@ paths:
                                       properties:
                                           data:
                                               $ref: '#/components/schemas/Organization'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/AgreementFieldNotFound'
                 '500':
@@ -651,6 +750,14 @@ paths:
 # Reusable components
 # ──────────────────────────────────────────────
 components:
+    # ── Security Schemes ─────────────────────────
+    securitySchemes:
+        BearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+            description: JWT token obtained via POST /api/v1/users/login
+
     # ── Parameters ────────────────────────────────
     parameters:
         orgName:
@@ -706,8 +813,8 @@ components:
                     schema:
                         $ref: '#/components/schemas/RoleInput'
                     example:
-                        name: admin
-                        description: Organization administrator
+                        name: member
+                        description: Organization member
         FieldBody:
             description: |
                 Data to create or update an element field.
@@ -944,6 +1051,36 @@ components:
                         data: null
                         error:
                             message: "Organization 'universidad-sevilla' has reached the maximum limit of 100 roles."
+                            details: null
+        Unauthorized:
+            description: Missing or invalid authentication token
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: Authorization header missing or malformed
+                        httpStatus: 401
+                        appCode: UNAUTHORIZED
+                        data: null
+                        error:
+                            message: Authorization header missing or malformed
+                            details: null
+        Forbidden:
+            description: Insufficient permissions to perform this action
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: You do not have permission to perform that action
+                        httpStatus: 403
+                        appCode: FORBIDDEN
+                        data: null
+                        error:
+                            message: You do not have permission to perform that action
                             details: null
         InternalError:
             description: Internal server error

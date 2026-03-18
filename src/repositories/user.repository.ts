@@ -1,6 +1,6 @@
 import User, { IUser } from '../models/user.model.js';
 
-import { DuplicateKeyError, UnauthorizedError } from '../utils/customErrors.js';
+import { DuplicateKeyError } from '../utils/customErrors.js';
 
 export const createUser = async (data: Partial<IUser>) => {
     try {

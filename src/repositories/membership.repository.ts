@@ -15,3 +15,36 @@ export const removeRoleFromMemberships = async (roleId: Types.ObjectId) => {
         },
     ]);
 };
+
+export const findMembership = async (orgId: Types.ObjectId, userId: Types.ObjectId) => {
+    return await Membership.findOne({ organizationId: orgId, userId: userId });
+};
+
+export const findEspecificRole = async (
+    orgId: Types.ObjectId,
+    userId: Types.ObjectId,
+    roleId: Types.ObjectId,
+) => {
+    return await Membership.findOne({ organizationId: orgId, userId: userId, rolesId: roleId });
+};
+
+export const createMembership = async (orgId: Types.ObjectId, userId: Types.ObjectId) => {
+    return await Membership.create({ organizationId: orgId, userId: userId });
+};
+
+export const removeMembership = async (orgId: Types.ObjectId, userId: Types.ObjectId) => {
+    return await Membership.deleteOne({ organizationId: orgId, userId: userId });
+};
+
+export const assignRole = async (
+    userId: Types.ObjectId,
+    orgId: Types.ObjectId,
+    roleId: Types.ObjectId,
+) => {
+    // Usamos upsert, si no existe la membership la crea, si existe añade el rol
+    return await Membership.findOneAndUpdate(
+        { organizationId: orgId, userId: userId },
+        { $addToSet: { rolesId: roleId } }, // addToSet previene duplicados e inicializa el array si es necesario
+        { upsert: true, new: true },
+    );
+};

@@ -31,11 +31,6 @@ export const getOrganizationByName = async (orgName: string) => {
     return await Organization.findOne({ name: orgName });
 };
 
-// Para trabajar con ids en módulos como elementos
-export const getOrganizationIdByName = async (orgName: string) => {
-    return await Organization.findOne({ name: orgName }).select('_id').lean(); // lean hace que no se devuelvan funciones pesadas de Mongoose;
-};
-
 export const updateOrganization = async (orgName: string, data: Partial<IOrganization>) => {
     try {
         return await Organization.findOneAndUpdate({ name: orgName }, data, { new: true });

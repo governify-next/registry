@@ -4,7 +4,10 @@ import { sendSuccess } from '../utils/standardResponse.js';
 
 export const createOrganization = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const organization = await organizationService.createOrganization(req.body);
+        const organization = await organizationService.createOrganization(
+            req.body,
+            req.auth!.userId,
+        );
         return sendSuccess(res, {
             data: organization,
             httpStatus: 201,
@@ -171,6 +174,34 @@ export const deleteAgreementField = async (req: Request, res: Response, next: Ne
             req.params.fieldName,
         );
         return sendSuccess(res, { data: organization, message: 'AgreementField deleted' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const addUserToOrganization = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.addUserToOrganization(
+            req.params.orgName,
+            req.body.username,
+        );
+        return sendSuccess(res, { data: organization, message: 'User added to organization' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const removeUserFromOrganization = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        await organizationService.removeUserFromOrganization(
+            req.params.orgName,
+            req.params.username,
+        );
+        return sendSuccess(res, { data: null, message: 'User removed from organization' });
     } catch (err) {
         next(err);
     }

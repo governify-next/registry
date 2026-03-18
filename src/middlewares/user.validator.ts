@@ -1,9 +1,17 @@
 import { body, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError } from '../utils/customErrors.js';
+import { getUserByUsername } from '../services/user.service.js';
+import { IUser } from '../models/user.model.js';
 
-export const validateCreateUser = [
-    body('username')
+declare module 'express' {
+    interface Request {
+        targetUser?: IUser;
+    }
+}
+
+const usernameValidation = (field: string) =>
+    body(field)
         .exists({ checkNull: true })
         .withMessage('Username is required')
         .isString()
@@ -11,7 +19,20 @@ export const validateCreateUser = [
         .isLength({ min: 3 })
         .withMessage('Username must be at least 3 characters long')
         .isLength({ max: 50 })
-        .withMessage('Username must be at most 50 characters long'),
+        .withMessage('Username must be at most 50 characters long');
+
+export const validateUsername = [
+    usernameValidation('username'),
+    (req: Request, res: Response, next: NextFunction) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty())
+            return next(new ValidationError('Validation failed', errors.array()));
+        next();
+    },
+];
+
+export const validateCreateUser = [
+    usernameValidation('username'),
     body('email')
         .exists({ checkNull: true })
         .withMessage('Email is required')
@@ -81,3 +102,21 @@ export const validateLogin = [
         next();
     },
 ];
+
+export const existingUser = (source: 'body' | 'params') => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        const username = req[source].username;
+        if (!username) return next();
+
+        try {
+            const user = await getUserByUsername(username);
+
+            if (!user) return next(new ValidationError(`${username} does not exist`));
+
+            req.targetUser = user;
+            next();
+        } catch (err) {
+            next(err);
+        }
+    };
+};

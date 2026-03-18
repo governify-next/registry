@@ -12,10 +12,7 @@ const membershipSchema = new Schema<IMembership>(
         userId: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
         rolesId: {
             type: [Schema.Types.ObjectId],
-            validate: {
-                validator: (value: Types.ObjectId[]) => value.length > 0,
-                message: 'La asignación debe tener al menos un rol asignado',
-            },
+            default: [],
         },
     },
     { timestamps: true },
