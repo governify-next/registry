@@ -111,3 +111,19 @@ export const removeUserFromOrganization = async (orgName: string, username: stri
     const userId = user!._id;
     return await membershipService.removeMembership(organizationId, userId);
 };
+
+export const addRoleToUser = async (orgName: string, username: string, roleName: string) => {
+    const user = await getUserByUsername(username);
+    const organization = await getOrganizationByName(orgName);
+    const role = organization?.roles.find((r) => r.name === roleName);
+
+    return await membershipService.assignRole(user!._id, organization!._id, role!._id!);
+};
+
+export const removeRoleFromUser = async (orgName: string, username: string, roleName: string) => {
+    const user = await getUserByUsername(username);
+    const organization = await getOrganizationByName(orgName);
+    const role = organization?.roles.find((r) => r.name === roleName);
+
+    return await membershipService.unassignRole(organization!._id, user!._id, role!._id!);
+};

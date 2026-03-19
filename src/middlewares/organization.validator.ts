@@ -124,22 +124,25 @@ export const existingOrganization = async (req: Request, res: Response, next: Ne
     }
 };
 
-export const existingRole = async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.params.roleName) return next();
+export const existingRole = (source: 'body' | 'params') => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        const roleName = req[source].roleName;
+        if (!roleName) return next(new ValidationError('Role name is required'));
 
-    try {
-        const role = req.organization!.roles.find((r) => r.name === req.params.roleName);
+        try {
+            const role = req.organization!.roles.find((r) => r.name === req.params.roleName);
 
-        if (!role)
-            return next(
-                new ValidationError(
-                    `Role '${req.params.roleName}' not found in organization '${req.organization!.name}'`,
-                ),
-            );
-        next();
-    } catch (err) {
-        next(err);
-    }
+            if (!role)
+                return next(
+                    new ValidationError(
+                        `Role '${req.params.roleName}' not found in organization '${req.organization!.name}'`,
+                    ),
+                );
+            next();
+        } catch (err) {
+            next(err);
+        }
+    };
 };
 
 export const existingField = (arrayName: 'elementFields' | 'agreementFields') => {

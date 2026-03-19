@@ -169,3 +169,26 @@ router.delete(
     notSelfRemoval,
     organizationController.removeUserFromOrganization,
 );
+
+// Org - User roles
+router.post(
+    '/:orgName/members/:username/roles',
+    isAuthenticated,
+    existingOrganization,
+    hasOrgRole('admin'),
+    existingUser('params'),
+    existingMembership(true),
+    existingRole('body'),
+    organizationController.addRoleToUser,
+);
+
+router.delete(
+    '/:orgName/members/:username/roles/:roleName',
+    isAuthenticated,
+    existingOrganization,
+    hasOrgRole('admin'),
+    existingUser('params'),
+    existingMembership(true),
+    existingRole('params'),
+    organizationController.removeRoleFromUser,
+);

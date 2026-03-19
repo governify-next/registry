@@ -206,3 +206,29 @@ export const removeUserFromOrganization = async (
         next(err);
     }
 };
+
+export const addRoleToUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.addRoleToUser(
+            req.params.orgName,
+            req.params.username,
+            req.body.roleName,
+        );
+        return sendSuccess(res, { data: organization, message: 'Role added to user' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const removeRoleFromUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.removeRoleFromUser(
+            req.params.orgName,
+            req.params.username,
+            req.params.roleName,
+        );
+        return sendSuccess(res, { data: organization, message: 'Role removed from user' });
+    } catch (err) {
+        next(err);
+    }
+};
