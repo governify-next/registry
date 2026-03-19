@@ -23,6 +23,14 @@ export const assignRole = async (
     return await membershipRepository.assignRole(userId, orgId, roleId);
 };
 
+export const unassignRole = async (
+    orgId: Types.ObjectId,
+    userId: Types.ObjectId,
+    roleId: Types.ObjectId,
+) => {
+    return await membershipRepository.unassignRole(orgId, userId, roleId);
+};
+
 export const findMembership = async (orgId: Types.ObjectId, userId: Types.ObjectId) => {
     return await membershipRepository.findMembership(orgId, userId);
 };

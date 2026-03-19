@@ -49,6 +49,18 @@ export const assignRole = async (
     );
 };
 
+export const unassignRole = async (
+    organizationId: Types.ObjectId,
+    userId: Types.ObjectId,
+    roleId: Types.ObjectId,
+) => {
+    return await Membership.findOneAndUpdate(
+        { organizationId, userId },
+        { $pull: { rolesId: roleId } },
+        { new: true },
+    );
+};
+
 export const removeMembershipsByOrganization = async (orgId: Types.ObjectId) => {
     return await Membership.deleteMany({ organizationId: orgId });
 };
