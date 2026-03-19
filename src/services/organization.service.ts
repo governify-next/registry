@@ -4,6 +4,7 @@ import type { FieldArrayName } from '../repositories/organization.repository.js'
 import * as membershipService from '../services/membership.service.js';
 import { Types } from 'mongoose';
 import { getUserByUsername } from './user.service.js';
+import { DuplicateKeyError, NotFoundError } from '../utils/customErrors.js';
 
 // Para trabajo interno en la organización
 export const getOrganizationByName = async (orgName: string) => {
@@ -117,6 +118,15 @@ export const addRoleToUser = async (orgName: string, username: string, roleName:
     const organization = await getOrganizationByName(orgName);
     const role = organization?.roles.find((r) => r.name === roleName);
 
+    const userHasRole = await membershipService.findEspecificRole(
+        organization!._id,
+        user!._id,
+        role!._id!,
+    );
+    if (userHasRole) {
+        throw new DuplicateKeyError('User already has that role in the organization');
+    }
+
     return await membershipService.assignRole(user!._id, organization!._id, role!._id!);
 };
 
@@ -124,6 +134,15 @@ export const removeRoleFromUser = async (orgName: string, username: string, role
     const user = await getUserByUsername(username);
     const organization = await getOrganizationByName(orgName);
     const role = organization?.roles.find((r) => r.name === roleName);
+
+    const userHasRole = await membershipService.findEspecificRole(
+        organization!._id,
+        user!._id,
+        role!._id!,
+    );
+    if (!userHasRole) {
+        throw new NotFoundError('User does not have that role in the organization');
+    }
 
     return await membershipService.unassignRole(organization!._id, user!._id, role!._id!);
 };
