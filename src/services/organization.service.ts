@@ -12,10 +12,11 @@ export const getOrganizationByName = async (orgName: string) => {
 };
 
 export const createOrganization = async (data: Partial<IOrganization>, userId: Types.ObjectId) => {
-    const { name, description } = data;
+    const { name, displayName, description } = data;
     // Creamos la organización con el rol base
     const createdOrganization = await organizationRepository.createOrganization({
         name,
+        displayName,
         description,
         roles: [{ name: 'admin', description: 'Organization Administrator' }],
     });
@@ -32,9 +33,10 @@ export const getOrganizations = async () => {
 };
 
 export const updateOrganization = async (orgName: string, data: Partial<IOrganization>) => {
-    const { name, description } = data;
+    const { name, displayName, description } = data;
     return await organizationRepository.updateOrganization(orgName, {
         name,
+        displayName,
         description,
     });
 };

@@ -42,6 +42,7 @@ const roleSchema = new Schema({
 
 export interface IOrganization extends Document {
     name: string;
+    displayName: string;
     description: string;
     elementFields: {
         name: string;
@@ -67,6 +68,7 @@ export interface IOrganization extends Document {
 const organizationSchema = new Schema<IOrganization>(
     {
         name: { type: String, required: true, unique: true },
+        displayName: { type: String, default: '' },
         description: { type: String, required: true },
         elementFields: { type: [fieldSchema], default: [] },
         agreementFields: { type: [fieldSchema], default: [] },

@@ -25,8 +25,8 @@ const nameValidation = (field: string) =>
         .withMessage(`${field} must be a string`)
         .notEmpty()
         .withMessage(`${field} must not be empty`)
-        .isLength({ max: 100 })
-        .withMessage(`${field} must be at most 100 characters`);
+        .isLength({ min: 3, max: 100 })
+        .withMessage(`${field} must be between 3 and 100 characters`);
 
 const descriptionValidation = (field: string) =>
     body(field)
@@ -34,8 +34,8 @@ const descriptionValidation = (field: string) =>
         .withMessage(`${field} is required`)
         .isString()
         .withMessage(`${field} must be a string`)
-        .isLength({ max: 500 })
-        .withMessage(`${field} must be at most 500 characters`);
+        .isLength({ min: 3, max: 500 })
+        .withMessage(`${field} must be between 3 and 500 characters`);
 
 const typeValidation = (field: string) =>
     body(field)
@@ -71,8 +71,21 @@ const valueValidation = (field: string) => {
     });
 };
 
+const displayNameValidation = body('displayName')
+    .optional()
+    .isString()
+    .withMessage('displayName must be a string')
+    .isLength({ max: 200 })
+    .withMessage('displayName must be at most 100 characters');
+
+const orgNameFormat = body('name')
+    .matches(/^[a-zA-Z0-9-]+$/)
+    .withMessage('Organization name can only contain letters, numbers and hyphens');
+
 export const validateOrganization = [
     nameValidation('name'),
+    orgNameFormat,
+    displayNameValidation,
     descriptionValidation('description'),
     (req: Request, res: Response, next: NextFunction) => {
         const errors = validationResult(req);

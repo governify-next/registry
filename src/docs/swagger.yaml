@@ -217,6 +217,7 @@ paths:
                                 data:
                                     - _id: 665a1b2c3d4e5f6a7b8c9d0e
                                       name: universidad-sevilla
+                                      displayName: Universidad de Sevilla
                                       description: Organization for Universidad de Sevilla
                                       elementFields: []
                                       agreementFields: []
@@ -266,6 +267,7 @@ paths:
                                 data:
                                     _id: 665a1b2c3d4e5f6a7b8c9d0e
                                     name: universidad-sevilla
+                                    displayName: Universidad de Sevilla
                                     description: Organization for Universidad de Sevilla
                                     elementFields: []
                                     agreementFields: []
@@ -923,6 +925,7 @@ components:
                         $ref: '#/components/schemas/OrganizationInput'
                     example:
                         name: universidad-sevilla
+                        displayName: Universidad de Sevilla
                         description: Organization for Universidad de Sevilla
         RoleBody:
             description: Data to create or update a role
@@ -1342,12 +1345,21 @@ components:
                     example: 665a1b2c3d4e5f6a7b8c9d0e
                 name:
                     type: string
-                    description: Unique organization name (used as identifier in the API)
+                    description: Unique organization name (used as identifier in the API). Only letters, numbers and hyphens allowed.
+                    pattern: '^[a-zA-Z0-9-]+$'
+                    minLength: 3
                     maxLength: 100
                     example: universidad-sevilla
+                displayName:
+                    type: string
+                    description: Human-readable display name. Can contain any characters. Defaults to empty string.
+                    maxLength: 200
+                    default: ''
+                    example: Universidad de Sevilla
                 description:
                     type: string
                     description: Organization description
+                    minLength: 3
                     maxLength: 500
                     example: Organization for Universidad de Sevilla
                 elementFields:
@@ -1387,12 +1399,20 @@ components:
             properties:
                 name:
                     type: string
-                    description: Unique organization name
+                    description: Unique organization name. Only letters, numbers and hyphens allowed.
+                    pattern: '^[a-zA-Z0-9-]+$'
+                    minLength: 3
                     maxLength: 100
                     example: universidad-sevilla
+                displayName:
+                    type: string
+                    description: Human-readable display name. Can contain any characters.
+                    maxLength: 200
+                    example: Universidad de Sevilla
                 description:
                     type: string
                     description: Organization description
+                    minLength: 3
                     maxLength: 500
                     example: Organization for Universidad de Sevilla
 
