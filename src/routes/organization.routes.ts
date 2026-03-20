@@ -14,7 +14,7 @@ import {
     notAdminRole,
 } from '../middlewares/organization.validator.js';
 import { hasRole, isAuthenticated } from '../middlewares/authentication.js';
-import { existingUser, validateUsername } from '../middlewares/user.validator.js';
+import { validateUsername } from '../middlewares/user.validator.js';
 import {
     existingMembership,
     maxMembers,
@@ -43,7 +43,6 @@ router.get(
 router.put(
     '/:orgName',
     isAuthenticated,
-    existingOrganization,
     hasOrgRole('admin'),
     validateOrganization,
     organizationController.updateOrganization,
@@ -51,7 +50,6 @@ router.put(
 router.delete(
     '/:orgName',
     isAuthenticated,
-    existingOrganization,
     hasOrgRole('admin'),
     organizationController.deleteOrganization,
 );
@@ -60,7 +58,6 @@ router.delete(
 router.post(
     '/:orgName/roles',
     isAuthenticated,
-    existingOrganization,
     hasOrgRole('admin'),
     validateRole,
     uniqueRole,
@@ -70,10 +67,9 @@ router.post(
 router.put(
     '/:orgName/roles/:roleName',
     isAuthenticated,
-    existingOrganization,
     hasOrgRole('admin'),
     notAdminRole,
-    existingRole,
+    existingRole('params'),
     validateRole,
     uniqueRole,
     organizationController.updateRole,
@@ -81,10 +77,9 @@ router.put(
 router.delete(
     '/:orgName/roles/:roleName',
     isAuthenticated,
-    existingOrganization,
     hasOrgRole('admin'),
     notAdminRole,
-    existingRole,
+    existingRole('params'),
     organizationController.deleteRole,
 );
 
@@ -92,7 +87,6 @@ router.delete(
 router.post(
     '/:orgName/elementFields',
     isAuthenticated,
-    existingOrganization,
     hasOrgRole('admin'),
     validateField,
     uniqueField('elementFields'),
@@ -101,7 +95,6 @@ router.post(
 router.put(
     '/:orgName/elementFields/:fieldName',
     isAuthenticated,
-    existingOrganization,
     hasOrgRole('admin'),
     existingField('elementFields'),
     validateField,
@@ -111,7 +104,6 @@ router.put(
 router.delete(
     '/:orgName/elementFields/:fieldName',
     isAuthenticated,
-    existingOrganization,
     hasOrgRole('admin'),
     existingField('elementFields'),
     organizationController.deleteElementField,
@@ -121,7 +113,6 @@ router.delete(
 router.post(
     '/:orgName/agreementFields',
     isAuthenticated,
-    existingOrganization,
     hasOrgRole('admin'),
     validateField,
     uniqueField('agreementFields'),
@@ -130,7 +121,6 @@ router.post(
 router.put(
     '/:orgName/agreementFields/:fieldName',
     isAuthenticated,
-    existingOrganization,
     hasOrgRole('admin'),
     existingField('agreementFields'),
     validateField,
@@ -140,7 +130,6 @@ router.put(
 router.delete(
     '/:orgName/agreementFields/:fieldName',
     isAuthenticated,
-    existingOrganization,
     hasOrgRole('admin'),
     existingField('agreementFields'),
     organizationController.deleteAgreementField,
@@ -150,11 +139,9 @@ router.delete(
 router.post(
     '/:orgName/members',
     isAuthenticated,
-    existingOrganization,
     hasOrgRole('admin'),
     validateUsername,
-    existingUser('body'),
-    existingMembership(false),
+    existingMembership(false, 'body'),
     maxMembers,
     organizationController.addUserToOrganization,
 );
@@ -162,10 +149,8 @@ router.post(
 router.delete(
     '/:orgName/members/:username',
     isAuthenticated,
-    existingOrganization,
     hasOrgRole('admin'),
-    existingUser('params'),
-    existingMembership(true),
+    existingMembership(true, 'params'),
     notSelfRemoval,
     organizationController.removeUserFromOrganization,
 );
@@ -174,10 +159,8 @@ router.delete(
 router.post(
     '/:orgName/members/:username/roles',
     isAuthenticated,
-    existingOrganization,
     hasOrgRole('admin'),
-    existingUser('params'),
-    existingMembership(true),
+    existingMembership(true, 'params'),
     existingRole('body'),
     organizationController.addRoleToUser,
 );
@@ -185,10 +168,8 @@ router.post(
 router.delete(
     '/:orgName/members/:username/roles/:roleName',
     isAuthenticated,
-    existingOrganization,
     hasOrgRole('admin'),
-    existingUser('params'),
-    existingMembership(true),
+    existingMembership(true, 'params'),
     existingRole('params'),
     organizationController.removeRoleFromUser,
 );

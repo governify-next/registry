@@ -4,10 +4,12 @@ import { ValidationError } from '../utils/customErrors.js';
 import { getUserByUsername } from '../services/user.service.js';
 import { IUser } from '../models/user.model.js';
 
-declare module 'express' {
-    interface Request {
-        targetUser?: IUser;
-    }
+// Helper
+export async function getUserOrFail(username: string): Promise<IUser> {
+    const user = await getUserByUsername(username);
+
+    if (!user) throw new ValidationError(`${username} does not exist`);
+    return user;
 }
 
 const usernameValidation = (field: string) =>
@@ -102,21 +104,3 @@ export const validateLogin = [
         next();
     },
 ];
-
-export const existingUser = (source: 'body' | 'params') => {
-    return async (req: Request, res: Response, next: NextFunction) => {
-        const username = req[source].username;
-        if (!username) return next();
-
-        try {
-            const user = await getUserByUsername(username);
-
-            if (!user) return next(new ValidationError(`${username} does not exist`));
-
-            req.targetUser = user;
-            next();
-        } catch (err) {
-            next(err);
-        }
-    };
-};
