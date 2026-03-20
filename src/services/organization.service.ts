@@ -1,6 +1,7 @@
 import * as organizationRepository from '../repositories/organization.repository.js';
 import { IOrganization } from '../models/organization.model.js';
-import type { FieldArrayName } from '../repositories/organization.repository.js';
+import type { FieldArrayName } from '../types/organization.types.js';
+import type { ExpandMode } from '../types/membership.types.js';
 import * as membershipService from '../services/membership.service.js';
 import { Types } from 'mongoose';
 import { getUserByUsername } from './user.service.js';
@@ -130,6 +131,27 @@ export const addRoleToUser = async (orgName: string, username: string, roleName:
     }
 
     return await membershipService.assignRole(user!._id, organization!._id, role!._id!);
+};
+
+export const getMembers = async (orgName: string, expand: ExpandMode) => {
+    const organization = await getOrganizationByName(orgName);
+    const memberships = await membershipService.getMembershipsByOrganization(
+        organization!._id,
+        expand,
+    );
+
+    // Sin expansión, devolvemos las memberships tal cual están guardadaas
+    if (expand === 'none') return memberships;
+
+    // Con expansión, reemplazamos rolesId por roles resueltos desde la organización
+    return memberships.map((m) => ({
+        ...m.toObject(), // convertimos el documento de mongoose a un objeto plano (solo datos) y copiamos sus propiedades en un objeto nuevo
+        rolesId: undefined, // sobreescribimos los id de roles a undefined (los eliminamos)
+        roles: m.rolesId.map((id) => {
+            const role = organization!.roles.find((r) => r._id!.toString() === id.toString());
+            return expand === 'full' ? role : { _id: role?._id, name: role?.name };
+        }),
+    }));
 };
 
 export const removeRoleFromUser = async (orgName: string, username: string, roleName: string) => {

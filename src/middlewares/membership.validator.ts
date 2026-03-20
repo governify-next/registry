@@ -4,6 +4,10 @@ import { findMembership } from '../services/membership.service.js';
 import { getOrganizationOrFail } from './organization.validator.js';
 import Membership from '../models/membership.model.js';
 import { getUserOrFail } from './user.validator.js';
+import type { ExpandMode } from '../types/membership.types.js';
+
+// Sincronizamos con el type definido para que el compilador avise si se actualiza
+const VALID_EXPAND_VALUES: readonly string[] = ['none', 'full', 'names'] satisfies ExpandMode[];
 
 export const existingMembership = (shouldExist: boolean, source: 'body' | 'params') => {
     return async (req: Request, res: Response, next: NextFunction) => {
@@ -56,6 +60,17 @@ export const maxMembers = async (req: Request, res: Response, next: NextFunction
     } catch (err) {
         next(err);
     }
+};
+
+export const validateExpand = (req: Request, res: Response, next: NextFunction) => {
+    const expand = req.query.expand as string | undefined;
+    if (expand && !VALID_EXPAND_VALUES.includes(expand))
+        return next(
+            new ValidationError(
+                `Invalid expand value. Must be one of: ${VALID_EXPAND_VALUES.join(', ')}`,
+            ),
+        );
+    next();
 };
 
 // Como siempre tiene que existir un admin en la organización, impedimos que el usuario que hace

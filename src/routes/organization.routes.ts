@@ -19,6 +19,7 @@ import {
     existingMembership,
     maxMembers,
     notSelfRemoval,
+    validateExpand,
 } from '../middlewares/membership.validator.js';
 
 const router = Router();
@@ -136,6 +137,13 @@ router.delete(
 );
 
 // Org - Users
+router.get(
+    '/:orgName/members',
+    isAuthenticated,
+    hasOrgRole('admin'),
+    validateExpand,
+    organizationController.getMembers,
+);
 router.post(
     '/:orgName/members',
     isAuthenticated,

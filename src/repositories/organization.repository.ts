@@ -1,5 +1,6 @@
 import Organization, { IOrganization } from '../models/organization.model.js';
 import { DuplicateKeyError } from '../utils/customErrors.js';
+import type { FieldArrayName } from '../types/organization.types.js';
 
 export const createOrganization = async (data: Partial<IOrganization>) => {
     try {
@@ -90,7 +91,6 @@ export const deleteRole = async (orgName: string, roleName: string) => {
 
 // Fields genéricos para que elementFields y agreementFields compartan la misma lógica
 
-export type FieldArrayName = 'elementFields' | 'agreementFields';
 type FieldData = { name: string; description: string; type: string; value?: unknown };
 
 export const addField = async (orgName: string, arrayName: FieldArrayName, field: FieldData) => {

@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import Membership from '../models/membership.model.js';
+import type { ExpandMode } from '../types/membership.types.js';
 
 // Método interno para el borrado en cascada de un rol
 export const removeRoleFromMemberships = async (roleId: Types.ObjectId) => {
@@ -63,4 +64,16 @@ export const unassignRole = async (
 
 export const removeMembershipsByOrganization = async (orgId: Types.ObjectId) => {
     return await Membership.deleteMany({ organizationId: orgId });
+};
+
+export const getMembershipsByOrganization = async (orgId: Types.ObjectId, expand: ExpandMode) => {
+    const query = Membership.find({ organizationId: orgId });
+
+    if (expand === 'full') {
+        query.populate('userId').populate('organizationId');
+    } else if (expand === 'names') {
+        query.populate('userId', 'username').populate('organizationId', 'name');
+    }
+
+    return await query.exec();
 };

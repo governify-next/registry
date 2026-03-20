@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import * as membershipRepository from '../repositories/membership.repository.js';
+import type { ExpandMode } from '../types/membership.types.js';
 
 export const removeRoleFromMemberships = async (roleId: Types.ObjectId) => {
     // Existencia de id ya viene validada, solo hay que borrar
@@ -45,4 +46,8 @@ export const findEspecificRole = async (
 
 export const removeMembershipsByOrganization = async (orgId: Types.ObjectId) => {
     return await membershipRepository.removeMembershipsByOrganization(orgId);
+};
+
+export const getMembershipsByOrganization = async (orgId: Types.ObjectId, expand: ExpandMode) => {
+    return await membershipRepository.getMembershipsByOrganization(orgId, expand);
 };

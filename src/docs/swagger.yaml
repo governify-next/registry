@@ -758,6 +758,53 @@ paths:
     /api/v1/organizations/{orgName}/members:
         parameters:
             - $ref: '#/components/parameters/orgName'
+        get:
+            tags:
+                - Members
+            summary: List members of an organization
+            operationId: getMembers
+            security:
+                - BearerAuth: []
+            description: |
+                Returns the memberships of the specified organization.
+                Requires organization admin role.
+                Use the `expand` query parameter to control the level of detail:
+                - `none` (default): returns raw ObjectIds
+
+                - `full`: populates user, organization and role objects
+
+                - `names`: populates only user username, organization name and role names
+            parameters:
+                - in: query
+                  name: expand
+                  required: false
+                  description: Level of detail for the returned memberships
+                  schema:
+                      type: string
+                      default: none
+                      enum: [none, full, names]
+            responses:
+                '200':
+                    description: List of members retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/Membership'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
+                '404':
+                    $ref: '#/components/responses/OrganizationNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
         post:
             tags:
                 - Members
@@ -888,7 +935,7 @@ components:
             description: Name of the role within the organization
             schema:
                 type: string
-            example: admin
+            example: member
         elementFieldName:
             name: fieldName
             in: path

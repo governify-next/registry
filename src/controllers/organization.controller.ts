@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as organizationService from '../services/organization.service.js';
 import { sendSuccess } from '../utils/standardResponse.js';
+import type { ExpandMode } from '../types/membership.types.js';
 
 export const createOrganization = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -174,6 +175,16 @@ export const deleteAgreementField = async (req: Request, res: Response, next: Ne
             req.params.fieldName,
         );
         return sendSuccess(res, { data: organization, message: 'AgreementField deleted' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getMembers = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const expand = (req.query.expand as ExpandMode) || 'none';
+        const members = await organizationService.getMembers(req.params.orgName, expand);
+        return sendSuccess(res, { data: members });
     } catch (err) {
         next(err);
     }
