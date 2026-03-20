@@ -43,11 +43,9 @@ const typeValidation = (field: string) =>
         .withMessage(`${field} is required`)
         .isString()
         .withMessage(`${field} must be a string`)
-        .notEmpty()
-        .withMessage(`${field} must not be empty`)
-        .isLength({ max: 50 })
-        .withMessage(`${field} must be at most 50 characters`)
-        .toLowerCase();
+        .toLowerCase()
+        .isIn(['string', 'enum', 'number'])
+        .withMessage(`${field} must be one of: string, enum, number`);
 
 const valueValidation = (field: string) => {
     // Extraemos el valor de field 'value'

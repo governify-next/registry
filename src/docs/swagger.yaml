@@ -1528,8 +1528,11 @@ components:
                     maxLength: 500
                 type:
                     type: string
-                    description: Field type (string, number, enum, etc.)
-                    maxLength: 50
+                    description: Field type
+                    enum:
+                        - string
+                        - enum
+                        - number
 
         # ── ElementField ─────────────────────────
         ElementField:

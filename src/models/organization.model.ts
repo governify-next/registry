@@ -6,7 +6,7 @@ const fieldSchema = new Schema(
     {
         name: { type: String, required: true },
         description: { type: String, required: true },
-        type: { type: String, required: true },
+        type: { type: String, required: true, enum: ['string', 'enum', 'number'] },
         value: {
             type: Schema.Types.Mixed, // acepta cualquier valor
             required: function () {
