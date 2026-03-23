@@ -86,8 +86,6 @@ paths:
                 - Users
             summary: Create a new user
             operationId: createUser
-            security:
-                - BearerAuth: []
             description: |
                 Creates a new user with the provided credentials.
                 Requires admin role to create users.

@@ -54,7 +54,7 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
 export const login = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const token = await userService.login(req.body.login, req.body.password);
-        return sendSuccess(res, { data: token });
+        return sendSuccess(res, { data: { token } });
     } catch (err) {
         next(err);
     }

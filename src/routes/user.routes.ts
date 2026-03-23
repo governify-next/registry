@@ -15,13 +15,7 @@ userRoutes.get(
     userController.getUserByUsername,
 );
 
-userRoutes.post(
-    '/',
-    isAuthenticated,
-    hasRole(SystemRole.ADMIN),
-    validateCreateUser,
-    userController.createUser,
-);
+userRoutes.post('/', validateCreateUser, userController.createUser);
 
 userRoutes.put(
     '/:username',

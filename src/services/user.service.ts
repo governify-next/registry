@@ -2,6 +2,7 @@ import * as userRepository from '../repositories/user.repository.js';
 import jwt from 'jsonwebtoken';
 import { IUser } from '../models/user.model.js';
 import { UnauthorizedError } from '../utils/customErrors.js';
+import { bootEnv } from '../config/bootConfig.js';
 
 export const createUser = async (data: Partial<IUser>) => {
     return await userRepository.createUser(data);
@@ -35,7 +36,7 @@ export const login = async (login: string, password: string) => {
 
     return jwt.sign(
         { userId, username, systemRole }, // TODO: add organization scopes
-        process.env.JWT_SECRET as string,
+        bootEnv.JWT_SECRET,
         { expiresIn: '1d' },
     );
 };

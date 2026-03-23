@@ -4,6 +4,7 @@ import { type Request, type Response, type NextFunction } from 'express';
 import { Types } from 'mongoose';
 import { getLogger } from '../utils/logger.js';
 import { SystemRole } from '../types/systemRole.js';
+import { bootEnv } from '../config/bootConfig.js';
 
 const logger = getLogger().setTag('authentication.ts');
 
@@ -27,7 +28,7 @@ export const isAuthenticated = (req: Request, res: Response, next: NextFunction)
 
     const token = authHeader.split(' ')[1];
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as UserJwtPayload;
+        const decoded = jwt.verify(token, bootEnv.JWT_SECRET) as UserJwtPayload;
 
         req.auth = decoded; // Attach UserJwtPayload to the Request for downstream use
         next();
