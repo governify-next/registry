@@ -184,7 +184,7 @@ export const getMembers = async (req: Request, res: Response, next: NextFunction
     try {
         const expand = (req.query.expand as ExpandMode) || 'none';
         const members = await organizationService.getMembers(req.params.orgName, expand);
-        return sendSuccess(res, { data: members });
+        return sendSuccess(res, { data: members, message: 'Organization members retrieved' });
     } catch (err) {
         next(err);
     }
