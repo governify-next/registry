@@ -22,6 +22,7 @@ import {
     validateExpand,
 } from '../middlewares/membership.validator.js';
 import { SystemRole } from '../types/systemRole.js';
+import { elementRoutes } from './element.routes.js';
 
 const router = Router();
 export const organizationRoutes = Router();
@@ -182,3 +183,5 @@ router.delete(
     existingRole('params'),
     organizationController.removeRoleFromUser,
 );
+
+organizationRoutes.use('/:orgName/elements', existingOrganization, elementRoutes);
