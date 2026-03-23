@@ -1,10 +1,10 @@
 openapi: 3.0.0
 info:
-    title: Scope Manager API
+    title: Registry API
     version: 1.0.0
     description: |
         REST API for managing organizations, their roles, element fields
-        and agreement fields within Scope Manager.
+        and agreement fields within Registry API.
 
         Each organization is the main container in the system: it groups elements,
         defines the vocabulary they must follow and establishes the available roles.

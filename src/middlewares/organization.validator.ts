@@ -9,6 +9,7 @@ import {
 import { getOrganizationByName } from '../services/organization.service.js';
 import { findEspecificRole } from '../services/membership.service.js';
 import { IOrganization } from '../models/organization.model.js';
+import { bootEnv } from '../config/bootConfig.js';
 
 // Helper
 export async function getOrganizationOrFail(orgName: string): Promise<IOrganization> {
@@ -74,7 +75,7 @@ const displayNameValidation = body('displayName')
     .isString()
     .withMessage('displayName must be a string')
     .isLength({ max: 200 })
-    .withMessage('displayName must be at most 100 characters');
+    .withMessage('displayName must be at most 200 characters');
 
 const orgNameFormat = body('name')
     .matches(/^[a-zA-Z0-9-]+$/)
@@ -198,7 +199,7 @@ export const uniqueRole = async (req: Request, res: Response, next: NextFunction
 export const maxRoles = async (req: Request, res: Response, next: NextFunction) => {
     if (!req.params.orgName) return next(new ValidationError('Organization name is required'));
     try {
-        const max = parseInt(process.env.MAX_ROLES_PER_ORGANIZATION || '100', 10);
+        const max = bootEnv.MAX_ROLES_PER_ORGANIZATION;
         const organization = await getOrganizationOrFail(req.params.orgName);
         if (organization.roles.length >= max)
             return next(

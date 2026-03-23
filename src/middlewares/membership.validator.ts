@@ -5,6 +5,7 @@ import { getOrganizationOrFail } from './organization.validator.js';
 import Membership from '../models/membership.model.js';
 import { getUserOrFail } from './user.validator.js';
 import type { ExpandMode } from '../types/membership.types.js';
+import { bootEnv } from '../config/bootConfig.js';
 
 // Sincronizamos con el type definido para que el compilador avise si se actualiza
 const VALID_EXPAND_VALUES: readonly string[] = ['none', 'full', 'names'] satisfies ExpandMode[];
@@ -47,7 +48,7 @@ export const maxMembers = async (req: Request, res: Response, next: NextFunction
     if (!req.params.orgName) return next(new ValidationError('Organization name is required'));
 
     try {
-        const max = parseInt(process.env.MAX_MEMBERS_PER_ORGANIZATION || '1000', 10);
+        const max = bootEnv.MAX_MEMBERS_PER_ORGANIZATION;
         const organization = await getOrganizationOrFail(req.params.orgName);
         const count = await Membership.countDocuments({ organizationId: organization._id });
         if (count >= max)
