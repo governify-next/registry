@@ -21,9 +21,9 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
     }
 };
 
-export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
+export const getUserByUsername = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const user = await userService.getUserById(req.params.id);
+        const user = await userService.getUserByUsername(req.params.username);
         if (!user) throw new NotFoundError('User not found');
         return sendSuccess(res, { data: user });
     } catch (err) {
@@ -33,7 +33,7 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
 
 export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const user = await userService.updateUser(req.params.id, req.body);
+        const user = await userService.updateUser(req.params.username, req.body);
         if (!user) throw new NotFoundError('User not found');
         return sendSuccess(res, { data: user, message: 'User updated' });
     } catch (err) {
@@ -43,9 +43,18 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
 
 export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const user = await userService.deleteUser(req.params.id);
+        const user = await userService.deleteUser(req.params.username);
         if (!user) throw new NotFoundError('User not found');
         return sendSuccess(res, { data: null, message: 'User deleted' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const login = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const token = await userService.login(req.body.login, req.body.password);
+        return sendSuccess(res, { data: { token } });
     } catch (err) {
         next(err);
     }

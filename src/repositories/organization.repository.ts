@@ -1,5 +1,6 @@
 import Organization, { IOrganization } from '../models/organization.model.js';
 import { DuplicateKeyError } from '../utils/customErrors.js';
+import type { FieldArrayName } from '../types/organization.types.js';
 
 export const createOrganization = async (data: Partial<IOrganization>) => {
     try {
@@ -26,6 +27,7 @@ export const getOrganizations = async () => {
     return await Organization.find();
 };
 
+// Para trabajo interno en la organización
 export const getOrganizationByName = async (orgName: string) => {
     return await Organization.findOne({ name: orgName });
 };
@@ -52,4 +54,82 @@ export const updateOrganization = async (orgName: string, data: Partial<IOrganiz
 
 export const deleteOrganization = async (orgName: string) => {
     return await Organization.findOneAndDelete({ name: orgName });
+};
+
+export const addRole = async (orgName: string, role: { name: string; description: string }) => {
+    return await Organization.findOneAndUpdate(
+        { name: orgName },
+        { $push: { roles: role } },
+        { new: true },
+    );
+};
+
+export const updateRole = async (
+    orgName: string,
+    oldRoleName: string,
+    data: { name: string; description: string },
+) => {
+    return await Organization.findOneAndUpdate(
+        { name: orgName, 'roles.name': oldRoleName },
+        {
+            $set: {
+                'roles.$.name': data.name, // $ nos dice el elemento del array que ha hecho "match" a lo puesto arriba
+                'roles.$.description': data.description,
+            },
+        },
+        { new: true },
+    );
+};
+
+export const deleteRole = async (orgName: string, roleName: string) => {
+    return await Organization.findOneAndUpdate(
+        { name: orgName },
+        { $pull: { roles: { name: roleName } } },
+        { new: true },
+    );
+};
+
+// Fields genéricos para que elementFields y agreementFields compartan la misma lógica
+
+type FieldData = { name: string; description: string; type: string; value?: unknown };
+
+export const addField = async (orgName: string, arrayName: FieldArrayName, field: FieldData) => {
+    return await Organization.findOneAndUpdate(
+        { name: orgName },
+        { $push: { [arrayName]: field } },
+        { new: true },
+    );
+};
+
+export const updateField = async (
+    orgName: string,
+    arrayName: FieldArrayName,
+    oldFieldName: string,
+    data: FieldData,
+) => {
+    const setClause: Record<string, unknown> = {
+        [`${arrayName}.$[fieldElem].name`]: data.name,
+        [`${arrayName}.$[fieldElem].description`]: data.description,
+        [`${arrayName}.$[fieldElem].type`]: data.type,
+    };
+    // Solo se actualiza value si fue enviado en el body
+    if ('value' in data) setClause[`${arrayName}.$[fieldElem].value`] = data.value;
+
+    return await Organization.findOneAndUpdate(
+        { name: orgName },
+        { $set: setClause },
+        { arrayFilters: [{ 'fieldElem.name': oldFieldName }], new: true },
+    );
+};
+
+export const deleteField = async (
+    orgName: string,
+    arrayName: FieldArrayName,
+    fieldName: string,
+) => {
+    return await Organization.findOneAndUpdate(
+        { name: orgName },
+        { $pull: { [arrayName]: { name: fieldName } } },
+        { new: true },
+    );
 };
