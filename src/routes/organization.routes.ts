@@ -24,42 +24,40 @@ import {
 import { SystemRole } from '../types/systemRole.js';
 import { elementRoutes } from './element.routes.js';
 
-const router = Router();
 export const organizationRoutes = Router();
-organizationRoutes.use('/api/v1/organizations', router);
 
 // Organización
-router.post(
-    '/',
+organizationRoutes.post(
+    '/organizations/',
     isAuthenticated,
     hasRole(SystemRole.ADMIN),
     validateOrganization,
     organizationController.createOrganization,
 );
-router.get('/', isAuthenticated, organizationController.getOrganizations);
-router.get(
-    '/:orgName',
+organizationRoutes.get('/organizations/', isAuthenticated, organizationController.getOrganizations);
+organizationRoutes.get(
+    '/organizations/:orgName',
     isAuthenticated,
     existingOrganization,
     organizationController.getOrganizationByName,
 );
-router.put(
-    '/:orgName',
+organizationRoutes.put(
+    '/organizations/:orgName',
     isAuthenticated,
     hasOrgRole('admin'),
     validateOrganization,
     organizationController.updateOrganization,
 );
-router.delete(
-    '/:orgName',
+organizationRoutes.delete(
+    '/organizations/:orgName',
     isAuthenticated,
     hasOrgRole('admin'),
     organizationController.deleteOrganization,
 );
 
 // Roles
-router.post(
-    '/:orgName/roles',
+organizationRoutes.post(
+    '/organizations/:orgName/roles',
     isAuthenticated,
     hasOrgRole('admin'),
     validateRole,
@@ -67,8 +65,8 @@ router.post(
     maxRoles,
     organizationController.addRole,
 );
-router.put(
-    '/:orgName/roles/:roleName',
+organizationRoutes.put(
+    '/organizations/:orgName/roles/:roleName',
     isAuthenticated,
     hasOrgRole('admin'),
     notAdminRole,
@@ -77,8 +75,8 @@ router.put(
     uniqueRole,
     organizationController.updateRole,
 );
-router.delete(
-    '/:orgName/roles/:roleName',
+organizationRoutes.delete(
+    '/organizations/:orgName/roles/:roleName',
     isAuthenticated,
     hasOrgRole('admin'),
     notAdminRole,
@@ -87,16 +85,16 @@ router.delete(
 );
 
 // ElementFields
-router.post(
-    '/:orgName/elementFields',
+organizationRoutes.post(
+    '/organizations/:orgName/elementFields',
     isAuthenticated,
     hasOrgRole('admin'),
     validateField,
     uniqueField('elementFields'),
     organizationController.addElementField,
 );
-router.put(
-    '/:orgName/elementFields/:fieldName',
+organizationRoutes.put(
+    '/organizations/:orgName/elementFields/:fieldName',
     isAuthenticated,
     hasOrgRole('admin'),
     existingField('elementFields'),
@@ -104,8 +102,8 @@ router.put(
     uniqueField('elementFields'),
     organizationController.updateElementField,
 );
-router.delete(
-    '/:orgName/elementFields/:fieldName',
+organizationRoutes.delete(
+    '/organizations/:orgName/elementFields/:fieldName',
     isAuthenticated,
     hasOrgRole('admin'),
     existingField('elementFields'),
@@ -113,16 +111,16 @@ router.delete(
 );
 
 // AgreementFields
-router.post(
-    '/:orgName/agreementFields',
+organizationRoutes.post(
+    '/organizations/:orgName/agreementFields',
     isAuthenticated,
     hasOrgRole('admin'),
     validateField,
     uniqueField('agreementFields'),
     organizationController.addAgreementField,
 );
-router.put(
-    '/:orgName/agreementFields/:fieldName',
+organizationRoutes.put(
+    '/organizations/:orgName/agreementFields/:fieldName',
     isAuthenticated,
     hasOrgRole('admin'),
     existingField('agreementFields'),
@@ -130,8 +128,8 @@ router.put(
     uniqueField('agreementFields'),
     organizationController.updateAgreementField,
 );
-router.delete(
-    '/:orgName/agreementFields/:fieldName',
+organizationRoutes.delete(
+    '/organizations/:orgName/agreementFields/:fieldName',
     isAuthenticated,
     hasOrgRole('admin'),
     existingField('agreementFields'),
@@ -139,15 +137,15 @@ router.delete(
 );
 
 // Org - Users
-router.get(
-    '/:orgName/members',
+organizationRoutes.get(
+    '/organizations/:orgName/members',
     isAuthenticated,
     hasOrgRole('admin'),
     validateExpand,
     organizationController.getMembers,
 );
-router.post(
-    '/:orgName/members',
+organizationRoutes.post(
+    '/organizations/:orgName/members',
     isAuthenticated,
     hasOrgRole('admin'),
     validateUsername,
@@ -156,8 +154,8 @@ router.post(
     organizationController.addUserToOrganization,
 );
 
-router.delete(
-    '/:orgName/members/:username',
+organizationRoutes.delete(
+    '/organizations/:orgName/members/:username',
     isAuthenticated,
     hasOrgRole('admin'),
     existingMembership(true, 'params'),
@@ -166,8 +164,8 @@ router.delete(
 );
 
 // Org - User roles
-router.post(
-    '/:orgName/members/:username/roles',
+organizationRoutes.post(
+    '/organizations/:orgName/members/:username/roles',
     isAuthenticated,
     hasOrgRole('admin'),
     existingMembership(true, 'params'),
@@ -175,8 +173,8 @@ router.post(
     organizationController.addRoleToUser,
 );
 
-router.delete(
-    '/:orgName/members/:username/roles/:roleName',
+organizationRoutes.delete(
+    '/organizations/:orgName/members/:username/roles/:roleName',
     isAuthenticated,
     hasOrgRole('admin'),
     existingMembership(true, 'params'),
@@ -184,4 +182,4 @@ router.delete(
     organizationController.removeRoleFromUser,
 );
 
-organizationRoutes.use('/:orgName/elements', existingOrganization, elementRoutes);
+organizationRoutes.use('/organizations/:orgName/elements', existingOrganization, elementRoutes);

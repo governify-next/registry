@@ -6,19 +6,19 @@ import { SystemRole } from '../types/systemRole.js';
 
 export const userRoutes = Router();
 
-userRoutes.get('/', isAuthenticated, hasRole(SystemRole.ADMIN), userController.getUsers);
+userRoutes.get('/users/', isAuthenticated, hasRole(SystemRole.ADMIN), userController.getUsers);
 
 userRoutes.get(
-    '/:username',
+    '/users/:username',
     isAuthenticated,
     hasRole(SystemRole.ADMIN),
     userController.getUserByUsername,
 );
 
-userRoutes.post('/', validateCreateUser, userController.createUser);
+userRoutes.post('/users/', validateCreateUser, userController.createUser);
 
 userRoutes.put(
-    '/:username',
+    '/users/:username',
     isAuthenticated,
     hasRole(SystemRole.ADMIN),
     validateCreateUser,
@@ -26,10 +26,10 @@ userRoutes.put(
 );
 
 userRoutes.delete(
-    '/:username',
+    '/users/:username',
     isAuthenticated,
     hasRole(SystemRole.ADMIN),
     userController.deleteUser,
 );
 
-userRoutes.post('/login', validateLogin, userController.login);
+userRoutes.post('/users/login', validateLogin, userController.login);
