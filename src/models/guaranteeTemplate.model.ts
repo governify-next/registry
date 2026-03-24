@@ -53,7 +53,7 @@ export interface IGuaranteeTemplate extends Document {
             value: number;
         }[];
         anchorDate: Date;
-    };
+    } | null;
 }
 
 // Esquema principal
@@ -65,7 +65,7 @@ const guaranteeTemplateSchema = new Schema<IGuaranteeTemplate>({
     numericExpression: { type: String, required: true },
     comparator: { type: String },
     threshold: { type: Number },
-    window: { type: windowSchema, required: true },
+    window: { type: windowSchema },
 });
 
 const GuaranteeTemplate = mongoose.model<IGuaranteeTemplate>(
