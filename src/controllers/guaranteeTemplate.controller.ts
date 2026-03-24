@@ -48,7 +48,7 @@ export const deleteGuaranteeTemplate = async (req: Request, res: Response, next:
         const deletedTemplate = await guaranteeTemplateService.deleteGuaranteeTemplate(
             req.params.guaranteeName,
         );
-        return sendSuccess(res, { data: deletedTemplate, message: 'Guarantee template deleted' });
+        return sendSuccess(res, { data: null, message: 'Guarantee template deleted' });
     } catch (err) {
         next(err);
     }

@@ -2,9 +2,8 @@ import { Types } from 'mongoose';
 import * as guaranteeTemplateRepository from '../repositories/guaranteeTemplate.repository.js';
 import * as metricService from './metric.service.js';
 import * as metricConfigService from './metricConfig.service.js';
-import { CreateGuaranteePayload } from '../types/guaranteeTemplate.types.js';
+import { GuaranteeTemplatePayload, MetricConfigEntry } from '../types/guaranteeTemplate.types.js';
 import { IGuaranteeTemplate } from '../models/guaranteeTemplate.model.js';
-import { NotFoundError } from '../utils/customErrors.js';
 
 // Método reutilizable para ensamblar el template con sus metricConfigs
 const assembleGuaranteeTemplate = async (template: IGuaranteeTemplate) => {
@@ -26,10 +25,8 @@ const assembleGuaranteeTemplate = async (template: IGuaranteeTemplate) => {
 // Método reutilizable para crear las configuraciones de métricas
 const buildAndSaveMetricConfigs = async (
     templateId: Types.ObjectId,
-    metricsConfig?: CreateGuaranteePayload['metricsConfig'],
+    metricsConfig: MetricConfigEntry[],
 ) => {
-    if (!metricsConfig || metricsConfig.length === 0) return; // para el update es necesario
-
     const metricNames = metricsConfig.map((m) => m.name);
     const metricsFromDb = await metricService.findMetricsByNames(metricNames);
 
@@ -57,7 +54,7 @@ export const getGuaranteeTemplates = async () => {
     return await Promise.all(templates.map((t) => assembleGuaranteeTemplate(t)));
 };
 
-export const createGuaranteeTemplate = async (data: CreateGuaranteePayload) => {
+export const createGuaranteeTemplate = async (data: GuaranteeTemplatePayload) => {
     // 1. Extraer cada parte del payload
     const { metricsConfig, ...guaranteeData } = data;
 
@@ -67,12 +64,12 @@ export const createGuaranteeTemplate = async (data: CreateGuaranteePayload) => {
     // 3. Crear las metricsConfigs asociadas
     await buildAndSaveMetricConfigs(newTemplate._id, metricsConfig);
 
-    return await getGuaranteeTemplate(guaranteeData.name!);
+    return await getGuaranteeTemplate(guaranteeData.name);
 };
 
 export const updateGuaranteeTemplate = async (
     guaranteeName: string,
-    data: CreateGuaranteePayload,
+    data: GuaranteeTemplatePayload,
 ) => {
     // 1. Extraer cada parte del payload
     const { metricsConfig, ...guaranteeData } = data;
@@ -83,23 +80,18 @@ export const updateGuaranteeTemplate = async (
         guaranteeData,
     );
 
-    // 3. Reemplazar metricConfig
-    if (updatedTemplate && metricsConfig) {
-        // Hacemos wipe and replace, borramos toda config de la plantilla y sustituimos por lo nuevo
-        await metricConfigService.deleteMetricConfigsByTemplateId(updatedTemplate._id);
-        await buildAndSaveMetricConfigs(updatedTemplate._id, metricsConfig);
-    }
+    // 3. Hacemos un wipe and replace de metricConfigs
+    await metricConfigService.deleteMetricConfigsByTemplateId(updatedTemplate!._id);
+    await buildAndSaveMetricConfigs(updatedTemplate!._id, metricsConfig);
 
     return await getGuaranteeTemplate(guaranteeName);
 };
 
 export const deleteGuaranteeTemplate = async (guaranteeName: string) => {
     // 1. Obtenemos el template
-    const guaranteeTemplate = await getGuaranteeTemplate(guaranteeName);
-
+    const template = await guaranteeTemplateRepository.getGuaranteeTemplate(guaranteeName);
     // 2. Borramos las metricConfigs asociadas
-    await metricConfigService.deleteMetricConfigsByTemplateId(guaranteeTemplate!._id);
-
+    await metricConfigService.deleteMetricConfigsByTemplateId(template!._id);
     // 3. Borramos el template
-    return await guaranteeTemplateRepository.deleteGuaranteeTemplate(guaranteeTemplate!.name);
+    return await guaranteeTemplateRepository.deleteGuaranteeTemplate(guaranteeName);
 };
