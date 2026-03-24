@@ -9,3 +9,7 @@ export const createMetricConfigs = async (configs: Partial<IMetricConfig>[]) => 
 export const deleteMetricConfigsByTemplateId = async (templateId: Types.ObjectId) => {
     return await metricConfigRepository.deleteMetricConfigsByTemplateId(templateId);
 };
+
+export const findByTemplateIdAndPopulate = async (templateId: Types.ObjectId) => {
+    return await metricConfigRepository.findByTemplateIdAndPopulate(templateId);
+};

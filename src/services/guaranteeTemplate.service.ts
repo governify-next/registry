@@ -3,13 +3,24 @@ import * as guaranteeTemplateRepository from '../repositories/guaranteeTemplate.
 import * as metricService from './metric.service.js';
 import * as metricConfigService from './metricConfig.service.js';
 import { CreateGuaranteePayload } from '../types/guaranteeTemplate.types.js';
+import { IGuaranteeTemplate } from '../models/guaranteeTemplate.model.js';
+import { NotFoundError } from '../utils/customErrors.js';
 
-export const getGuaranteeTemplate = async (guaranteeName: string) => {
-    return await guaranteeTemplateRepository.getGuaranteeTemplate(guaranteeName);
-};
+// Método reutilizable para ensamblar el template con sus metricConfigs
+const assembleGuaranteeTemplate = async (template: IGuaranteeTemplate) => {
+    // 1. Traemos las metricConfigs del template
+    const metricConfigs = await metricConfigService.findByTemplateIdAndPopulate(template._id);
 
-export const getGuaranteeTemplates = async () => {
-    return await guaranteeTemplateRepository.getGuaranteeTemplates();
+    // 2. Montamos el array de respuesta
+    const mappedMetricConfigs = metricConfigs.map((mc) => ({
+        name: mc.metricId.title,
+        config: mc.metricConfig,
+    }));
+    // 3. Devolvemos la plantilla (el toObject permite añadir campos a la nueva instancia)
+    return {
+        ...template.toObject(),
+        metricsConfig: mappedMetricConfigs,
+    };
 };
 
 // Método reutilizable para crear las configuraciones de métricas
@@ -35,6 +46,17 @@ const buildAndSaveMetricConfigs = async (
     await metricConfigService.createMetricConfigs(configToSave);
 };
 
+export const getGuaranteeTemplate = async (guaranteeName: string) => {
+    const template = await guaranteeTemplateRepository.getGuaranteeTemplate(guaranteeName);
+    return await assembleGuaranteeTemplate(template!);
+};
+
+export const getGuaranteeTemplates = async () => {
+    const templates = await guaranteeTemplateRepository.getGuaranteeTemplates();
+    // Usamos Promise.all para resolver en paralelo
+    return await Promise.all(templates.map((t) => assembleGuaranteeTemplate(t)));
+};
+
 export const createGuaranteeTemplate = async (data: CreateGuaranteePayload) => {
     // 1. Extraer cada parte del payload
     const { metricsConfig, ...guaranteeData } = data;
@@ -45,7 +67,7 @@ export const createGuaranteeTemplate = async (data: CreateGuaranteePayload) => {
     // 3. Crear las metricsConfigs asociadas
     await buildAndSaveMetricConfigs(newTemplate._id, metricsConfig);
 
-    return newTemplate;
+    return await getGuaranteeTemplate(guaranteeData.name!);
 };
 
 export const updateGuaranteeTemplate = async (
@@ -68,7 +90,7 @@ export const updateGuaranteeTemplate = async (
         await buildAndSaveMetricConfigs(updatedTemplate._id, metricsConfig);
     }
 
-    return updatedTemplate;
+    return await getGuaranteeTemplate(guaranteeName);
 };
 
 export const deleteGuaranteeTemplate = async (guaranteeName: string) => {
