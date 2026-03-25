@@ -8,11 +8,18 @@ export interface IMetricConfig extends Document {
     metricConfig: unknown;
 }
 
-const metricConfigSchema = new Schema<IMetricConfig>({
-    guaranteeTemplateId: { type: Schema.Types.ObjectId, required: true, ref: 'GuaranteeTemplate' },
-    metricId: { type: Schema.Types.ObjectId, required: true, ref: 'Metric' },
-    metricConfig: { type: Schema.Types.Mixed },
-});
+const metricConfigSchema = new Schema<IMetricConfig>(
+    {
+        guaranteeTemplateId: {
+            type: Schema.Types.ObjectId,
+            required: true,
+            ref: 'GuaranteeTemplate',
+        },
+        metricId: { type: Schema.Types.ObjectId, required: true, ref: 'Metric' },
+        metricConfig: { type: Schema.Types.Mixed },
+    },
+    { minimize: false }, // para que no guarde el config vacío por defecto
+);
 
 // Esquema principal
 

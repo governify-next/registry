@@ -16,30 +16,49 @@ const extractMetricNames = (expression: string): string[] => {
 };
 
 /**
- * Valida que una expresión numérica sea parseable como fórmula matemática.
- * Permite: nombres de métrica, números, operadores +-/*() y punto decimal.
+ * Valida que una expresión sea una fórmula matemática válida.
+ * Tokens permitidos: nombres de métrica, números (opcionalmente con decimales), operadores +-/* y paréntesis.
+ *
+ * Reglas:
+ * 1. La expresión debe estar compuesta únicamente por tokens válidos (sin caracteres sueltos).
+ * 2. Dos operandos (nombre o número) no pueden ir seguidos sin un operador entre ellos.
+ * 3. Los paréntesis deben estar balanceados.
  */
 const isValidMathExpression = (expression: string): boolean => {
-    const allowedCharsRegex = /^[A-Za-z0-9_+\-*/().]+$/;
-    if (!allowedCharsRegex.test(expression)) return false;
+    // Ejemplo: "(MT_A/MT_B)*100"
+    const TOKEN_REGEX = /[A-Za-z_][A-Za-z0-9_-]*|\d+(\.\d+)?|[+\-*/()]/g;
+    const tokens = expression.match(TOKEN_REGEX);
+    //  Rompe en: ["(", "MT_A", "/", "MT_B", ")", "*", "100"]
 
-    // Paréntesis balanceados (el resultado final siempre debe ser 0)
+    // Reconstruimos para ver si se ha ignorado algún elemento incluido
+    if (!tokens || tokens.join('') !== expression) return false;
+
+    // Recorremos cada token uno a uno
     let depth = 0;
-    for (const char of expression) {
-        if (char === '(') depth++;
-        if (char === ')') depth--;
-        if (depth < 0) return false;
-    }
-    if (depth !== 0) return false;
+    let prev = ''; // token anterior
+    const isOperand = (t: string) => /^[A-Za-z_\d]/.test(t);
+    const isOperator = (t: string) => /^[+\-*/]$/.test(t);
 
-    // Sustituimos nombres de métrica por 1 y evaluamos que sea computable
-    const testExpression = expression.replace(/[A-Za-z_][A-Za-z0-9_-]*/g, '1');
-    try {
-        const result = new Function(`return (${testExpression})`)();
-        return typeof result === 'number' && isFinite(result);
-    } catch {
-        return false;
+    for (const token of tokens) {
+        // Dos operandos seguidos sin operador: 100MT_A
+        if (isOperand(token) && isOperand(prev)) return false;
+        // Operando seguido de "(": 100(...)
+        if (token === '(' && isOperand(prev)) return false;
+        // ")" seguido de operando: (...)100
+        if (isOperand(token) && prev === ')') return false;
+        // Operador justo después de "(": (*MT_A)
+        if (isOperator(token) && prev === '(') return false;
+        // ")" justo después de operador o "(": (MT_A/) o ()
+        if (token === ')' && (isOperator(prev) || prev === '(')) return false;
+
+        if (token === '(') depth++;
+        if (token === ')') depth--;
+        if (depth < 0) return false;
+
+        prev = token;
     }
+
+    return depth === 0; // al final del todo, debemos tener profundidad 0 o los paréntesis estaban mal balanceados
 };
 
 // ─── Validaciones de campo ────────────────────────────

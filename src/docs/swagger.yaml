@@ -26,6 +26,8 @@ tags:
       description: Fields that define the structure of an organization's agreements
     - name: Members
       description: Member management within an organization
+    - name: GuaranteeTemplates
+      description: Guarantee template management
 
 paths:
     # ──────────────────────────────────────────────
@@ -993,6 +995,227 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
+    # ──────────────────────────────────────────────
+    # GuaranteeTemplates
+    # ──────────────────────────────────────────────
+    /api/v1/guaranteeTemplates:
+        get:
+            tags:
+                - GuaranteeTemplates
+            summary: List all guarantee templates
+            operationId: getGuaranteeTemplates
+            description: |
+                Returns all guarantee templates in the system, each one assembled
+                with its associated metricsConfig array.
+            responses:
+                '200':
+                    description: List of guarantee templates retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/GuaranteeTemplate'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - _id: 665e5f6a7b8c9d0e1f2a3b4c
+                                      name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                      multiPart: false
+                                      info:
+                                          title: Number of Commits by Team
+                                          description: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
+                                          example: If a team has made 150 commits to the repository over the last month, this number reflects the team's overall contribution.
+                                      numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                      comparator: null
+                                      threshold: null
+                                      window: null
+                                      __v: 0
+                                      metricsConfig:
+                                          - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                            config: {}
+                                error: null
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        post:
+            tags:
+                - GuaranteeTemplates
+            summary: Create a guarantee template
+            operationId: createGuaranteeTemplate
+            description: |
+                Creates a new guarantee template along with its metric configurations.
+                The fields `comparator`, `threshold` and `window` must be explicitly set to `null`,
+                as these values are injected later by the AgreementTemplate.
+                The `numericExpression` must be a valid mathematical expression referencing
+                exactly the metrics declared in `metricsConfig` (bidirectional consistency).
+            requestBody:
+                $ref: '#/components/requestBodies/GuaranteeTemplateBody'
+            responses:
+                '200':
+                    description: Guarantee template created successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/GuaranteeTemplate'
+                            example:
+                                success: true
+                                message: Guarantee template created
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665e5f6a7b8c9d0e1f2a3b4c
+                                    name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                    multiPart: false
+                                    info:
+                                        title: Number of Commits by Team
+                                        description: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
+                                        example: If a team has made 150 commits to the repository over the last month, this number reflects the team's overall contribution.
+                                    numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                    comparator: null
+                                    threshold: null
+                                    window: null
+                                    __v: 0
+                                    metricsConfig:
+                                        - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                          config: {}
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '409':
+                    $ref: '#/components/responses/GuaranteeTemplateConflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/guaranteeTemplates/{guaranteeName}:
+        parameters:
+            - $ref: '#/components/parameters/guaranteeName'
+        get:
+            tags:
+                - GuaranteeTemplates
+            summary: Get a guarantee template by name
+            operationId: getGuaranteeTemplate
+            description: |
+                Returns a specific guarantee template identified by its unique name,
+                assembled with its associated metricsConfig array.
+            responses:
+                '200':
+                    description: Guarantee template found
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/GuaranteeTemplate'
+                '400':
+                    $ref: '#/components/responses/GuaranteeTemplateNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        put:
+            tags:
+                - GuaranteeTemplates
+            summary: Update a guarantee template
+            operationId: updateGuaranteeTemplate
+            description: |
+                Updates an existing guarantee template. All modifiable fields must be sent
+                in the body: `name`, `multiPart`, `info`, `numericExpression` and `metricsConfig`.
+                Fields `comparator`, `threshold` and `window` are not modifiable and are
+                silently ignored if sent.
+                If the `name` changes, the new name must be unique in the system.
+                The metricsConfig array is fully replaced (wipe-and-replace strategy).
+            requestBody:
+                $ref: '#/components/requestBodies/GuaranteeTemplateUpdateBody'
+            responses:
+                '200':
+                    description: Guarantee template updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/GuaranteeTemplate'
+                            example:
+                                success: true
+                                message: Guarantee template updated
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665e5f6a7b8c9d0e1f2a3b4c
+                                    name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                    multiPart: false
+                                    info:
+                                        title: Updated Title
+                                        description: Updated description.
+                                        example: Updated example.
+                                    numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                    comparator: null
+                                    threshold: null
+                                    window: null
+                                    __v: 0
+                                    metricsConfig:
+                                        - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                          config: {}
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/GuaranteeTemplateNotFound'
+                '409':
+                    $ref: '#/components/responses/GuaranteeTemplateConflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        delete:
+            tags:
+                - GuaranteeTemplates
+            summary: Delete a guarantee template
+            operationId: deleteGuaranteeTemplate
+            description: |
+                Permanently deletes a guarantee template and all its associated
+                metric configurations (MetricConfig documents).
+            responses:
+                '200':
+                    description: Guarantee template deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: object
+                                              nullable: true
+                                              example: null
+                            example:
+                                success: true
+                                message: Guarantee template deleted
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data: null
+                                error: null
+                '400':
+                    $ref: '#/components/responses/GuaranteeTemplateNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
 # ──────────────────────────────────────────────
 # Reusable components
 # ──────────────────────────────────────────────
@@ -1047,6 +1270,14 @@ components:
             schema:
                 type: string
             example: johndoe
+        guaranteeName:
+            name: guaranteeName
+            in: path
+            required: true
+            description: Unique name of the guarantee template
+            schema:
+                type: string
+            example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
 
     # ── Request Bodies ────────────────────────────
     requestBodies:
@@ -1135,6 +1366,47 @@ components:
                         $ref: '#/components/schemas/MemberInput'
                     example:
                         username: johndoe
+
+        GuaranteeTemplateBody:
+            description: Data to create a guarantee template
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/GuaranteeTemplateCreateInput'
+                    example:
+                        name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                        multiPart: false
+                        info:
+                            title: Number of Commits by Team
+                            description: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
+                            example: If a team has made 150 commits to the repository over the last month, this number reflects the team's overall contribution.
+                        numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                        comparator: null
+                        threshold: null
+                        window: null
+                        metricsConfig:
+                            - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                              config: {}
+
+        GuaranteeTemplateUpdateBody:
+            description: Data to update a guarantee template
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/GuaranteeTemplateUpdateInput'
+                    example:
+                        name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                        multiPart: false
+                        info:
+                            title: Updated Title
+                            description: Updated description.
+                            example: Updated example.
+                        numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                        metricsConfig:
+                            - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                              config: {}
 
     # ── Reusable responses ────────────────────────
     responses:
@@ -1332,6 +1604,36 @@ components:
                         data: null
                         error:
                             message: "The user 'johndoe' already exists in organization 'universidad-sevilla'"
+                            details: null
+        GuaranteeTemplateNotFound:
+            description: The guarantee template does not exist
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: "Guarantee template 'GR_NONEXISTENT' not found"
+                        httpStatus: 400
+                        appCode: VALIDATION_ERROR
+                        data: null
+                        error:
+                            message: "Guarantee template 'GR_NONEXISTENT' not found"
+                            details: null
+        GuaranteeTemplateConflict:
+            description: A guarantee template with that name already exists
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: "Guarantee template 'GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS' already exists"
+                        httpStatus: 409
+                        appCode: DUPLICATE_KEY
+                        data: null
+                        error:
+                            message: "Guarantee template 'GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS' already exists"
                             details: null
         MemberNotFound:
             description: The user is not a member of the organization
@@ -1938,3 +2240,219 @@ components:
                     description: User password (minimum 6 characters)
                     minLength: 6
                     example: securePassword123
+
+        # ── GuaranteeTemplate ──────────────────────
+        GuaranteeTemplate:
+            type: object
+            description: |
+                Theoretical definition of a guarantee condition. By itself it has no specific
+                objective — the comparator, threshold and window are injected by the
+                AgreementTemplate when it references this template.
+            required:
+                - _id
+                - name
+                - multiPart
+                - info
+                - numericExpression
+            properties:
+                _id:
+                    type: string
+                    description: MongoDB internal identifier (ObjectId)
+                    example: 665e5f6a7b8c9d0e1f2a3b4c
+                name:
+                    type: string
+                    description: Unique template name. Only letters, numbers, hyphens and underscores.
+                    pattern: '^[A-Za-z0-9_-]+$'
+                    minLength: 3
+                    maxLength: 100
+                    example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                multiPart:
+                    type: boolean
+                    description: Whether this guarantee evaluates individual parts (true) or the element as a whole (false)
+                    example: false
+                info:
+                    type: object
+                    description: Human-readable information about the guarantee
+                    required:
+                        - title
+                    properties:
+                        title:
+                            type: string
+                            description: Guarantee title (3-200 characters)
+                            example: Number of Commits by Team
+                        description:
+                            type: string
+                            description: Guarantee description (max 500 characters)
+                            example: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
+                        example:
+                            type: string
+                            description: Usage example (max 500 characters)
+                            example: If a team has made 150 commits to the repository over the last month, this number reflects the team's overall contribution.
+                numericExpression:
+                    type: string
+                    description: Mathematical expression referencing metric names. No spaces allowed. Operators allowed are +-/*().
+                    maxLength: 500
+                    example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                comparator:
+                    type: string
+                    nullable: true
+                    description: Always null in the template. Injected by AgreementTemplate.
+                    example: null
+                threshold:
+                    type: number
+                    nullable: true
+                    description: Always null in the template. Injected by AgreementTemplate.
+                    example: null
+                window:
+                    type: object
+                    nullable: true
+                    description: Always null in the template. Injected by AgreementTemplate.
+                    example: null
+                __v:
+                    type: integer
+                    description: Mongoose version key
+                    example: 0
+                metricsConfig:
+                    type: array
+                    description: Metric configurations associated with this template (assembled from MetricConfig documents)
+                    items:
+                        $ref: '#/components/schemas/MetricConfigEntry'
+
+        MetricConfigEntry:
+            type: object
+            description: A metric configuration entry within a guarantee template
+            required:
+                - name
+                - config
+            properties:
+                name:
+                    type: string
+                    description: Name of the referenced metric (3-100 characters)
+                    minLength: 3
+                    maxLength: 100
+                    example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                config:
+                    type: object
+                    description: Configuration for this metric. Can be empty ({}) if the metric requires no configuration.
+                    example: {}
+
+        GuaranteeTemplateCreateInput:
+            type: object
+            description: |
+                Payload for creating a guarantee template.
+                Fields comparator, threshold and window must be explicitly set to null.
+                The numericExpression must reference exactly the metrics in metricsConfig.
+            required:
+                - name
+                - multiPart
+                - info
+                - numericExpression
+                - comparator
+                - threshold
+                - window
+                - metricsConfig
+            properties:
+                name:
+                    type: string
+                    pattern: '^[A-Za-z0-9_-]+$'
+                    minLength: 3
+                    maxLength: 100
+                    example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                multiPart:
+                    type: boolean
+                    example: false
+                info:
+                    type: object
+                    required:
+                        - title
+                        - description
+                        - example
+                    properties:
+                        title:
+                            type: string
+                            minLength: 3
+                            maxLength: 200
+                            example: Number of Commits by Team
+                        description:
+                            type: string
+                            maxLength: 500
+                            example: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
+                        example:
+                            type: string
+                            maxLength: 500
+                            example: If a team has made 150 commits to the repository over the last month, this number reflects the team's overall contribution.
+                numericExpression:
+                    type: string
+                    maxLength: 500
+                    example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                comparator:
+                    type: string
+                    nullable: true
+                    enum: [null]
+                    example: null
+                threshold:
+                    type: number
+                    nullable: true
+                    enum: [null]
+                    example: null
+                window:
+                    type: object
+                    nullable: true
+                    enum: [null]
+                    example: null
+                metricsConfig:
+                    type: array
+                    minItems: 1
+                    items:
+                        $ref: '#/components/schemas/MetricConfigEntry'
+
+        GuaranteeTemplateUpdateInput:
+            type: object
+            description: |
+                Payload for updating a guarantee template. Only modifiable fields are required.
+                Fields comparator, threshold and window are silently ignored if sent.
+            required:
+                - name
+                - multiPart
+                - info
+                - numericExpression
+                - metricsConfig
+            properties:
+                name:
+                    type: string
+                    pattern: '^[A-Za-z0-9_-]+$'
+                    minLength: 3
+                    maxLength: 100
+                    example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                multiPart:
+                    type: boolean
+                    example: false
+                info:
+                    type: object
+                    required:
+                        - title
+                        - description
+                        - example
+                    properties:
+                        title:
+                            type: string
+                            minLength: 3
+                            maxLength: 200
+                            example: Updated Title
+                        description:
+                            type: string
+                            maxLength: 500
+                            example: Updated description.
+                        example:
+                            type: string
+                            maxLength: 500
+                            example: Updated example.
+                numericExpression:
+                    type: string
+                    maxLength: 500
+                    example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                metricsConfig:
+                    type: array
+                    minItems: 1
+                    items:
+                        $ref: '#/components/schemas/MetricConfigEntry'
