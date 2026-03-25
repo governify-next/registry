@@ -59,13 +59,13 @@ export const getGuaranteeTemplates = async () => {
 };
 
 export const createGuaranteeTemplate = async (data: GuaranteeTemplatePayload) => {
-    // 1. Extraer cada parte del payload
+    // 1. Extraemos cada parte del payload
     const { metricsConfig, ...guaranteeData } = data;
 
-    // 2. Crear la guaranteeTemplate
+    // 2. Creamos la guaranteeTemplate
     const newTemplate = await guaranteeTemplateRepository.createGuaranteeTemplate(guaranteeData);
 
-    // 3. Crear las metricsConfigs asociadas
+    // 3. Creamos las metricsConfigs asociadas
     await buildAndSaveMetricConfigs(newTemplate._id, metricsConfig);
 
     return await getGuaranteeTemplate(guaranteeData.name);
@@ -75,13 +75,13 @@ export const updateGuaranteeTemplate = async (
     guaranteeName: string,
     data: GuaranteeTemplatePayload,
 ) => {
-    // 1. Extraer cada parte del payload
-    const { metricsConfig, ...guaranteeData } = data;
+    // 1. Extraemos solo los campos modificables
+    const { metricsConfig, name, multiPart, info, numericExpression } = data;
 
-    // 2. Actualizar guaranteeTemplate
+    // 2. Actualizamos guaranteeTemplate
     const updatedTemplate = await guaranteeTemplateRepository.updateGuaranteeTemplate(
         guaranteeName,
-        guaranteeData,
+        { name, multiPart, info, numericExpression },
     );
 
     // 3. Hacemos un wipe and replace de metricConfigs

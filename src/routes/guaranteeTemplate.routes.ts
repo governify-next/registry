@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import * as guaranteeTemplateController from '../controllers/guaranteeTemplate.controller.js';
-import { validateCreateGuaranteeTemplate } from '../middlewares/guaranteeTemplate.validator.js';
+import {
+    validateCreateGuaranteeTemplate,
+    validateUpdateGuaranteeTemplate,
+    existingGuaranteeTemplate,
+} from '../middlewares/guaranteeTemplate.validator.js';
 
 export const guaranteeTemplateRoutes = Router();
 
@@ -11,6 +15,7 @@ guaranteeTemplateRoutes.get(
 
 guaranteeTemplateRoutes.get(
     '/guaranteeTemplates/:guaranteeName',
+    existingGuaranteeTemplate,
     guaranteeTemplateController.getGuaranteeTemplate,
 );
 
@@ -22,10 +27,12 @@ guaranteeTemplateRoutes.post(
 
 guaranteeTemplateRoutes.put(
     '/guaranteeTemplates/:guaranteeName',
+    validateUpdateGuaranteeTemplate,
     guaranteeTemplateController.updateGuaranteeTemplate,
 );
 
 guaranteeTemplateRoutes.delete(
     '/guaranteeTemplates/:guaranteeName',
+    existingGuaranteeTemplate,
     guaranteeTemplateController.deleteGuaranteeTemplate,
 );

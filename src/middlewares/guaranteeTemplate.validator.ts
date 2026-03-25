@@ -221,6 +221,41 @@ const validNumericExpression = (req: Request, res: Response, next: NextFunction)
     next();
 };
 
+export const existingGuaranteeTemplate = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const template = await guaranteeTemplateService.findGuaranteeTemplateByName(
+            req.params.guaranteeName,
+        );
+        if (!template)
+            return next(
+                new ValidationError(`Guarantee template '${req.params.guaranteeName}' not found`),
+            );
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
+const uniqueGuaranteeNameOnUpdate = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Si el nombre no cambia, no hay conflicto
+        if (req.body.name === req.params.guaranteeName) return next();
+
+        const existing = await guaranteeTemplateService.findGuaranteeTemplateByName(req.body.name);
+        if (existing)
+            return next(
+                new DuplicateKeyError(`Guarantee template '${req.body.name}' already exists`),
+            );
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
 // ─── Middleware ────────────────────────────────────────────────────
 
 export const validateCreateGuaranteeTemplate = [
@@ -236,6 +271,22 @@ export const validateCreateGuaranteeTemplate = [
     collectValidationErrors,
     // 2. Validación de lógica
     uniqueGuaranteeName,
+    noDuplicateMetricNames,
+    metricsExistInDb,
+    validNumericExpression,
+];
+
+export const validateUpdateGuaranteeTemplate = [
+    // 1. Validación de los campos modificables
+    nameValidation,
+    multiPartValidation,
+    ...infoValidation,
+    numericExpressionValidation,
+    ...metricsConfigStructureValidation,
+    collectValidationErrors,
+    // 2. Validación de lógica
+    existingGuaranteeTemplate,
+    uniqueGuaranteeNameOnUpdate,
     noDuplicateMetricNames,
     metricsExistInDb,
     validNumericExpression,
