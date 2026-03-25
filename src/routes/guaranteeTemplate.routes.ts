@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as guaranteeTemplateController from '../controllers/guaranteeTemplate.controller.js';
+import { validateCreateGuaranteeTemplate } from '../middlewares/guaranteeTemplate.validator.js';
 
 export const guaranteeTemplateRoutes = Router();
 
@@ -15,6 +16,7 @@ guaranteeTemplateRoutes.get(
 
 guaranteeTemplateRoutes.post(
     '/guaranteeTemplates',
+    validateCreateGuaranteeTemplate,
     guaranteeTemplateController.createGuaranteeTemplate,
 );
 

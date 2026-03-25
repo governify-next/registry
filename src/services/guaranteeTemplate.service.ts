@@ -43,6 +43,10 @@ const buildAndSaveMetricConfigs = async (
     await metricConfigService.createMetricConfigs(configToSave);
 };
 
+export const findGuaranteeTemplateByName = async (guaranteeName: string) => {
+    return await guaranteeTemplateRepository.getGuaranteeTemplate(guaranteeName);
+};
+
 export const getGuaranteeTemplate = async (guaranteeName: string) => {
     const template = await guaranteeTemplateRepository.getGuaranteeTemplate(guaranteeName);
     return await assembleGuaranteeTemplate(template!);
@@ -89,7 +93,7 @@ export const updateGuaranteeTemplate = async (
 
 export const deleteGuaranteeTemplate = async (guaranteeName: string) => {
     // 1. Obtenemos el template
-    const template = await guaranteeTemplateRepository.getGuaranteeTemplate(guaranteeName);
+    const template = await findGuaranteeTemplateByName(guaranteeName);
     // 2. Borramos las metricConfigs asociadas
     await metricConfigService.deleteMetricConfigsByTemplateId(template!._id);
     // 3. Borramos el template
