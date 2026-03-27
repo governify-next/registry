@@ -1,5 +1,5 @@
 // Tipo base de dominio independiente de mongoose
-export interface GuaranteeTemplateData {
+export interface IGuaranteeTemplateData {
     name: string;
     info: {
         title: string;
@@ -12,12 +12,12 @@ export interface GuaranteeTemplateData {
     window: null;
 }
 
-export interface MetricConfigEntry {
+export interface IMetricConfigEntry {
     name: string;
     config: Record<string, unknown>;
 }
 
 // Payload del POST/PUT: datos de la plantilla (guaranteeTemplate en sí) + configuración de métricas (metricConfigs)
-export interface GuaranteeTemplatePayload extends GuaranteeTemplateData {
-    metricsConfig: MetricConfigEntry[];
+export interface GuaranteeTemplatePayload extends IGuaranteeTemplateData {
+    metricsConfig: IMetricConfigEntry[];
 }

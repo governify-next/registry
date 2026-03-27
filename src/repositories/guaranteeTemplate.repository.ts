@@ -1,5 +1,5 @@
 import GuaranteeTemplate from '../models/guaranteeTemplate.model.js';
-import { GuaranteeTemplateData } from '../types/guaranteeTemplate.types.js';
+import { IGuaranteeTemplateData } from '../types/guaranteeTemplate.types.js';
 import { Types } from 'mongoose';
 
 export const getGuaranteeTemplates = async () => {
@@ -18,14 +18,14 @@ export const getGuaranteeTemplateById = async (guaranteeTemplateId: Types.Object
     return await GuaranteeTemplate.findById(guaranteeTemplateId);
 };
 
-export const createGuaranteeTemplate = async (data: GuaranteeTemplateData) => {
+export const createGuaranteeTemplate = async (data: IGuaranteeTemplateData) => {
     const guaranteeTemplate = new GuaranteeTemplate(data);
     return await guaranteeTemplate.save();
 };
 
 export const updateGuaranteeTemplate = async (
     guaranteeName: string,
-    data: Partial<GuaranteeTemplateData>,
+    data: Partial<IGuaranteeTemplateData>,
 ) => {
     return await GuaranteeTemplate.findOneAndUpdate({ name: guaranteeName }, data, { new: true });
 };

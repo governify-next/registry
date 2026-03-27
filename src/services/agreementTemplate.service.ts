@@ -3,7 +3,7 @@ import * as agreementTemplateRepository from '../repositories/agreementTemplate.
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
 import * as guaranteeService from '../services/guarantee.service.js';
 import { IAgreementTemplate } from '../models/agreementTemplate.model.js';
-import { AgreementTemplatePayload, GuaranteeEntry } from '../types/agreementTemplate.types.js';
+import { AgreementTemplatePayload, IGuaranteeEntry } from '../types/agreementTemplate.types.js';
 
 const assembleAgreementTemplate = async (agreementTemplate: IAgreementTemplate) => {
     const guarantees = await guaranteeService.getGuaranteesByAgreementTemplateId(
@@ -41,7 +41,7 @@ export const createAgreementTemplateByOrganization = async (
 
 export const buildAndSaveGuarantees = async (
     templateId: Types.ObjectId,
-    guarantees: GuaranteeEntry[],
+    guarantees: IGuaranteeEntry[],
 ) => {
     const guaranteeTemplatesNames = guarantees.map((g) => g.guaranteeTemplateName);
     const guaranteeTemplatesFromDb =
@@ -65,4 +65,64 @@ export const buildAndSaveGuarantees = async (
     });
 
     await guaranteeService.createGuarantees(configToSave);
+};
+
+export const getAgreementTemplateByOrganization = async (
+    orgId: Types.ObjectId,
+    agreementTemplateName: string,
+) => {
+    const template = await agreementTemplateRepository.getAgreementTemplateByOrganization(
+        orgId,
+        agreementTemplateName,
+    );
+
+    return await assembleAgreementTemplate(template!);
+};
+
+export const getAgreementTemplatesByOrganization = async (orgId: Types.ObjectId) => {
+    const templates = await agreementTemplateRepository.getAgreementTemplatesByOrganization(orgId);
+
+    return await Promise.all(templates.map((t) => assembleAgreementTemplate(t)));
+};
+
+export const updateAgreementTemplateByOrganization = async (
+    orgId: Types.ObjectId,
+    agreementTemplateName: string,
+    data: AgreementTemplatePayload,
+) => {
+    const { guarantees, ...updatedData } = data; // TODO: Asegurar que no se puede pasar orgId en el middleware
+
+    // 1. Actualizamos el agreementTemplate
+    const updatedTemplate = await agreementTemplateRepository.updateAgreementTemplate(
+        agreementTemplateName,
+        updatedData,
+    );
+
+    // 2. Hacemos un wipe and replace de las guarantees asociadas al agreement template
+    await guaranteeService.deleteGuaranteesByTemplateId(updatedTemplate!._id);
+
+    // 3. Creamos las nuevas guarantees asociadas
+    await buildAndSaveGuarantees(updatedTemplate!._id, guarantees);
+
+    // 4. Devolvemos la respuesta construida
+    return await assembleAgreementTemplate(updatedTemplate!);
+};
+
+export const deleteAgreementTemplateByOrganization = async (
+    orgId: Types.ObjectId,
+    agreementTemplateName: string,
+) => {
+    // 1. Buscamos el agreement template
+    const template = await agreementTemplateRepository.getAgreementTemplateByOrganization(
+        orgId,
+        agreementTemplateName,
+    );
+    // 2. Borramos las garantías que referencian al agreement template
+    await guaranteeService.deleteGuaranteesByTemplateId(template!._id);
+    // 3. Borramos el agreement template
+    return await agreementTemplateRepository.deleteAgreementTemplate(template!._id);
+};
+
+export const getPublicAgreementTemplates = async () => {
+    return await agreementTemplateRepository.getPublicAgreementTemplates();
 };

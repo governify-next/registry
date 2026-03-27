@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { sendSuccess } from '../utils/standardResponse.js';
 import * as agreementTemplateService from '../services/agreementTemplate.service.js';
 import * as organizationService from '../services/organization.service.js';
-/*
+
 export const getAgreementTemplateByOrganization = async (
     req: Request,
     res: Response,
@@ -19,8 +19,7 @@ export const getAgreementTemplateByOrganization = async (
         next(err);
     }
 };
-*/
-/*
+
 export const getAgreementTemplatesByOrganization = async (
     req: Request,
     res: Response,
@@ -35,7 +34,7 @@ export const getAgreementTemplatesByOrganization = async (
         next(err);
     }
 };
-*/
+
 export const createAgreementTemplateByOrganization = async (
     req: Request,
     res: Response,
@@ -53,7 +52,7 @@ export const createAgreementTemplateByOrganization = async (
         next(err);
     }
 };
-/*
+
 export const updateAgreementTemplateByOrganization = async (
     req: Request,
     res: Response,
@@ -72,8 +71,7 @@ export const updateAgreementTemplateByOrganization = async (
         next(err);
     }
 };
-*/
-/*
+
 export const deleteAgreementTemplateByOrganization = async (
     req: Request,
     res: Response,
@@ -81,18 +79,16 @@ export const deleteAgreementTemplateByOrganization = async (
 ) => {
     try {
         const organization = await organizationService.getOrganizationByName(req.params.orgName);
-        const deletedTemplate =
-            await agreementTemplateService.deleteAgreementTemplateByOrganization(
-                organization!._id,
-                req.params.agreementTemplateName,
-            );
+        await agreementTemplateService.deleteAgreementTemplateByOrganization(
+            organization!._id,
+            req.params.agreementTemplateName,
+        );
         return sendSuccess(res, { data: null, message: 'Agreement template deleted' });
     } catch (err) {
         next(err);
     }
 };
-*/
-/*
+
 export const getPublicAgreementTemplates = async (
     req: Request,
     res: Response,
@@ -105,4 +101,3 @@ export const getPublicAgreementTemplates = async (
         next(err);
     }
 };
-*/

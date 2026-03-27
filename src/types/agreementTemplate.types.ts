@@ -1,7 +1,8 @@
 // Tipo base de dominio independiente de mongoose
-export interface AgreementTemplateData {
+export interface IAgreementTemplateData {
     name: string;
     description: string;
+    public: boolean;
 }
 
 export interface WindowData {
@@ -12,7 +13,7 @@ export interface WindowData {
     anchorDate: string;
 }
 
-export interface GuaranteeEntry {
+export interface IGuaranteeEntry {
     guaranteeTemplateName: string;
     comparator: string;
     threshold: number;
@@ -20,6 +21,6 @@ export interface GuaranteeEntry {
 }
 
 // Payload del POST/PUT: datos de la plantilla
-export interface AgreementTemplatePayload extends AgreementTemplateData {
-    guarantees: GuaranteeEntry[];
+export interface AgreementTemplatePayload extends IAgreementTemplateData {
+    guarantees: IGuaranteeEntry[];
 }

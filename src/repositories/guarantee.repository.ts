@@ -8,3 +8,7 @@ export const createGuarantees = async (configs: Partial<IGuarantee>[]) => {
 export const getGuaranteesByAgreementTemplateId = async (agreementTemplateId: Types.ObjectId) => {
     return await Guarantee.find({ agreementTemplateId });
 };
+
+export const deleteGuaranteesByTemplateId = async (agreementTemplateId: Types.ObjectId) => {
+    return await Guarantee.deleteMany({ agreementTemplateId: agreementTemplateId });
+};

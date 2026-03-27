@@ -1,6 +1,20 @@
 import { Types } from 'mongoose';
 import { IGuarantee } from '../models/guarantee.model.js';
 import * as guaranteeRepository from '../repositories/guarantee.repository.js';
+import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
+
+export const assembleGuarantee = async (guarantee: IGuarantee) => {
+    const guaranteeTemplate = await guaranteeTemplateService.findGuaranteeTemplateById(
+        guarantee.guaranteeTemplateId,
+    );
+
+    return {
+        guaranteeTemplateName: guaranteeTemplate!.name,
+        comparator: guarantee.comparator,
+        threshold: guarantee.threshold,
+        window: guarantee.window,
+    };
+};
 
 export const createGuarantees = async (configs: Partial<IGuarantee>[]) => {
     return await guaranteeRepository.createGuarantees(configs);
@@ -8,4 +22,8 @@ export const createGuarantees = async (configs: Partial<IGuarantee>[]) => {
 
 export const getGuaranteesByAgreementTemplateId = async (agreementTemplateId: Types.ObjectId) => {
     return await guaranteeRepository.getGuaranteesByAgreementTemplateId(agreementTemplateId);
+};
+
+export const deleteGuaranteesByTemplateId = async (agreementTemplateId: Types.ObjectId) => {
+    return await guaranteeRepository.deleteGuaranteesByTemplateId(agreementTemplateId);
 };

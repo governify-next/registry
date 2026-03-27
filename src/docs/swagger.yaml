@@ -2306,9 +2306,9 @@ components:
                     type: array
                     description: Metric configurations associated with this template (assembled from MetricConfig documents)
                     items:
-                        $ref: '#/components/schemas/MetricConfigEntry'
+                        $ref: '#/components/schemas/IMetricConfigEntry'
 
-        MetricConfigEntry:
+        IMetricConfigEntry:
             type: object
             description: A metric configuration entry within a guarantee template
             required:
@@ -2390,7 +2390,7 @@ components:
                     type: array
                     minItems: 1
                     items:
-                        $ref: '#/components/schemas/MetricConfigEntry'
+                        $ref: '#/components/schemas/IMetricConfigEntry'
 
         GuaranteeTemplateUpdateInput:
             type: object
@@ -2437,4 +2437,4 @@ components:
                     type: array
                     minItems: 1
                     items:
-                        $ref: '#/components/schemas/MetricConfigEntry'
+                        $ref: '#/components/schemas/IMetricConfigEntry'

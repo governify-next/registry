@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 import * as guaranteeTemplateRepository from '../repositories/guaranteeTemplate.repository.js';
 import * as metricService from './metric.service.js';
 import * as metricConfigService from './metricConfig.service.js';
-import { GuaranteeTemplatePayload, MetricConfigEntry } from '../types/guaranteeTemplate.types.js';
+import { GuaranteeTemplatePayload, IMetricConfigEntry } from '../types/guaranteeTemplate.types.js';
 import { IGuaranteeTemplate } from '../models/guaranteeTemplate.model.js';
 
 // Método reutilizable para ensamblar el template con sus metricConfigs
@@ -25,7 +25,7 @@ const assembleGuaranteeTemplate = async (template: IGuaranteeTemplate) => {
 // Método reutilizable para crear las configuraciones de métricas
 const buildAndSaveMetricConfigs = async (
     templateId: Types.ObjectId,
-    metricsConfig: MetricConfigEntry[],
+    metricsConfig: IMetricConfigEntry[],
 ) => {
     const metricNames = metricsConfig.map((m) => m.name);
     const metricsFromDb = await metricService.findMetricsByNames(metricNames);
