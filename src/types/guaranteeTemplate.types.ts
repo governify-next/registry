@@ -1,7 +1,6 @@
 // Tipo base de dominio independiente de mongoose
 export interface GuaranteeTemplateData {
     name: string;
-    multiPart: boolean;
     info: {
         title: string;
         description?: string;

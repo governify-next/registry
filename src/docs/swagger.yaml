@@ -1029,7 +1029,6 @@ paths:
                                 data:
                                     - _id: 665e5f6a7b8c9d0e1f2a3b4c
                                       name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
-                                      multiPart: false
                                       info:
                                           title: Number of Commits by Team
                                           description: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
@@ -1078,7 +1077,6 @@ paths:
                                 data:
                                     _id: 665e5f6a7b8c9d0e1f2a3b4c
                                     name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
-                                    multiPart: false
                                     info:
                                         title: Number of Commits by Team
                                         description: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
@@ -1133,7 +1131,7 @@ paths:
             operationId: updateGuaranteeTemplate
             description: |
                 Updates an existing guarantee template. All modifiable fields must be sent
-                in the body: `name`, `multiPart`, `info`, `numericExpression` and `metricsConfig`.
+                in the body: `name`, `info`, `numericExpression` and `metricsConfig`.
                 Fields `comparator`, `threshold` and `window` are not modifiable and are
                 silently ignored if sent.
                 If the `name` changes, the new name must be unique in the system.
@@ -1160,7 +1158,6 @@ paths:
                                 data:
                                     _id: 665e5f6a7b8c9d0e1f2a3b4c
                                     name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
-                                    multiPart: false
                                     info:
                                         title: Updated Title
                                         description: Updated description.
@@ -1376,7 +1373,6 @@ components:
                         $ref: '#/components/schemas/GuaranteeTemplateCreateInput'
                     example:
                         name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
-                        multiPart: false
                         info:
                             title: Number of Commits by Team
                             description: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
@@ -1398,7 +1394,6 @@ components:
                         $ref: '#/components/schemas/GuaranteeTemplateUpdateInput'
                     example:
                         name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
-                        multiPart: false
                         info:
                             title: Updated Title
                             description: Updated description.
@@ -2251,7 +2246,6 @@ components:
             required:
                 - _id
                 - name
-                - multiPart
                 - info
                 - numericExpression
             properties:
@@ -2266,10 +2260,6 @@ components:
                     minLength: 3
                     maxLength: 100
                     example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
-                multiPart:
-                    type: boolean
-                    description: Whether this guarantee evaluates individual parts (true) or the element as a whole (false)
-                    example: false
                 info:
                     type: object
                     description: Human-readable information about the guarantee
@@ -2344,7 +2334,6 @@ components:
                 The numericExpression must reference exactly the metrics in metricsConfig.
             required:
                 - name
-                - multiPart
                 - info
                 - numericExpression
                 - comparator
@@ -2358,9 +2347,6 @@ components:
                     minLength: 3
                     maxLength: 100
                     example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
-                multiPart:
-                    type: boolean
-                    example: false
                 info:
                     type: object
                     required:
@@ -2413,7 +2399,6 @@ components:
                 Fields comparator, threshold and window are silently ignored if sent.
             required:
                 - name
-                - multiPart
                 - info
                 - numericExpression
                 - metricsConfig
@@ -2424,9 +2409,6 @@ components:
                     minLength: 3
                     maxLength: 100
                     example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
-                multiPart:
-                    type: boolean
-                    example: false
                 info:
                     type: object
                     required:

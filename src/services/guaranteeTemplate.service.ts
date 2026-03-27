@@ -47,6 +47,14 @@ export const findGuaranteeTemplateByName = async (guaranteeName: string) => {
     return await guaranteeTemplateRepository.getGuaranteeTemplate(guaranteeName);
 };
 
+export const findGuaranteeTemplatesByName = async (guaranteeTemplatesNames: string[]) => {
+    return await guaranteeTemplateRepository.findGuaranteeTemplatesByNames(guaranteeTemplatesNames);
+};
+
+export const findGuaranteeTemplateById = async (guaranteeTemplateId: Types.ObjectId) => {
+    return await guaranteeTemplateRepository.getGuaranteeTemplateById(guaranteeTemplateId);
+};
+
 export const getGuaranteeTemplate = async (guaranteeName: string) => {
     const template = await guaranteeTemplateRepository.getGuaranteeTemplate(guaranteeName);
     return await assembleGuaranteeTemplate(template!);
@@ -76,12 +84,12 @@ export const updateGuaranteeTemplate = async (
     data: GuaranteeTemplatePayload,
 ) => {
     // 1. Extraemos solo los campos modificables
-    const { metricsConfig, name, multiPart, info, numericExpression } = data;
+    const { metricsConfig, name, info, numericExpression } = data;
 
     // 2. Actualizamos guaranteeTemplate
     const updatedTemplate = await guaranteeTemplateRepository.updateGuaranteeTemplate(
         guaranteeName,
-        { name, multiPart, info, numericExpression },
+        { name, info, numericExpression },
     );
 
     // 3. Hacemos un wipe and replace de metricConfigs

@@ -75,12 +75,6 @@ const nameValidation = body('name')
     .matches(/^[A-Za-z0-9_-]+$/)
     .withMessage('name can only contain letters, numbers, hyphens and underscores');
 
-const multiPartValidation = body('multiPart')
-    .exists({ checkNull: true })
-    .withMessage('multiPart is required')
-    .isBoolean({ strict: true })
-    .withMessage('multiPart must be a boolean');
-
 const nullFieldValidation = (field: string) =>
     body(field)
         .exists({ checkNull: false })
@@ -280,7 +274,6 @@ const uniqueGuaranteeNameOnUpdate = async (req: Request, res: Response, next: Ne
 export const validateCreateGuaranteeTemplate = [
     // 1. Validación de campos
     nameValidation,
-    multiPartValidation,
     nullFieldValidation('comparator'),
     nullFieldValidation('threshold'),
     nullFieldValidation('window'),
@@ -298,7 +291,6 @@ export const validateCreateGuaranteeTemplate = [
 export const validateUpdateGuaranteeTemplate = [
     // 1. Validación de los campos modificables
     nameValidation,
-    multiPartValidation,
     ...infoValidation,
     numericExpressionValidation,
     ...metricsConfigStructureValidation,
