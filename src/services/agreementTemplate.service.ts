@@ -2,29 +2,17 @@ import { Types } from 'mongoose';
 import * as agreementTemplateRepository from '../repositories/agreementTemplate.repository.js';
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
 import * as guaranteeService from '../services/guarantee.service.js';
-import { IGuarantee } from '../models/guarantee.model.js';
 import { IAgreementTemplate } from '../models/agreementTemplate.model.js';
 import { AgreementTemplatePayload, GuaranteeEntry } from '../types/agreementTemplate.types.js';
-
-const assembleGuarantee = async (guarantee: IGuarantee) => {
-    const guaranteeTemplate = await guaranteeTemplateService.findGuaranteeTemplateById(
-        guarantee.guaranteeTemplateId,
-    );
-
-    return {
-        guaranteeTemplateName: guaranteeTemplate!.name,
-        comparator: guarantee.comparator,
-        threshold: guarantee.threshold,
-        window: guarantee.window,
-    };
-};
 
 const assembleAgreementTemplate = async (agreementTemplate: IAgreementTemplate) => {
     const guarantees = await guaranteeService.getGuaranteesByAgreementTemplateId(
         agreementTemplate._id,
     );
 
-    const mappedGuarantees = await Promise.all(guarantees.map((g) => assembleGuarantee(g)));
+    const mappedGuarantees = await Promise.all(
+        guarantees.map((g) => guaranteeService.assembleGuarantee(g)),
+    );
 
     return {
         ...agreementTemplate.toObject(),
