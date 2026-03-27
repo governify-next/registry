@@ -96,7 +96,7 @@ export const updateGuaranteeTemplate = async (
     await metricConfigService.deleteMetricConfigsByTemplateId(updatedTemplate!._id);
     await buildAndSaveMetricConfigs(updatedTemplate!._id, metricsConfig);
 
-    return await getGuaranteeTemplate(guaranteeName);
+    return await getGuaranteeTemplate(updatedTemplate!.name);
 };
 
 export const deleteGuaranteeTemplate = async (guaranteeName: string) => {

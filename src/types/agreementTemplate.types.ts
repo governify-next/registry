@@ -1,21 +1,24 @@
 // Tipo base de dominio independiente de mongoose
 export interface IAgreementTemplateData {
     name: string;
+    displayName: string;
     description: string;
-    public: boolean;
+    isPublic: boolean;
 }
 
 export interface WindowData {
     period: {
-        unit: 'milisecond' | 'second' | 'minute' | 'hour' | 'day' | 'week';
+        unit: 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'week';
         value: number;
     }[];
     anchorDate: string;
 }
 
+export type Comparator = '<' | '>' | '<=' | '>=' | '==' | '!=';
+
 export interface IGuaranteeEntry {
     guaranteeTemplateName: string;
-    comparator: string;
+    comparator: Comparator;
     threshold: number;
     window: WindowData;
 }

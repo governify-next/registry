@@ -25,10 +25,11 @@ export const getAgreementTemplatesByOrganization = async (orgId: Types.ObjectId)
 };
 
 export const updateAgreementTemplate = async (
+    orgId: Types.ObjectId,
     agreementTemplateName: string,
     data: Partial<IAgreementTemplateData>,
 ) => {
-    return await AgreementTemplate.findOneAndUpdate({ name: agreementTemplateName }, data, {
+    return await AgreementTemplate.findOneAndUpdate({ orgId, name: agreementTemplateName }, data, {
         new: true,
     });
 };
@@ -38,5 +39,5 @@ export const deleteAgreementTemplate = async (agreementTemplateId: Types.ObjectI
 };
 
 export const getPublicAgreementTemplates = async () => {
-    return await AgreementTemplate.find({ public: true });
+    return await AgreementTemplate.find({ isPublic: true });
 };

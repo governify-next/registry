@@ -40,6 +40,8 @@ const isValidMathExpression = (expression: string): boolean => {
     const isOperator = (t: string) => /^[+\-*/]$/.test(t);
 
     for (const token of tokens) {
+        // La expresión no puede empezar por operador: +MT_A, *100
+        if (isOperator(token) && prev === '') return false;
         // Dos operandos seguidos sin operador: 100MT_A
         if (isOperand(token) && isOperand(prev)) return false;
         // Operando seguido de "(": 100(...)
@@ -57,6 +59,9 @@ const isValidMathExpression = (expression: string): boolean => {
 
         prev = token;
     }
+
+    // La expresión no puede terminar en operador: MT_A+, 100/
+    if (isOperator(prev)) return false;
 
     return depth === 0; // al final del todo, debemos tener profundidad 0 o los paréntesis estaban mal balanceados
 };
@@ -135,16 +140,16 @@ const metricsConfigStructureValidation = [
         .exists({ checkNull: true })
         .withMessage('Each metricsConfig entry must have a name')
         .isString()
-        .withMessage('metricsConfig[].name must be a string')
+        .withMessage('metricsConfig name must be a string')
         .notEmpty()
-        .withMessage('metricsConfig[].name must not be empty')
+        .withMessage('metricsConfig name must not be empty')
         .isLength({ min: 3, max: 100 })
-        .withMessage('metricsConfig[].name must be between 3 and 100 characters'),
+        .withMessage('metricsConfig name must be between 3 and 100 characters'),
     body('metricsConfig.*.config')
         .exists({ checkNull: true })
         .withMessage('Each metricsConfig entry must have a config')
         .isObject()
-        .withMessage('metricsConfig[].config must be an object'),
+        .withMessage('metricsConfig config must be an object'),
 ];
 
 // ─── Express-validator ─────────────────────────────
@@ -157,8 +162,11 @@ const collectValidationErrors = (req: Request, res: Response, next: NextFunction
 
 // ─── Validaciones de lógica de negocio ─────────────────────────────────
 
-const uniqueGuaranteeName = async (req: Request, res: Response, next: NextFunction) => {
+const uniqueGuaranteeTemplateName = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        // Si es update y el nombre no cambia, no hay conflicto
+        if (req.params.guaranteeName && req.params.guaranteeName === req.body.name) return next();
+
         const existing = await guaranteeTemplateService.findGuaranteeTemplateByName(req.body.name);
         if (existing)
             return next(
@@ -253,22 +261,6 @@ export const existingGuaranteeTemplate = async (
     }
 };
 
-const uniqueGuaranteeNameOnUpdate = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        // Si el nombre no cambia, no hay conflicto
-        if (req.body.name === req.params.guaranteeName) return next();
-
-        const existing = await guaranteeTemplateService.findGuaranteeTemplateByName(req.body.name);
-        if (existing)
-            return next(
-                new DuplicateKeyError(`Guarantee template '${req.body.name}' already exists`),
-            );
-        next();
-    } catch (err) {
-        next(err);
-    }
-};
-
 // ─── Middleware ────────────────────────────────────────────────────
 
 export const validateCreateGuaranteeTemplate = [
@@ -282,7 +274,7 @@ export const validateCreateGuaranteeTemplate = [
     ...metricsConfigStructureValidation,
     collectValidationErrors,
     // 2. Validación de lógica
-    uniqueGuaranteeName,
+    uniqueGuaranteeTemplateName,
     noDuplicateMetricNames,
     metricsExistInDb,
     validNumericExpression,
@@ -297,7 +289,7 @@ export const validateUpdateGuaranteeTemplate = [
     collectValidationErrors,
     // 2. Validación de lógica
     existingGuaranteeTemplate,
-    uniqueGuaranteeNameOnUpdate,
+    uniqueGuaranteeTemplateName,
     noDuplicateMetricNames,
     metricsExistInDb,
     validNumericExpression,
