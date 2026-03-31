@@ -17,7 +17,7 @@ agreementTemplateRoutes.get(
 
 agreementTemplateRoutes.get(
     '/organizations/:orgName/agreementTemplates/:agreementTemplateName',
-    existingAgreementTemplate,
+    existingAgreementTemplate((req) => req.params.agreementTemplateName),
     agreementTemplateController.getAgreementTemplateByOrganization,
 );
 
@@ -35,7 +35,7 @@ agreementTemplateRoutes.put(
 
 agreementTemplateRoutes.delete(
     '/organizations/:orgName/agreementTemplates/:agreementTemplateName',
-    existingAgreementTemplate,
+    existingAgreementTemplate((req) => req.params.agreementTemplateName),
     agreementTemplateController.deleteAgreementTemplateByOrganization,
 );
 

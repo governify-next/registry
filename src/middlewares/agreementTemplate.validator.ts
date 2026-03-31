@@ -112,26 +112,25 @@ const collectValidationErrors = (req: Request, res: Response, next: NextFunction
 
 // ─── Validaciones de lógica de negocio ─────────────────────────────────
 
-const existingGuaranteeTemplates = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const guaranteeTemplatesNames: string[] = req.body.guarantees.map(
-            (g: { guaranteeTemplateName: string }) => g.guaranteeTemplateName,
-        );
-        const guaranteeTemplatesFromDb =
-            await guaranteeTemplateService.findGuaranteeTemplatesByName(guaranteeTemplatesNames);
-        const foundNames = guaranteeTemplatesFromDb.map((gt) => gt.name);
-        const missing = guaranteeTemplatesNames.filter((name) => !foundNames.includes(name));
+export const existingGuaranteeTemplates = (getNames: (req: Request) => string[]) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const guaranteeTemplatesNames = getNames(req);
+            const uniqueNames = [...new Set(guaranteeTemplatesNames)];
+            const guaranteeTemplatesFromDb =
+                await guaranteeTemplateService.findGuaranteeTemplatesByName(uniqueNames);
+            const foundNames = guaranteeTemplatesFromDb.map((gt) => gt.name);
+            const missing = uniqueNames.filter((name) => !foundNames.includes(name));
 
-        if (missing.length > 0)
-            return next(
-                new NotFoundError(
-                    `GuaranteeTemplates not found in database: ${missing.join(', ')}`,
-                ),
-            );
-        next();
-    } catch (err) {
-        next(err);
-    }
+            if (missing.length > 0)
+                return next(
+                    new NotFoundError(`GuaranteeTemplates not found: ${missing.join(', ')}`),
+                );
+            next();
+        } catch (err) {
+            next(err);
+        }
+    };
 };
 
 const uniqueAgreementTemplateInOrganization = async (
@@ -182,28 +181,26 @@ const noDuplicateGuaranteeTemplateNames = (req: Request, res: Response, next: Ne
     }
 };
 
-export const existingAgreementTemplate = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-) => {
-    try {
-        const organization = await getOrganizationOrFail(req.params.orgName);
+export const existingAgreementTemplate = (getTemplateName: (req: Request) => string) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const organization = await getOrganizationOrFail(req.params.orgName);
 
-        const agreementTemplate =
-            await agreementTemplateService.getCleanAgreementTemplateByOrganization(
-                organization._id,
-                req.params.agreementTemplateName,
-            );
+            const agreementTemplate =
+                await agreementTemplateService.getCleanAgreementTemplateByOrganization(
+                    organization._id,
+                    getTemplateName(req),
+                );
 
-        if (!agreementTemplate)
-            return next(
-                new NotFoundError('The AgreementTemplate to be updated could not be found!'),
-            );
-        next();
-    } catch (err) {
-        next(err);
-    }
+            if (!agreementTemplate)
+                return next(
+                    new NotFoundError(`AgreementTemplate '${getTemplateName(req)}' not found`),
+                );
+            next();
+        } catch (err) {
+            next(err);
+        }
+    };
 };
 
 // ─── Middleware ────────────────────────────────────────────────────
@@ -218,7 +215,9 @@ export const validateCreateAgreementTemplate = [
     collectValidationErrors,
     // Validación de lógica
     uniqueAgreementTemplateInOrganization,
-    existingGuaranteeTemplates,
+    existingGuaranteeTemplates((req) =>
+        req.body.guarantees.map((g: { guaranteeTemplateName: string }) => g.guaranteeTemplateName),
+    ),
     noDuplicateGuaranteeTemplateNames,
 ];
 
@@ -231,8 +230,10 @@ export const validateUpdateAgreementTemplate = [
     ...guaranteesStructureValidation,
     collectValidationErrors,
     // Validación de lógica
-    existingAgreementTemplate,
+    existingAgreementTemplate((req) => req.params.agreementTemplateName),
     uniqueAgreementTemplateInOrganization,
-    existingGuaranteeTemplates,
+    existingGuaranteeTemplates((req) =>
+        req.body.guarantees.map((g: { guaranteeTemplateName: string }) => g.guaranteeTemplateName),
+    ),
     noDuplicateGuaranteeTemplateNames,
 ];
