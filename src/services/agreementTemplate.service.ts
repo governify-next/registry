@@ -140,3 +140,7 @@ export const getPublicAgreementTemplates = async () => {
     const templates = await agreementTemplateRepository.getPublicAgreementTemplates();
     return await Promise.all(templates.map((t) => assembleAgreementTemplate(t)));
 };
+
+export const resolveAgreementTemplateById = async (templateId: Types.ObjectId) => {
+    return await agreementTemplateRepository.resolveAgreementTemplateById(templateId);
+};

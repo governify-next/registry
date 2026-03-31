@@ -41,3 +41,7 @@ export const deleteAgreementTemplate = async (agreementTemplateId: Types.ObjectI
 export const getPublicAgreementTemplates = async () => {
     return await AgreementTemplate.find({ isPublic: true });
 };
+
+export const resolveAgreementTemplateById = async (templateId: Types.ObjectId) => {
+    return await AgreementTemplate.findOne({ _id: templateId });
+};

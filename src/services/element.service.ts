@@ -1,7 +1,17 @@
 import * as elementRepository from '../repositories/element.repository.js';
 import { IElement } from '../models/element.model.js';
 import { NotFoundError } from '../utils/customErrors.js';
+import { getOrganizationByName } from './organization.service.js';
 import { Types } from 'mongoose';
+
+// Helper para obtener un elemento
+export const resolveElementId = async (orgName: string, elementName: string) => {
+    // 1. Obtenemos la organización
+    const organization = await getOrganizationByName(orgName);
+
+    // 2. Obtenemos el elemento
+    return await getElementByName(organization!._id, elementName);
+};
 
 export const createElement = async (organizationId: Types.ObjectId, data: Partial<IElement>) => {
     return await elementRepository.createElement(organizationId, data);

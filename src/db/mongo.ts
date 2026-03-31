@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
+import { bootEnv } from '../config/bootConfig.js';
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/express_base';
+const MONGO_URI = bootEnv.MONGO_URI;
 
 export const connectMongo = async () => {
     await mongoose.connect(MONGO_URI);

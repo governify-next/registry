@@ -47,7 +47,11 @@ export const createAgreementTemplateByOrganization = async (
                 organization!._id,
                 req.body,
             );
-        return sendSuccess(res, { data: agreementTemplate, message: 'Agreement template created' });
+        return sendSuccess(res, {
+            data: agreementTemplate,
+            httpStatus: 201,
+            message: 'Agreement template created',
+        });
     } catch (err) {
         next(err);
     }

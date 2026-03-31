@@ -5,7 +5,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 export interface IMetricConfig extends Document {
     guaranteeTemplateId: Types.ObjectId;
     metricId: Types.ObjectId;
-    metricConfig: unknown;
+    metricConfig: unknown; // TODO: cambiar por Record<string, unknown>
 }
 
 const metricConfigSchema = new Schema<IMetricConfig>(
