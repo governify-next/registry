@@ -12,6 +12,7 @@ import {
 import * as signatureRepository from '../repositories/signature.repository.js';
 import { IAgreementVersion } from '../models/agreementCollection.model.js';
 import { resolveAgreementTemplateById } from './agreementTemplate.service.js';
+import { findByTemplateIdAndPopulate } from './metricConfig.service.js';
 
 export const createSignaturesByVersion = async (
     signatures: ISignatureEntry[],
@@ -48,14 +49,22 @@ export const assembleBySignature = async (agreementVersion: IAgreementVersion) =
             const guaranteeTemplate = await findGuaranteeTemplateById(
                 guarantee!.guaranteeTemplateId,
             );
+            const metricConfigs = await findByTemplateIdAndPopulate(guaranteeTemplate!._id);
+            const mappedMetricConfigs = metricConfigs.map((mc) => ({
+                name: mc.metricId.title, // TODO: Mejorar legibilidad
+                config: mc.metricConfig,
+            }));
             return {
+                signatureId: sig._id,
                 guarantee: {
                     name: guaranteeTemplate!.name,
+                    numericExpression: guaranteeTemplate!.numericExpression,
                     comparator: guarantee!.comparator,
                     threshold: guarantee!.threshold,
                     window: guarantee!.window,
+                    metricsConfig: mappedMetricConfigs,
                 },
-                config: sig.auditConfig,
+                auditConfig: sig.auditConfig,
             };
         }),
     );

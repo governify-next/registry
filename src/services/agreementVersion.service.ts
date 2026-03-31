@@ -60,7 +60,11 @@ export const createAgreementVersionByCollection = async (
         agreementVersion,
     );
 
-    return updatedCollection;
+    const createdVersion = updatedCollection!.agreementVersions.find(
+        (v) => v.versionNumber === newVersionNumber,
+    );
+
+    return createdVersion;
 };
 
 export const getAgreementVersionsByCollection = async (

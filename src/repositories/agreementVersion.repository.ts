@@ -7,7 +7,10 @@ export const createAgreementVersion = async (
 ) => {
     return await AgreementCollection.findOneAndUpdate(
         { _id: agColId },
-        { $push: { agreementVersions: agreementVersion } },
+        {
+            $push: { agreementVersions: agreementVersion },
+            $set: { auditableVersionNumber: agreementVersion.versionNumber },
+        },
         { new: true },
     );
 };

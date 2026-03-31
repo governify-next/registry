@@ -52,7 +52,7 @@ const agreementCollectionSchema = new Schema<IAgreementCollection>(
         name: { type: String },
         displayName: { type: String },
         elementId: { type: Schema.Types.ObjectId, ref: 'Element', required: true },
-        auditableVersionNumber: { type: Number, default: null },
+        auditableVersionNumber: { type: Number, required: true, default: null },
         fields: { type: Schema.Types.Mixed, required: true },
         permissions: { type: Schema.Types.Mixed, required: true },
         agreementVersions: { type: [agreementVersionSchema], default: [] },

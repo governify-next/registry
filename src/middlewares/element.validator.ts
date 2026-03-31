@@ -1,7 +1,9 @@
 import { body, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
-import { ValidationError } from '../utils/customErrors.js';
+import { ValidationError, NotFoundError } from '../utils/customErrors.js';
 import * as organizationService from '../services/organization.service.js';
+import * as elementService from '../services/element.service.js';
+import { getOrganizationOrFail } from './organization.validator.js';
 
 const validateElementFields = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -96,6 +98,27 @@ const validateElementPermissions = async (req: Request, res: Response, next: Nex
             return next(new ValidationError('Permission validation failed', errors));
         }
 
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const existingElement = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await getOrganizationOrFail(req.params.orgName);
+
+        const element = await elementService.getElementByName(
+            organization._id,
+            req.params.elementName,
+        );
+
+        if (!element)
+            return next(
+                new NotFoundError(
+                    `Element '${req.params.elementName}' not found in organization '${req.params.orgName}'`,
+                ),
+            );
         next();
     } catch (err) {
         next(err);
