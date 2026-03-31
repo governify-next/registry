@@ -1,11 +1,34 @@
 import { Router } from 'express';
 import * as elementController from '../controllers/element.controller.js';
 import { validateElement } from '../middlewares/element.validator.js';
+import { existingOrganization } from '../middlewares/organization.validator.js';
 
-export const elementRoutes = Router({ mergeParams: true });
+export const elementRoutes = Router();
 
-elementRoutes.post('/', validateElement, elementController.createElement);
-elementRoutes.get('/', elementController.getElementsByOrganization);
-elementRoutes.get('/:elementName', elementController.getElementByName);
-elementRoutes.put('/:elementName', validateElement, elementController.updateElement);
-elementRoutes.delete('/:elementName', elementController.deleteElement);
+elementRoutes.post(
+    '/organizations/:orgName/elements',
+    existingOrganization,
+    validateElement,
+    elementController.createElement,
+);
+elementRoutes.get(
+    '/organizations/:orgName/elements',
+    existingOrganization,
+    elementController.getElementsByOrganization,
+);
+elementRoutes.get(
+    '/organizations/:orgName/elements/:elementName',
+    existingOrganization,
+    elementController.getElementByName,
+);
+elementRoutes.put(
+    '/organizations/:orgName/elements/:elementName',
+    existingOrganization,
+    validateElement,
+    elementController.updateElement,
+);
+elementRoutes.delete(
+    '/organizations/:orgName/elements/:elementName',
+    existingOrganization,
+    elementController.deleteElement,
+);

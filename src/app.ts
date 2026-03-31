@@ -7,6 +7,7 @@ import { errorHandler } from './middlewares/errorHandler.js';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import path from 'path';
+import { elementRoutes } from './routes/element.routes.js';
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use(healthRoutes);
 app.use('/api/v1', userRoutes);
 app.use('/api/v1', organizationRoutes);
+app.use('/api/v1', elementRoutes);
 app.use(errorHandler);
 
 export default app;
