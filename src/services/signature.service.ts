@@ -9,6 +9,7 @@ import * as signatureRepository from '../repositories/signature.repository.js';
 import { IAgreementVersion } from '../models/agreementCollection.model.js';
 import { resolveAgreementTemplateById } from './agreementTemplate.service.js';
 import { findByTemplateId } from './metricConfig.service.js';
+import { bootEnv } from '../config/bootConfig.js';
 
 export const createSignaturesByVersion = async (
     signatures: ISignatureEntry[],
@@ -80,5 +81,12 @@ export const assembleBySignature = async (agreementVersion: IAgreementVersion) =
 };
 
 export const deleteSignaturesByIds = async (signatureIds: Types.ObjectId[]) => {
+    // Borrar los states asociados a una signature en el reporter
+    await Promise.all(
+        signatureIds.map((id) => fetch(`${bootEnv.REPORTER_URL}/api/v1/states/signatures/${id}`), {
+            method: 'DELETE',
+        }),
+    );
+
     return await signatureRepository.deleteSignaturesByIds(signatureIds);
 };
