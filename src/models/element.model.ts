@@ -17,10 +17,10 @@ export interface IElement extends Document {
     organizationId: Types.ObjectId; // Reference by _id, not name
     fields: Record<string, unknown>[];
     permissions: {
-        view: string[];
-        edit: string[];
-        delete: string[];
-        create: string[];
+        view: Types.ObjectId[];
+        edit: Types.ObjectId[];
+        delete: Types.ObjectId[];
+        create: Types.ObjectId[];
     };
     auditConfig: Record<string, unknown>;
     parts: {
@@ -38,10 +38,10 @@ const elementSchema = new Schema<IElement>(
         organizationId: { type: Schema.Types.ObjectId, ref: 'Organization', required: true },
         fields: [{ type: Schema.Types.Mixed }],
         permissions: {
-            view: { type: [String], required: true },
-            edit: { type: [String], required: true },
-            delete: { type: [String], required: true },
-            create: { type: [String], required: true },
+            view: { type: [Schema.Types.ObjectId], required: true },
+            edit: { type: [Schema.Types.ObjectId], required: true },
+            delete: { type: [Schema.Types.ObjectId], required: true },
+            create: { type: [Schema.Types.ObjectId], required: true },
         },
         auditConfig: { type: Schema.Types.Mixed, default: {} },
         parts: { type: [partSchema], default: [] },
