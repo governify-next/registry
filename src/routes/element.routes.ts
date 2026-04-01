@@ -34,13 +34,13 @@ elementRoutes.delete(
 );
 
 elementRoutes.get(
-    '/orgs/:orgName/elements/:elementName/parts',
+    '/organizations/:orgName/elements/:elementName/parts',
     existingOrganization,
     elementController.getElementParts,
 );
 
 elementRoutes.post(
-    '/orgs/:orgName/elements/:elementName/parts',
+    '/organizations/:orgName/elements/:elementName/parts',
     existingOrganization,
     validateElementPart,
     elementController.addElementPart,
