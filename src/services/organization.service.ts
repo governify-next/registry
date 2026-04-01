@@ -33,6 +33,10 @@ export const getOrganizations = async () => {
     return await organizationRepository.getOrganizations();
 };
 
+export const getOrganizationById = async (organizationId: string) => {
+    return await organizationRepository.getOrganizationById(organizationId);
+};
+
 export const updateOrganization = async (orgName: string, data: Partial<IOrganization>) => {
     const { name, displayName, description } = data;
     return await organizationRepository.updateOrganization(orgName, {
