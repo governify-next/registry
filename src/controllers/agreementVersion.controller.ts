@@ -70,7 +70,7 @@ export const deleteAgreementVersionByCollection = async (
     next: NextFunction,
 ) => {
     try {
-        await agreementVersionService.deleteAuditableVersionByCollection(
+        await agreementVersionService.deleteVersionByCollection(
             req.params.orgName,
             req.params.elementName,
             req.params.agColName,

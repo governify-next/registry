@@ -30,6 +30,10 @@ tags:
       description: Guarantee template management
     - name: AgreementTemplates
       description: Agreement template management within an organization
+    - name: AgreementCollections
+      description: Agreement collection management within an element
+    - name: AgreementVersions
+      description: Agreement version management within a collection
 
 paths:
     # ──────────────────────────────────────────────
@@ -1507,6 +1511,548 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
+    # ──────────────────────────────────────────────
+    # AgreementCollections
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+        get:
+            tags:
+                - AgreementCollections
+            summary: List all agreement collections in an element
+            operationId: getAgreementCollectionsByElement
+            description: |
+                Returns all agreement collections belonging to the specified element.
+            responses:
+                '200':
+                    description: List of agreement collections retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/AgreementCollection'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - _id: 69cbe9901d5009a04361925d
+                                      name: acuerdo-PSG2-2526
+                                      displayName: Acuerdo PSG2 2025-2026
+                                      elementId: 69cbdee759092b362376ca17
+                                      auditableVersionNumber: 1
+                                      agreementVersions:
+                                          - contract:
+                                                validity:
+                                                    timezone: Europe/Madrid
+                                                    initial: '2026-03-31T00:00:00.000Z'
+                                                    end: '2026-12-31T23:59:59.000Z'
+                                                    earlyTermination: null
+                                                agreementTemplateId: 69cbd30332c8b7152e9aa73a
+                                                signaturesId:
+                                                    - 69cbea571d5009a043619276
+                                            versionNumber: 1
+                                      fields: []
+                                      permissions: []
+                                      __v: 0
+                                error: null
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        post:
+            tags:
+                - AgreementCollections
+            summary: Create an agreement collection
+            operationId: createAgreementCollectionByElement
+            description: |
+                Creates a new agreement collection within the specified element.
+                The collection is created empty (no versions). Versions are added later
+                through the agreement version endpoints.
+            requestBody:
+                $ref: '#/components/requestBodies/AgreementCollectionBody'
+            responses:
+                '200':
+                    description: Agreement collection created successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementCollection'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 69cbe9901d5009a04361925d
+                                    name: acuerdo-PSG2-2526
+                                    displayName: Acuerdo PSG2 2025-2026
+                                    elementId: 69cbdee759092b362376ca17
+                                    auditableVersionNumber: null
+                                    agreementVersions: []
+                                    fields: []
+                                    permissions: []
+                                    __v: 0
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '409':
+                    $ref: '#/components/responses/Conflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/agColName'
+        get:
+            tags:
+                - AgreementCollections
+            summary: Get an agreement collection by name
+            operationId: getAgreementCollectionByElement
+            description: |
+                Returns a specific agreement collection by name within the element.
+                Supports an optional `expand` query parameter to assemble version data
+                with resolved signatures, guarantees and metric configurations.
+            parameters:
+                - in: query
+                  name: expand
+                  schema:
+                      type: string
+                      enum: ['true', 'false']
+                      default: 'false'
+                  description: If `true`, returns versions with fully assembled signature and guarantee data.
+            responses:
+                '200':
+                    description: Agreement collection found
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementCollection'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 69cbe9901d5009a04361925d
+                                    name: acuerdo-PSG2-2526
+                                    displayName: Acuerdo PSG2 2025-2026
+                                    elementId: 69cbdee759092b362376ca17
+                                    auditableVersionNumber: 1
+                                    agreementVersions:
+                                        - contract:
+                                              validity:
+                                                  timezone: Europe/Madrid
+                                                  initial: '2026-03-31T00:00:00.000Z'
+                                                  end: '2026-12-31T23:59:59.000Z'
+                                                  earlyTermination: null
+                                              agreementTemplateId: 69cbd30332c8b7152e9aa73a
+                                              signaturesId:
+                                                  - 69cbea571d5009a043619276
+                                          versionNumber: 1
+                                    fields: []
+                                    permissions: []
+                                    __v: 0
+                                error: null
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        put:
+            tags:
+                - AgreementCollections
+            summary: Update an agreement collection
+            operationId: updateAgreementCollectionByElement
+            description: |
+                Updates an existing agreement collection within the element.
+                The `auditableVersionNumber` can be changed to point to a different version
+                or set to `null` if no version should be auditable.
+            requestBody:
+                $ref: '#/components/requestBodies/AgreementCollectionUpdateBody'
+            responses:
+                '200':
+                    description: Agreement collection updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementCollection'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 69cbe9901d5009a04361925d
+                                    name: acuerdo-PSG2-2526
+                                    displayName: Acuerdo PSG2 2025-2026 (actualizado)
+                                    elementId: 69cbdee759092b362376ca17
+                                    auditableVersionNumber: null
+                                    agreementVersions:
+                                        - contract:
+                                              validity:
+                                                  timezone: Europe/Madrid
+                                                  initial: '2026-03-31T00:00:00.000Z'
+                                                  end: '2026-12-31T23:59:59.000Z'
+                                                  earlyTermination: null
+                                              agreementTemplateId: 69cbd30332c8b7152e9aa73a
+                                              signaturesId:
+                                                  - 69cbea571d5009a043619276
+                                          versionNumber: 1
+                                    fields: []
+                                    permissions: []
+                                    __v: 0
+                                    updatedAt: '2026-03-31T18:26:00.438Z'
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '409':
+                    $ref: '#/components/responses/Conflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        delete:
+            tags:
+                - AgreementCollections
+            summary: Delete an agreement collection
+            operationId: deleteAgreementCollectionByElement
+            description: |
+                Deletes an agreement collection and all its associated versions and signatures.
+            responses:
+                '200':
+                    description: Agreement collection deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: object
+                                              nullable: true
+                                              example: null
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    # ──────────────────────────────────────────────
+    # AgreementVersions
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}/agreementVersions:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/agColName'
+        get:
+            tags:
+                - AgreementVersions
+            summary: List all versions in a collection
+            operationId: getAgreementVersionsByCollection
+            description: |
+                Returns all agreement versions within the specified collection.
+                Supports an optional `expand` query parameter to assemble version data
+                with resolved signatures, guarantees and metric configurations.
+            parameters:
+                - in: query
+                  name: expand
+                  schema:
+                      type: string
+                      enum: ['true', 'false']
+                      default: 'false'
+                  description: If `true`, returns versions with fully assembled signature and guarantee data.
+            responses:
+                '200':
+                    description: List of agreement versions
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/AgreementVersionExpanded'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - versionNumber: 1
+                                      contract:
+                                          agreementTemplateName: PSG2-2526
+                                          validity:
+                                              timezone: Europe/Madrid
+                                              initial: '2026-03-31T00:00:00.000Z'
+                                              end: '2026-12-31T23:59:59.000Z'
+                                              earlyTermination: null
+                                          signatures:
+                                              - signatureId: 69cbea571d5009a043619276
+                                                guarantee:
+                                                    name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                                    numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                    comparator: '>='
+                                                    threshold: 5
+                                                    window:
+                                                        period:
+                                                            - unit: day
+                                                              value: 1
+                                                        anchorDate: '2025-12-08T21:00:00.000Z'
+                                                    metricsConfig:
+                                                        - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                          config: {}
+                                                auditConfig:
+                                                    owner: universidad-sevilla
+                                                    repo: L1-01-project
+                                error: null
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        post:
+            tags:
+                - AgreementVersions
+            summary: Create a new version in a collection
+            operationId: createAgreementVersionByCollection
+            description: |
+                Creates a new agreement version within the specified collection.
+                The version number is auto-incremented. The new version becomes the
+                auditable version automatically. Each signature must reference an existing
+                guarantee template by name and include its audit configuration.
+            requestBody:
+                $ref: '#/components/requestBodies/AgreementVersionBody'
+            responses:
+                '200':
+                    description: Agreement version created successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementVersionRaw'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    contract:
+                                        validity:
+                                            timezone: Europe/Madrid
+                                            initial: '2026-03-31T00:00:00.000Z'
+                                            end: '2026-12-31T23:59:59.000Z'
+                                            earlyTermination: null
+                                        agreementTemplateId: 69cbd30332c8b7152e9aa73a
+                                        signaturesId:
+                                            - 69cbea571d5009a043619276
+                                    versionNumber: 1
+                                    createdAt: '2026-03-31T16:00:00.000Z'
+                                    updatedAt: '2026-03-31T16:00:00.000Z'
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}/agreementVersions/auditableVersion:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/agColName'
+        get:
+            tags:
+                - AgreementVersions
+            summary: Get the auditable version of a collection
+            operationId: getAuditableVersionByCollection
+            description: |
+                Returns the currently auditable version of the collection.
+                If no auditable version is set (auditableVersionNumber is null),
+                returns a 404 error.
+            parameters:
+                - in: query
+                  name: expand
+                  schema:
+                      type: string
+                      enum: ['true', 'false']
+                      default: 'false'
+                  description: If `true`, returns the version with fully assembled signature and guarantee data.
+            responses:
+                '200':
+                    description: Auditable version found
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementVersionExpanded'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    versionNumber: 1
+                                    contract:
+                                        agreementTemplateName: PSG2-2526
+                                        validity:
+                                            timezone: Europe/Madrid
+                                            initial: '2026-03-31T00:00:00.000Z'
+                                            end: '2026-12-31T23:59:59.000Z'
+                                            earlyTermination: null
+                                        signatures:
+                                            - signatureId: 69cbea571d5009a043619276
+                                              guarantee:
+                                                  name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                                  numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                  comparator: '>='
+                                                  threshold: 5
+                                                  window:
+                                                      period:
+                                                          - unit: day
+                                                            value: 1
+                                                      anchorDate: '2025-12-08T21:00:00.000Z'
+                                                  metricsConfig:
+                                                      - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                        config: {}
+                                              auditConfig:
+                                                  owner: universidad-sevilla
+                                                  repo: L1-01-project
+                                error: null
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}/agreementVersions/{versionNumber}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/agColName'
+            - $ref: '#/components/parameters/versionNumber'
+        delete:
+            tags:
+                - AgreementVersions
+            summary: Delete a version from a collection
+            operationId: deleteAgreementVersionByCollection
+            description: |
+                Deletes a specific agreement version by its version number.
+                Also deletes all associated signatures.
+            responses:
+                '200':
+                    description: Agreement version deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: object
+                                              nullable: true
+                                              example: null
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}/agreementVersions/activeVersion/terminate:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/agColName'
+        post:
+            tags:
+                - AgreementVersions
+            summary: Terminate the active version
+            operationId: terminateActiveVersion
+            description: |
+                Terminates the currently auditable version by setting its `earlyTermination`
+                date to the current timestamp and setting `auditableVersionNumber` to null.
+                Returns 404 if there is no auditable version.
+            responses:
+                '200':
+                    description: Active version terminated successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementCollection'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 69cbe9901d5009a04361925d
+                                    name: acuerdo-PSG2-2526
+                                    displayName: Acuerdo PSG2 2025-2026
+                                    elementId: 69cbdee759092b362376ca17
+                                    auditableVersionNumber: null
+                                    agreementVersions:
+                                        - contract:
+                                              validity:
+                                                  timezone: Europe/Madrid
+                                                  initial: '2026-03-31T00:00:00.000Z'
+                                                  end: '2026-12-31T23:59:59.000Z'
+                                                  earlyTermination: '2026-03-31T17:27:09.901Z'
+                                              agreementTemplateId: 69cbd30332c8b7152e9aa73a
+                                              signaturesId:
+                                                  - 69cbf256cf7ba204e4725122
+                                          versionNumber: 1
+                                    fields: []
+                                    permissions: []
+                                    __v: 0
+                                error: null
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
 # ──────────────────────────────────────────────
 # Reusable components
 # ──────────────────────────────────────────────
@@ -1577,6 +2123,31 @@ components:
             schema:
                 type: string
             example: PSG2-2526
+        elementName:
+            name: elementName
+            in: path
+            required: true
+            description: Unique name of the element within the organization
+            schema:
+                type: string
+            example: L1-01
+        agColName:
+            name: agColName
+            in: path
+            required: true
+            description: Unique name of the agreement collection within the element
+            schema:
+                type: string
+            example: acuerdo-PSG2-2526
+        versionNumber:
+            name: versionNumber
+            in: path
+            required: true
+            description: Version number of the agreement version
+            schema:
+                type: integer
+                minimum: 1
+            example: 1
 
     # ── Request Bodies ────────────────────────────
     requestBodies:
@@ -1703,6 +2274,53 @@ components:
                                       - unit: day
                                         value: 1
                                   anchorDate: '2025-12-08T21:00:00.000Z'
+
+        AgreementCollectionBody:
+            description: Data to create an agreement collection
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/AgreementCollectionInput'
+                    example:
+                        name: acuerdo-PSG2-2526
+                        displayName: Acuerdo PSG2 2025-2026
+                        fields: []
+                        permissions: []
+
+        AgreementCollectionUpdateBody:
+            description: Data to update an agreement collection
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/AgreementCollectionUpdateInput'
+                    example:
+                        name: acuerdo-PSG2-2526
+                        displayName: Acuerdo PSG2 2025-2026 (actualizado)
+                        fields: []
+                        permissions: []
+                        auditableVersionNumber: null
+
+        AgreementVersionBody:
+            description: Data to create an agreement version
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/AgreementVersionInput'
+                    example:
+                        contract:
+                            agreementTemplateName: PSG2-2526
+                            validity:
+                                timezone: Europe/Madrid
+                                initial: '2026-03-31T00:00:00.000Z'
+                                end: '2026-12-31T23:59:59.000Z'
+                        signatures:
+                            - guaranteeName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                              auditConfig:
+                                  owner: universidad-sevilla
+                                  repo: L1-01-project
 
         GuaranteeTemplateBody:
             description: Data to create a guarantee template
@@ -2904,6 +3522,340 @@ components:
                     minItems: 1
                     items:
                         $ref: '#/components/schemas/IMetricConfigEntry'
+
+        # ── AgreementCollection ──────────────────────
+        AgreementCollection:
+            type: object
+            description: |
+                An agreement collection groups multiple agreement versions for an element.
+                Only one version can be auditable at a time, tracked by `auditableVersionNumber`.
+            required:
+                - _id
+                - name
+                - elementId
+            properties:
+                _id:
+                    type: string
+                    description: MongoDB internal identifier (ObjectId)
+                    example: 69cbe9901d5009a04361925d
+                name:
+                    type: string
+                    description: Collection name, unique within the element. Only letters, numbers, hyphens and underscores.
+                    pattern: '^[A-Za-z0-9_-]+$'
+                    minLength: 3
+                    maxLength: 100
+                    example: mi-collection
+                displayName:
+                    type: string
+                    description: Human-readable display name (max 200 characters)
+                    maxLength: 200
+                    example: Mi Collection
+                elementId:
+                    type: string
+                    description: ObjectId of the element this collection belongs to
+                    example: 69cbdee759092b362376ca17
+                auditableVersionNumber:
+                    type: integer
+                    nullable: true
+                    description: Version number of the currently auditable version, or null if none
+                    example: 1
+                agreementVersions:
+                    type: array
+                    description: Embedded agreement versions
+                    items:
+                        $ref: '#/components/schemas/AgreementVersionRaw'
+                fields:
+                    type: array
+                    description: Collection fields
+                    items:
+                        type: object
+                permissions:
+                    type: array
+                    description: Collection permissions
+                    items:
+                        type: object
+                __v:
+                    type: integer
+                    description: Mongoose version key
+                    example: 0
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+
+        AgreementCollectionInput:
+            type: object
+            description: Payload for creating an agreement collection
+            required:
+                - name
+                - displayName
+                - fields
+                - permissions
+            properties:
+                name:
+                    type: string
+                    pattern: '^[A-Za-z0-9_-]+$'
+                    minLength: 3
+                    maxLength: 100
+                    example: mi-collection
+                displayName:
+                    type: string
+                    maxLength: 200
+                    example: Mi Collection
+                fields:
+                    type: array
+                    items:
+                        type: object
+                permissions:
+                    type: array
+                    items:
+                        type: object
+
+        AgreementCollectionUpdateInput:
+            type: object
+            description: Payload for updating an agreement collection
+            required:
+                - name
+                - displayName
+                - fields
+                - permissions
+                - auditableVersionNumber
+            properties:
+                name:
+                    type: string
+                    pattern: '^[A-Za-z0-9_-]+$'
+                    minLength: 3
+                    maxLength: 100
+                    example: mi-collection2
+                displayName:
+                    type: string
+                    maxLength: 200
+                    example: Acuerdo PSG2 2025-2026 (actualizado)
+                fields:
+                    type: array
+                    items:
+                        type: object
+                permissions:
+                    type: array
+                    items:
+                        type: object
+                auditableVersionNumber:
+                    type: integer
+                    nullable: true
+                    description: Version number to set as auditable, or null to unset
+                    example: null
+
+        # ── AgreementVersion ──────────────────────
+        AgreementVersionRaw:
+            type: object
+            description: Raw agreement version as stored in the database (with ObjectId references)
+            properties:
+                versionNumber:
+                    type: integer
+                    description: Auto-incremented version number
+                    example: 1
+                contract:
+                    type: object
+                    properties:
+                        validity:
+                            type: object
+                            properties:
+                                timezone:
+                                    type: string
+                                    description: IANA timezone
+                                    example: Europe/Madrid
+                                initial:
+                                    type: string
+                                    format: date-time
+                                    example: '2026-03-31T00:00:00.000Z'
+                                end:
+                                    type: string
+                                    format: date-time
+                                    example: '2026-12-31T23:59:59.000Z'
+                                earlyTermination:
+                                    type: string
+                                    format: date-time
+                                    nullable: true
+                                    description: Set when the version is terminated early
+                                    example: null
+                        agreementTemplateId:
+                            type: string
+                            description: ObjectId of the referenced agreement template
+                            example: 69cbd30332c8b7152e9aa73a
+                        signaturesId:
+                            type: array
+                            description: Array of Signature ObjectId references
+                            items:
+                                type: string
+                            example:
+                                - 69cbea571d5009a043619276
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+
+        AgreementVersionExpanded:
+            type: object
+            description: Assembled agreement version with resolved signatures, guarantees and metric configurations
+            properties:
+                versionNumber:
+                    type: integer
+                    example: 1
+                contract:
+                    type: object
+                    properties:
+                        agreementTemplateName:
+                            type: string
+                            description: Resolved name of the agreement template
+                            example: PSG2-2526
+                        validity:
+                            type: object
+                            properties:
+                                timezone:
+                                    type: string
+                                    example: Europe/Madrid
+                                initial:
+                                    type: string
+                                    format: date-time
+                                    example: '2026-03-31T00:00:00.000Z'
+                                end:
+                                    type: string
+                                    format: date-time
+                                    example: '2026-12-31T23:59:59.000Z'
+                                earlyTermination:
+                                    type: string
+                                    format: date-time
+                                    nullable: true
+                                    example: null
+                        signatures:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/ExpandedSignature'
+
+        ExpandedSignature:
+            type: object
+            description: A fully assembled signature with guarantee and metric data
+            properties:
+                signatureId:
+                    type: string
+                    description: ObjectId of the signature
+                    example: 69cbea571d5009a043619276
+                guarantee:
+                    type: object
+                    properties:
+                        name:
+                            type: string
+                            description: Guarantee template name
+                            example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                        numericExpression:
+                            type: string
+                            description: Numeric expression from the guarantee template
+                            example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                        comparator:
+                            type: string
+                            enum: ['<', '>', '<=', '>=', '==', '!=']
+                            example: '>='
+                        threshold:
+                            type: number
+                            example: 5
+                        window:
+                            type: object
+                            properties:
+                                period:
+                                    type: array
+                                    items:
+                                        type: object
+                                        properties:
+                                            unit:
+                                                type: string
+                                                enum: [millisecond, second, minute, hour, day, week]
+                                                example: day
+                                            value:
+                                                type: integer
+                                                example: 1
+                                anchorDate:
+                                    type: string
+                                    format: date-time
+                                    example: '2025-12-08T21:00:00.000Z'
+                        metricsConfig:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/IMetricConfigEntry'
+                auditConfig:
+                    type: object
+                    description: Audit configuration for this signature
+                    example:
+                        owner: universidad-sevilla
+                        repo: L1-01-project
+
+        AgreementVersionInput:
+            type: object
+            description: |
+                Payload for creating an agreement version.
+                Each signature references an existing guarantee template by name.
+            required:
+                - contract
+                - signatures
+            properties:
+                contract:
+                    type: object
+                    required:
+                        - agreementTemplateName
+                        - validity
+                    properties:
+                        agreementTemplateName:
+                            type: string
+                            description: Name of an existing agreement template in the organization
+                            minLength: 3
+                            maxLength: 100
+                            example: PSG2-2526
+                        validity:
+                            type: object
+                            required:
+                                - timezone
+                                - initial
+                                - end
+                            properties:
+                                timezone:
+                                    type: string
+                                    description: Valid IANA timezone
+                                    example: Europe/Madrid
+                                initial:
+                                    type: string
+                                    format: date-time
+                                    description: Start date (ISO8601). Must be before `end`.
+                                    example: '2026-03-31T00:00:00.000Z'
+                                end:
+                                    type: string
+                                    format: date-time
+                                    description: End date (ISO8601). Must be after `initial`.
+                                    example: '2026-12-31T23:59:59.000Z'
+                signatures:
+                    type: array
+                    description: At least one signature is required
+                    minItems: 1
+                    items:
+                        type: object
+                        required:
+                            - guaranteeName
+                            - auditConfig
+                        properties:
+                            guaranteeName:
+                                type: string
+                                description: Name of an existing guarantee template
+                                minLength: 3
+                                maxLength: 100
+                                example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                            auditConfig:
+                                type: object
+                                description: Audit configuration for this signature
+                                example:
+                                    owner: universidad-sevilla
+                                    repo: L1-01-project
 
         GuaranteeTemplateUpdateInput:
             type: object

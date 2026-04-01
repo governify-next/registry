@@ -106,7 +106,7 @@ export const getAuditableVersionByCollection = async (
     return await assembleBySignature(agreementVersion!);
 };
 
-export const deleteAuditableVersionByCollection = async (
+export const deleteVersionByCollection = async (
     orgName: string,
     elementName: string,
     agreementName: string,
@@ -121,13 +121,17 @@ export const deleteAuditableVersionByCollection = async (
     const version = agreementCollection!.agreementVersions.find(
         (v) => v.versionNumber === versionNumber,
     );
+
     const signatureIds = version!.contract.signaturesId;
 
     await deleteSignaturesByIds(signatureIds);
 
-    return await agreementVersionRepository.deleteAuditableVersionByCollection(
+    const isAuditable = agreementCollection!.auditableVersionNumber === versionNumber;
+
+    return await agreementVersionRepository.deleteVersionByCollection(
         agreementCollection!._id,
         versionNumber,
+        isAuditable,
     );
 };
 

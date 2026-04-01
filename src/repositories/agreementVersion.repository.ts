@@ -27,15 +27,17 @@ export const updateSignaturesId = async (
     );
 };
 
-export const deleteAuditableVersionByCollection = async (
+export const deleteVersionByCollection = async (
     agColId: Types.ObjectId,
     versionNumber: number,
+    resetAuditable: boolean,
 ) => {
     return await AgreementCollection.findOneAndUpdate(
+        { _id: agColId },
         {
-            _id: agColId,
+            $pull: { agreementVersions: { versionNumber } },
+            ...(resetAuditable && { $set: { auditableVersionNumber: null } }),
         },
-        { $pull: { agreementVersions: { versionNumber } } },
         { new: true },
     );
 };
