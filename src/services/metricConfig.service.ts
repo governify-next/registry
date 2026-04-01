@@ -10,6 +10,6 @@ export const deleteMetricConfigsByTemplateId = async (templateId: Types.ObjectId
     return await metricConfigRepository.deleteMetricConfigsByTemplateId(templateId);
 };
 
-export const findByTemplateIdAndPopulate = async (templateId: Types.ObjectId) => {
-    return await metricConfigRepository.findByTemplateIdAndPopulate(templateId);
+export const findByTemplateId = async (templateId: Types.ObjectId) => {
+    return await metricConfigRepository.findByTemplateId(templateId);
 };

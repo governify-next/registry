@@ -4,8 +4,8 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface IMetricConfig extends Document {
     guaranteeTemplateId: Types.ObjectId;
-    metricId: Types.ObjectId;
-    metricConfig: unknown; // TODO: cambiar por Record<string, unknown>
+    metricName: string;
+    metricConfig: Record<string, unknown>;
 }
 
 const metricConfigSchema = new Schema<IMetricConfig>(
@@ -15,7 +15,7 @@ const metricConfigSchema = new Schema<IMetricConfig>(
             required: true,
             ref: 'GuaranteeTemplate',
         },
-        metricId: { type: Schema.Types.ObjectId, required: true, ref: 'Metric' },
+        metricName: { type: String, required: true },
         metricConfig: { type: Schema.Types.Mixed },
     },
     { minimize: false }, // para que no guarde el config vacío por defecto

@@ -2,7 +2,7 @@ import { body, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError, DuplicateKeyError } from '../utils/customErrors.js';
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
-import * as metricService from '../services/metric.service.js';
+import { bootEnv } from '../config/bootConfig.js';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -191,17 +191,30 @@ const noDuplicateMetricNames = (req: Request, res: Response, next: NextFunction)
     next();
 };
 
-const metricsExistInDb = async (req: Request, res: Response, next: NextFunction) => {
+const validateMetricsInReporter = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const metricNames: string[] = req.body.metricsConfig.map((m: { name: string }) => m.name);
-        const metricsFromDb = await metricService.findMetricsByNames(metricNames);
-        const foundNames = metricsFromDb.map((m) => m.title);
-        const missing = metricNames.filter((name) => !foundNames.includes(name));
+        const metricsConfig: { name: string; config: Record<string, unknown> }[] =
+            req.body.metricsConfig;
+        const errors: string[] = [];
 
-        if (missing.length > 0)
-            return next(
-                new ValidationError(`Metrics not found in database: ${missing.join(', ')}`),
+        for (const metric of metricsConfig) {
+            const response = await fetch(
+                `${bootEnv.REPORTER_URL}/api/v1/metrics/${metric.name}/validate`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ metricConfig: metric.config }),
+                },
             );
+            const result = await response.json();
+
+            if (!result.data?.valid) {
+                errors.push(`${metric.name}: ${result.data?.error || 'Unknown error'}`);
+            }
+        }
+
+        if (errors.length > 0)
+            return next(new ValidationError(`Metric validation failed: ${errors.join('; ')}`));
         next();
     } catch (err) {
         next(err);
@@ -276,7 +289,7 @@ export const validateCreateGuaranteeTemplate = [
     // 2. Validación de lógica
     uniqueGuaranteeTemplateName,
     noDuplicateMetricNames,
-    metricsExistInDb,
+    validateMetricsInReporter,
     validNumericExpression,
 ];
 
@@ -291,6 +304,6 @@ export const validateUpdateGuaranteeTemplate = [
     existingGuaranteeTemplate,
     uniqueGuaranteeTemplateName,
     noDuplicateMetricNames,
-    metricsExistInDb,
+    validateMetricsInReporter,
     validNumericExpression,
 ];

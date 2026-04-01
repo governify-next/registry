@@ -2,6 +2,9 @@ import { body, checkExact, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError, NotFoundError } from '../utils/customErrors.js';
 import * as agreementCollectionService from '../services/agreementCollection.service.js';
+import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
+import * as metricConfigService from '../services/metricConfig.service.js';
+import { bootEnv } from '../config/bootConfig.js';
 import {
     existingAgreementTemplate,
     existingGuaranteeTemplates,
@@ -168,6 +171,47 @@ const earlyTerminationInRange = async (req: Request, res: Response, next: NextFu
     }
 };
 
+const validateAuditConfigsInReporter = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const signatures: { guaranteeName: string; auditConfig: Record<string, unknown> }[] =
+            req.body.signatures;
+        const errors: string[] = [];
+
+        for (const sig of signatures) {
+            const guaranteeTemplate = await guaranteeTemplateService.findGuaranteeTemplateByName(
+                sig.guaranteeName,
+            );
+            const metricConfigs = await metricConfigService.findByTemplateId(
+                guaranteeTemplate!._id,
+            );
+
+            for (const mc of metricConfigs) {
+                const response = await fetch(
+                    `${bootEnv.REPORTER_URL}/api/v1/metrics/${mc.metricName}/validate`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ auditConfig: sig.auditConfig }),
+                    },
+                );
+                const result = await response.json();
+
+                if (!result.data?.valid) {
+                    errors.push(
+                        `${sig.guaranteeName} -> ${mc.metricName}: ${result.data?.error || 'Unknown error'}`,
+                    );
+                }
+            }
+        }
+
+        if (errors.length > 0)
+            return next(new ValidationError(`AuditConfig validation failed: ${errors.join('; ')}`));
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
 // ─── Middleware ────────────────────────────────────────────────────
 
 export const validateTerminateVersion = [
@@ -185,4 +229,5 @@ export const validateCreateAgreementVersion = [
     existingGuaranteeTemplates((req) =>
         req.body.signatures.map((s: { guaranteeName: string }) => s.guaranteeName),
     ),
+    validateAuditConfigsInReporter,
 ];

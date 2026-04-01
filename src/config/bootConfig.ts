@@ -15,6 +15,9 @@ export const bootEnv = {
     // JWT configuration
     JWT_SECRET: process.env.JWT_SECRET || 'governify-secret',
 
+    // External services
+    REPORTER_URL: process.env.REPORTER_URL || 'http://localhost:5901',
+
     // Application-specific settings
     MAX_ROLES_PER_ORGANIZATION: parseInt(process.env.MAX_ROLES_PER_ORGANIZATION || '100', 10),
     MAX_MEMBERS_PER_ORGANIZATION: parseInt(process.env.MAX_MEMBERS_PER_ORGANIZATION || '1000', 10),

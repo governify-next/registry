@@ -1,18 +1,17 @@
 import { Types } from 'mongoose';
 import * as guaranteeTemplateRepository from '../repositories/guaranteeTemplate.repository.js';
-import * as metricService from './metric.service.js';
 import * as metricConfigService from './metricConfig.service.js';
-import { GuaranteeTemplatePayload, IMetricConfigEntry } from '../types/guaranteeTemplate.types.js';
 import { IGuaranteeTemplate } from '../models/guaranteeTemplate.model.js';
+import { IMetricConfigEntry, GuaranteeTemplatePayload } from '../types/guaranteeTemplate.types.js';
 
 // Método reutilizable para ensamblar el template con sus metricConfigs
 const assembleGuaranteeTemplate = async (template: IGuaranteeTemplate) => {
     // 1. Traemos las metricConfigs del template
-    const metricConfigs = await metricConfigService.findByTemplateIdAndPopulate(template._id);
+    const metricConfigs = await metricConfigService.findByTemplateId(template._id);
 
     // 2. Montamos el array de respuesta
     const mappedMetricConfigs = metricConfigs.map((mc) => ({
-        name: mc.metricId.title,
+        name: mc.metricName,
         config: mc.metricConfig,
     }));
     // 3. Devolvemos la plantilla (el toObject permite añadir campos a la nueva instancia)
@@ -27,18 +26,11 @@ const buildAndSaveMetricConfigs = async (
     templateId: Types.ObjectId,
     metricsConfig: IMetricConfigEntry[],
 ) => {
-    const metricNames = metricsConfig.map((m) => m.name);
-    const metricsFromDb = await metricService.findMetricsByNames(metricNames);
-
-    const configToSave = metricsConfig.map((mConf) => {
-        const dbMetric = metricsFromDb.find((m) => m.title === mConf.name);
-
-        return {
-            guaranteeTemplateId: templateId,
-            metricId: dbMetric!._id,
-            metricConfig: mConf.config,
-        };
-    });
+    const configToSave = metricsConfig.map((mConf) => ({
+        guaranteeTemplateId: templateId,
+        metricName: mConf.name,
+        metricConfig: mConf.config,
+    }));
 
     await metricConfigService.createMetricConfigs(configToSave);
 };
