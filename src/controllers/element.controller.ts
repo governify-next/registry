@@ -67,3 +67,36 @@ export const deleteElement = async (req: Request, res: Response, next: NextFunct
         next(err);
     }
 };
+
+export const getElementParts = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.getOrganizationByName(req.params.orgName);
+        const parts = await elementService.getElementParts(
+            organization!._id,
+            req.params.elementName,
+        );
+        return sendSuccess(res, { data: parts });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const addElementPart = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.getOrganizationByName(req.params.orgName);
+        const part = await elementService.addElementPart(
+            organization!._id,
+            req.params.elementName,
+            {
+                auditConfig: req.body.auditConfig,
+            },
+        );
+        return sendSuccess(res, {
+            data: part,
+            httpStatus: 201,
+            message: 'Element part created',
+        });
+    } catch (err) {
+        next(err);
+    }
+};

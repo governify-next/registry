@@ -63,3 +63,15 @@ export const updateElement = async (
 export const deleteElement = async (organizationId: Types.ObjectId, elementName: string) => {
     return await Element.findOneAndDelete({ organizationId, name: elementName });
 };
+
+export const addElementPart = async (
+    organizationId: Types.ObjectId,
+    elementName: string,
+    data: { auditConfig: Record<string, unknown> },
+) => {
+    return await Element.findOneAndUpdate(
+        { organizationId, name: elementName },
+        { $push: { parts: { auditConfig: data.auditConfig } } },
+        { new: true },
+    );
+};

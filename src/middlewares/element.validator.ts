@@ -142,3 +142,17 @@ export const validateElement = [
     validateElementFields,
     validateElementPermissions,
 ];
+
+export const validateElementPart = [
+    body('auditConfig')
+        .exists({ checkNull: true })
+        .isObject()
+        .withMessage('auditConfig must be an object'),
+    (req: Request, res: Response, next: NextFunction) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return next(new ValidationError('Validation failed', errors.array()));
+        }
+        next();
+    },
+];

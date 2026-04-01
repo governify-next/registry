@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as elementController from '../controllers/element.controller.js';
-import { validateElement } from '../middlewares/element.validator.js';
+import { validateElement, validateElementPart } from '../middlewares/element.validator.js';
 import { existingOrganization } from '../middlewares/organization.validator.js';
 
 export const elementRoutes = Router();
@@ -31,4 +31,17 @@ elementRoutes.delete(
     '/organizations/:orgName/elements/:elementName',
     existingOrganization,
     elementController.deleteElement,
+);
+
+elementRoutes.get(
+    '/orgs/:orgName/elements/:elementName/parts',
+    existingOrganization,
+    elementController.getElementParts,
+);
+
+elementRoutes.post(
+    '/orgs/:orgName/elements/:elementName/parts',
+    existingOrganization,
+    validateElementPart,
+    elementController.addElementPart,
 );

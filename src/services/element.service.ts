@@ -41,3 +41,25 @@ export const deleteElement = async (organizationId: Types.ObjectId, elementName:
 
     return deletedElement;
 };
+
+export const getElementParts = async (organizationId: Types.ObjectId, elementName: string) => {
+    const element = await getElementByName(organizationId, elementName);
+    if (!element) {
+        return null;
+    }
+
+    return element.parts;
+};
+
+export const addElementPart = async (
+    organizationId: Types.ObjectId,
+    elementName: string,
+    data: { auditConfig: Record<string, unknown> },
+) => {
+    const part = await elementRepository.addElementPart(organizationId, elementName, data);
+    if (!part) {
+        throw new NotFoundError(`Element with name '${elementName}' not found in organization`);
+    }
+
+    return part;
+};
