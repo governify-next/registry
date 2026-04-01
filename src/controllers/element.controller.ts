@@ -112,7 +112,7 @@ export const addRoleToElementPermission = async (
             organization!._id,
             req.params.elementName,
             req.params.permissionName,
-            req.body.role,
+            req.body.roles,
         );
         return sendSuccess(res, {
             data: element,

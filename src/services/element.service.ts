@@ -69,7 +69,7 @@ export const addRoleToElementPermission = async (
     organizationId: Types.ObjectId,
     elementName: string,
     permissionName: string,
-    roleName: string,
+    roleNames: string[],
 ) => {
     const element = await getElementByName(organizationId, elementName);
     if (!element) {
@@ -78,10 +78,13 @@ export const addRoleToElementPermission = async (
 
     const organization = await organizationService.getOrganizationById(organizationId.toString());
 
-    const role = organization!.roles.find((r) => r.name === roleName);
-    if (!role) {
-        throw new NotFoundError(`Role '${roleName}' not found in organization`);
-    }
+    const roleIds = roleNames.map((roleName) => {
+        const role = organization!.roles.find((r) => r.name === roleName);
+        if (!role) {
+            throw new NotFoundError(`Role '${roleName}' not found in organization`);
+        }
+        return role._id!;
+    });
 
     if (!['view', 'edit', 'delete', 'create'].includes(permissionName)) {
         throw new NotFoundError(`Permission '${permissionName}' not found on element`);
@@ -91,6 +94,6 @@ export const addRoleToElementPermission = async (
         organizationId,
         elementName,
         permissionName,
-        role._id!,
+        roleIds,
     );
 };

@@ -156,3 +156,19 @@ export const validateElementPart = [
         next();
     },
 ];
+
+export const validateElementPermissionRoles = [
+    body('roles')
+        .exists({ checkNull: true })
+        .withMessage('roles is required')
+        .isArray({ min: 1 })
+        .withMessage('roles must be a non-empty array of role names'),
+    body('roles.*').isString().withMessage('each role must be a string'),
+    (req: Request, res: Response, next: NextFunction) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return next(new ValidationError('Validation failed', errors.array()));
+        }
+        next();
+    },
+];

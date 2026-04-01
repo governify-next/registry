@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import * as elementController from '../controllers/element.controller.js';
-import { validateElement, validateElementPart } from '../middlewares/element.validator.js';
+import {
+    validateElement,
+    validateElementPart,
+    validateElementPermissionRoles,
+} from '../middlewares/element.validator.js';
 import { existingOrganization } from '../middlewares/organization.validator.js';
 
 export const elementRoutes = Router();
@@ -49,5 +53,6 @@ elementRoutes.post(
 elementRoutes.post(
     '/organizations/:orgName/elements/:elementName/permissions/:permissionName',
     existingOrganization,
+    validateElementPermissionRoles,
     elementController.addRoleToElementPermission,
 );

@@ -80,7 +80,7 @@ export const addRoleToElementPermission = async (
     organizationId: Types.ObjectId,
     elementName: string,
     permissionName: string,
-    roleId: Types.ObjectId,
+    roleIds: Types.ObjectId[],
 ) => {
     const element = await Element.findOne({ organizationId, name: elementName });
     if (!element) {
@@ -92,11 +92,12 @@ export const addRoleToElementPermission = async (
         throw new NotFoundError(`Permission '${permissionName}' not found on element`);
     }
 
-    if (permission.includes(roleId)) {
-        return element; // Role already has this permission, no need to update
+    for (const roleId of roleIds) {
+        if (!permission.includes(roleId)) {
+            permission.push(roleId);
+        }
     }
 
-    permission.push(roleId);
     await element.save();
     return element;
 };
