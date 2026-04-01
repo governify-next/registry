@@ -134,7 +134,48 @@ export const existingAuditableVersion = async (req: Request, res: Response, next
     }
 };
 
+const earlyTerminationValidation = body('earlyTermination')
+    .exists({ checkNull: true })
+    .withMessage('earlyTermination is required')
+    .isISO8601()
+    .withMessage('earlyTermination must be a valid ISO8601 date');
+
+const earlyTerminationInRange = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const collection = await agreementCollectionService.getCleanAgreementCollectionByElement(
+            req.params.orgName,
+            req.params.elementName,
+            req.params.agColName,
+        );
+
+        const version = collection!.agreementVersions.find(
+            (v) => v.versionNumber === collection!.auditableVersionNumber,
+        );
+
+        const earlyTermination = new Date(req.body.earlyTermination);
+        const initial = new Date(version!.contract.validity.initial);
+        const end = new Date(version!.contract.validity.end);
+
+        if (earlyTermination <= initial || earlyTermination >= end)
+            return next(
+                new ValidationError(
+                    'earlyTermination must be after validity.initial and before validity.end',
+                ),
+            );
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
 // ─── Middleware ────────────────────────────────────────────────────
+
+export const validateTerminateVersion = [
+    checkExact([earlyTerminationValidation], { locations: ['body'] }),
+    collectValidationErrors,
+    existingAuditableVersion,
+    earlyTerminationInRange,
+];
 
 export const validateCreateAgreementVersion = [
     checkExact(fieldValidations, { locations: ['body'] }),

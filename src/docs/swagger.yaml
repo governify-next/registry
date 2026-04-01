@@ -2008,8 +2008,25 @@ paths:
             operationId: terminateActiveVersion
             description: |
                 Terminates the currently auditable version by setting its `earlyTermination`
-                date to the current timestamp and setting `auditableVersionNumber` to null.
+                to the provided date and setting `auditableVersionNumber` to null.
+                The `earlyTermination` date must be after `validity.initial` and before `validity.end`.
                 Returns 404 if there is no auditable version.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - earlyTermination
+                            properties:
+                                earlyTermination:
+                                    type: string
+                                    format: date-time
+                                    description: Termination date (ISO8601). Must be after validity.initial and before validity.end.
+                                    example: '2026-06-15T12:00:00.000Z'
+                        example:
+                            earlyTermination: '2026-06-15T12:00:00.000Z'
             responses:
                 '200':
                     description: Active version terminated successfully
@@ -2039,7 +2056,7 @@ paths:
                                                   timezone: Europe/Madrid
                                                   initial: '2026-03-31T00:00:00.000Z'
                                                   end: '2026-12-31T23:59:59.000Z'
-                                                  earlyTermination: '2026-03-31T17:27:09.901Z'
+                                                  earlyTermination: '2026-06-15T12:00:00.000Z'
                                               agreementTemplateId: 69cbd30332c8b7152e9aa73a
                                               signaturesId:
                                                   - 69cbf256cf7ba204e4725122
@@ -2048,6 +2065,8 @@ paths:
                                     permissions: []
                                     __v: 0
                                 error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':

@@ -139,6 +139,7 @@ export const terminateActiveVersion = async (
     orgName: string,
     elementName: string,
     agreementName: string,
+    earlyTermination: string,
 ) => {
     const agreementCollection = await getCleanAgreementCollectionByElement(
         orgName,
@@ -153,6 +154,7 @@ export const terminateActiveVersion = async (
     return await agreementVersionRepository.terminateActiveVersion(
         agreementCollection!._id,
         version!.versionNumber,
+        new Date(earlyTermination),
     );
 };
 

@@ -4,6 +4,7 @@ import { existingElement } from '../middlewares/element.validator.js';
 import { existingAgreementCollection } from '../middlewares/agreementCollection.validator.js';
 import {
     validateCreateAgreementVersion,
+    validateTerminateVersion,
     existingAuditableVersion,
     existingVersionNumber,
 } from '../middlewares/agreementVersion.validator.js';
@@ -45,6 +46,6 @@ agreementVersionRoutes.post(
     '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/activeVersion/terminate',
     existingElement,
     existingAgreementCollection,
-    existingAuditableVersion,
+    validateTerminateVersion,
     agreementVersionController.terminateActiveVersion,
 );

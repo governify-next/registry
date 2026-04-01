@@ -42,12 +42,16 @@ export const deleteVersionByCollection = async (
     );
 };
 
-export const terminateActiveVersion = async (agColId: Types.ObjectId, versionNumber: number) => {
+export const terminateActiveVersion = async (
+    agColId: Types.ObjectId,
+    versionNumber: number,
+    earlyTermination: Date,
+) => {
     return await AgreementCollection.findOneAndUpdate(
         { _id: agColId, 'agreementVersions.versionNumber': versionNumber },
         {
             $set: {
-                'agreementVersions.$.contract.validity.earlyTermination': new Date(),
+                'agreementVersions.$.contract.validity.earlyTermination': earlyTermination,
                 auditableVersionNumber: null,
             },
         },

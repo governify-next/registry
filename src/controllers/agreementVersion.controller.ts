@@ -91,6 +91,7 @@ export const terminateActiveVersion = async (req: Request, res: Response, next: 
             req.params.orgName,
             req.params.elementName,
             req.params.agColName,
+            req.body.earlyTermination,
         );
         return sendSuccess(res, {
             data: result,
