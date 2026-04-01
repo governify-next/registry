@@ -45,3 +45,9 @@ elementRoutes.post(
     validateElementPart,
     elementController.addElementPart,
 );
+
+elementRoutes.post(
+    '/organizations/:orgName/elements/:elementName/permissions/:permissionName',
+    existingOrganization,
+    elementController.addRoleToElementPermission,
+);

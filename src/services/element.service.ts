@@ -1,4 +1,5 @@
 import * as elementRepository from '../repositories/element.repository.js';
+import * as organizationService from './organization.service.js';
 import { IElement } from '../models/element.model.js';
 import { NotFoundError } from '../utils/customErrors.js';
 import { Types } from 'mongoose';
@@ -62,4 +63,34 @@ export const addElementPart = async (
     }
 
     return part;
+};
+
+export const addRoleToElementPermission = async (
+    organizationId: Types.ObjectId,
+    elementName: string,
+    permissionName: string,
+    roleName: string,
+) => {
+    const element = await getElementByName(organizationId, elementName);
+    if (!element) {
+        throw new NotFoundError(`Element with name '${elementName}' not found in organization`);
+    }
+
+    const organization = await organizationService.getOrganizationById(organizationId.toString());
+
+    const role = organization!.roles.find((r) => r.name === roleName);
+    if (!role) {
+        throw new NotFoundError(`Role '${roleName}' not found in organization`);
+    }
+
+    if (!['view', 'edit', 'delete', 'create'].includes(permissionName)) {
+        throw new NotFoundError(`Permission '${permissionName}' not found on element`);
+    }
+
+    return await elementRepository.addRoleToElementPermission(
+        organizationId,
+        elementName,
+        permissionName,
+        role._id!,
+    );
 };

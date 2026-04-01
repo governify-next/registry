@@ -1,6 +1,6 @@
 import Element, { IElement } from '../models/element.model.js';
 import { Types } from 'mongoose';
-import { DuplicateKeyError } from '../utils/customErrors.js';
+import { DuplicateKeyError, NotFoundError } from '../utils/customErrors.js';
 
 export const createElement = async (organizationId: Types.ObjectId, data: Partial<IElement>) => {
     try {
@@ -74,4 +74,29 @@ export const addElementPart = async (
         { $push: { parts: { auditConfig: data.auditConfig } } },
         { new: true },
     );
+};
+
+export const addRoleToElementPermission = async (
+    organizationId: Types.ObjectId,
+    elementName: string,
+    permissionName: string,
+    roleId: Types.ObjectId,
+) => {
+    const element = await Element.findOne({ organizationId, name: elementName });
+    if (!element) {
+        throw new NotFoundError(`Element with name '${elementName}' not found in organization`);
+    }
+
+    const permission = element.permissions[permissionName as keyof typeof element.permissions]; // this was checked before
+    if (!permission) {
+        throw new NotFoundError(`Permission '${permissionName}' not found on element`);
+    }
+
+    if (permission.includes(roleId)) {
+        return element; // Role already has this permission, no need to update
+    }
+
+    permission.push(roleId);
+    await element.save();
+    return element;
 };

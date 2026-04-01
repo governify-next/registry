@@ -100,3 +100,25 @@ export const addElementPart = async (req: Request, res: Response, next: NextFunc
         next(err);
     }
 };
+
+export const addRoleToElementPermission = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const organization = await organizationService.getOrganizationByName(req.params.orgName);
+        const element = await elementService.addRoleToElementPermission(
+            organization!._id,
+            req.params.elementName,
+            req.params.permissionName,
+            req.body.role,
+        );
+        return sendSuccess(res, {
+            data: element,
+            message: 'Role added to element permission',
+        });
+    } catch (err) {
+        next(err);
+    }
+};
