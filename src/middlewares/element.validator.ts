@@ -1,4 +1,4 @@
-import { body, validationResult } from 'express-validator';
+import { body, param, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError } from '../utils/customErrors.js';
 import * as organizationService from '../services/organization.service.js';
@@ -148,6 +148,17 @@ export const validateElementPart = [
         .exists({ checkNull: true })
         .isObject()
         .withMessage('auditConfig must be an object'),
+    (req: Request, res: Response, next: NextFunction) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return next(new ValidationError('Validation failed', errors.array()));
+        }
+        next();
+    },
+];
+
+export const validateElementPartId = [
+    param('partId').isMongoId().withMessage('partId must be a valid MongoDB ObjectId'),
     (req: Request, res: Response, next: NextFunction) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {

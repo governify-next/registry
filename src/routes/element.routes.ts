@@ -3,6 +3,7 @@ import * as elementController from '../controllers/element.controller.js';
 import {
     validateElement,
     validateElementPart,
+    validateElementPartId,
     validateElementPermissionRoles,
 } from '../middlewares/element.validator.js';
 import { existingOrganization } from '../middlewares/organization.validator.js';
@@ -48,6 +49,28 @@ elementRoutes.post(
     existingOrganization,
     validateElementPart,
     elementController.addElementPart,
+);
+
+elementRoutes.get(
+    '/organizations/:orgName/elements/:elementName/parts/:partId',
+    existingOrganization,
+    validateElementPartId,
+    elementController.getElementPartById,
+);
+
+elementRoutes.put(
+    '/organizations/:orgName/elements/:elementName/parts/:partId',
+    existingOrganization,
+    validateElementPartId,
+    validateElementPart,
+    elementController.updateElementPart,
+);
+
+elementRoutes.delete(
+    '/organizations/:orgName/elements/:elementName/parts/:partId',
+    existingOrganization,
+    validateElementPartId,
+    elementController.deleteElementPart,
 );
 
 elementRoutes.post(

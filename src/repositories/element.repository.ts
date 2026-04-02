@@ -76,6 +76,65 @@ export const addElementPart = async (
     );
 };
 
+export const getElementPartById = async (
+    organizationId: Types.ObjectId,
+    elementName: string,
+    partId: string,
+) => {
+    const element = await Element.findOne(
+        {
+            organizationId,
+            name: elementName,
+            'parts._id': partId,
+        },
+        { 'parts.$': 1 },
+    );
+
+    return element?.parts?.[0] ?? null;
+};
+
+export const updateElementPart = async (
+    organizationId: Types.ObjectId,
+    elementName: string,
+    partId: string,
+    data: { auditConfig: Record<string, unknown> },
+) => {
+    const result = await Element.updateOne(
+        {
+            organizationId,
+            name: elementName,
+            'parts._id': partId,
+        },
+        {
+            $set: { 'parts.$.auditConfig': data.auditConfig },
+        },
+    );
+
+    if (result.matchedCount === 0) {
+        return null;
+    }
+
+    return await getElementPartById(organizationId, elementName, partId);
+};
+
+export const deleteElementPart = async (
+    organizationId: Types.ObjectId,
+    elementName: string,
+    partId: string,
+) => {
+    return await Element.findOneAndUpdate(
+        {
+            organizationId,
+            name: elementName,
+            'parts._id': partId,
+        },
+        {
+            $pull: { parts: { _id: partId } },
+        },
+        { new: true },
+    );
+};
+
 export const addRoleToElementPermission = async (
     organizationId: Types.ObjectId,
     elementName: string,

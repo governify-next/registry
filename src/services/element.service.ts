@@ -65,6 +65,63 @@ export const addElementPart = async (
     return part;
 };
 
+export const getElementPartById = async (
+    organizationId: Types.ObjectId,
+    elementName: string,
+    partId: string,
+) => {
+    await getElementByName(organizationId, elementName);
+
+    const part = await elementRepository.getElementPartById(organizationId, elementName, partId);
+    if (!part) {
+        throw new NotFoundError(
+            `Element part with id '${partId}' not found in element '${elementName}'`,
+        );
+    }
+
+    return part;
+};
+
+export const updateElementPart = async (
+    organizationId: Types.ObjectId,
+    elementName: string,
+    partId: string,
+    data: { auditConfig: Record<string, unknown> },
+) => {
+    await getElementByName(organizationId, elementName);
+
+    const part = await elementRepository.updateElementPart(
+        organizationId,
+        elementName,
+        partId,
+        data,
+    );
+    if (!part) {
+        throw new NotFoundError(
+            `Element part with id '${partId}' not found in element '${elementName}'`,
+        );
+    }
+
+    return part;
+};
+
+export const deleteElementPart = async (
+    organizationId: Types.ObjectId,
+    elementName: string,
+    partId: string,
+) => {
+    await getElementByName(organizationId, elementName);
+
+    const deleted = await elementRepository.deleteElementPart(organizationId, elementName, partId);
+    if (!deleted) {
+        throw new NotFoundError(
+            `Element part with id '${partId}' not found in element '${elementName}'`,
+        );
+    }
+
+    return deleted;
+};
+
 export const addRoleToElementPermission = async (
     organizationId: Types.ObjectId,
     elementName: string,

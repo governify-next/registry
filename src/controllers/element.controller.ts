@@ -101,6 +101,54 @@ export const addElementPart = async (req: Request, res: Response, next: NextFunc
     }
 };
 
+export const getElementPartById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.getOrganizationByName(req.params.orgName);
+        const part = await elementService.getElementPartById(
+            organization!._id,
+            req.params.elementName,
+            req.params.partId,
+        );
+        return sendSuccess(res, { data: part });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const updateElementPart = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.getOrganizationByName(req.params.orgName);
+        const part = await elementService.updateElementPart(
+            organization!._id,
+            req.params.elementName,
+            req.params.partId,
+            {
+                auditConfig: req.body.auditConfig,
+            },
+        );
+        return sendSuccess(res, {
+            data: part,
+            message: 'Element part updated',
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const deleteElementPart = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await organizationService.getOrganizationByName(req.params.orgName);
+        await elementService.deleteElementPart(
+            organization!._id,
+            req.params.elementName,
+            req.params.partId,
+        );
+        return sendSuccess(res, { data: null, message: 'Element part deleted' });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const addRoleToElementPermission = async (
     req: Request,
     res: Response,
