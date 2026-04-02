@@ -3,6 +3,7 @@ import * as guaranteeTemplateController from '../controllers/guaranteeTemplate.c
 import {
     validateCreateGuaranteeTemplate,
     validateUpdateGuaranteeTemplate,
+    validateDeleteGuaranteeTemplate,
     existingGuaranteeTemplate,
 } from '../middlewares/guaranteeTemplate.validator.js';
 
@@ -33,6 +34,6 @@ guaranteeTemplateRoutes.put(
 
 guaranteeTemplateRoutes.delete(
     '/guaranteeTemplates/:guaranteeName',
-    existingGuaranteeTemplate,
+    validateDeleteGuaranteeTemplate,
     guaranteeTemplateController.deleteGuaranteeTemplate,
 );

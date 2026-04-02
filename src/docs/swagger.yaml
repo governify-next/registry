@@ -103,6 +103,25 @@ paths:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/UserInput'
+                        examples:
+                            john:
+                                summary: Usuario admin
+                                value:
+                                    username: johndoe
+                                    email: john@example.com
+                                    password: securePassword123
+                                    name: John
+                                    surname: Doe
+                                    systemRole: ADMIN
+                            jane:
+                                summary: Usuario estándar
+                                value:
+                                    username: janedoe
+                                    email: jane@example.com
+                                    password: securePassword456
+                                    name: Jane
+                                    surname: Doe
+                                    systemRole: USER
             responses:
                 '201':
                     description: User created successfully
@@ -1012,7 +1031,7 @@ paths:
             operationId: getGuaranteeTemplates
             description: |
                 Returns all guarantee templates in the system, each one assembled
-                with its associated metricsConfig array.
+                with its associated metricConfigs array.
             responses:
                 '200':
                     description: List of guarantee templates retrieved successfully
@@ -1044,9 +1063,11 @@ paths:
                                       threshold: null
                                       window: null
                                       __v: 0
-                                      metricsConfig:
+                                      metricConfigs:
                                           - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                                            config: {}
+                                            metricConfig:
+                                                tag: feat
+                                                branch: main
                                 error: null
                 '500':
                     $ref: '#/components/responses/InternalError'
@@ -1060,7 +1081,7 @@ paths:
                 The fields `comparator`, `threshold` and `window` must be explicitly set to `null`,
                 as these values are injected later by the AgreementTemplate.
                 The `numericExpression` must be a valid mathematical expression referencing
-                exactly the metrics declared in `metricsConfig` (bidirectional consistency).
+                exactly the metrics declared in `metricConfigs` (bidirectional consistency).
             requestBody:
                 $ref: '#/components/requestBodies/GuaranteeTemplateBody'
             responses:
@@ -1092,9 +1113,11 @@ paths:
                                     threshold: null
                                     window: null
                                     __v: 0
-                                    metricsConfig:
+                                    metricConfigs:
                                         - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                                          config: {}
+                                          metricConfig:
+                                              tag: feat
+                                              branch: main
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
@@ -1113,7 +1136,7 @@ paths:
             operationId: getGuaranteeTemplate
             description: |
                 Returns a specific guarantee template identified by its unique name,
-                assembled with its associated metricsConfig array.
+                assembled with its associated metricConfigs array.
             responses:
                 '200':
                     description: Guarantee template found
@@ -1137,11 +1160,11 @@ paths:
             operationId: updateGuaranteeTemplate
             description: |
                 Updates an existing guarantee template. All modifiable fields must be sent
-                in the body: `name`, `info`, `numericExpression` and `metricsConfig`.
+                in the body: `name`, `info`, `numericExpression` and `metricConfigs`.
                 Fields `comparator`, `threshold` and `window` are not modifiable and are
                 silently ignored if sent.
                 If the `name` changes, the new name must be unique in the system.
-                The metricsConfig array is fully replaced (wipe-and-replace strategy).
+                The metricConfigs array is fully replaced (wipe-and-replace strategy).
             requestBody:
                 $ref: '#/components/requestBodies/GuaranteeTemplateUpdateBody'
             responses:
@@ -1173,9 +1196,11 @@ paths:
                                     threshold: null
                                     window: null
                                     __v: 0
-                                    metricsConfig:
+                                    metricConfigs:
                                         - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                                          config: {}
+                                          metricConfig:
+                                              tag: feat
+                                              branch: main
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
@@ -1269,22 +1294,6 @@ paths:
                                                     - unit: day
                                                       value: 1
                                                 anchorDate: '2025-12-08T21:00:00.000Z'
-                                          - guaranteeTemplateName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS_WITH_TAG_FEAT
-                                            comparator: '>='
-                                            threshold: 3
-                                            window:
-                                                period:
-                                                    - unit: day
-                                                      value: 1
-                                                anchorDate: '2025-12-08T21:00:00.000Z'
-                                          - guaranteeTemplateName: GR_PART_xx_GITHUB_xx_MEMBER_CONTRIBUTION_PERCENTAGE_BASED_ON_COMMITS
-                                            comparator: '>='
-                                            threshold: 15
-                                            window:
-                                                period:
-                                                    - unit: day
-                                                      value: 1
-                                                anchorDate: '2025-12-08T21:00:00.000Z'
                                 error: null
                 '404':
                     $ref: '#/components/responses/OrganizationNotFound'
@@ -1331,22 +1340,6 @@ paths:
                                         - guaranteeTemplateName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
                                           comparator: '>='
                                           threshold: 5
-                                          window:
-                                              period:
-                                                  - unit: day
-                                                    value: 1
-                                              anchorDate: '2025-12-08T21:00:00.000Z'
-                                        - guaranteeTemplateName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS_WITH_TAG_FEAT
-                                          comparator: '>='
-                                          threshold: 3
-                                          window:
-                                              period:
-                                                  - unit: day
-                                                    value: 1
-                                              anchorDate: '2025-12-08T21:00:00.000Z'
-                                        - guaranteeTemplateName: GR_PART_xx_GITHUB_xx_MEMBER_CONTRIBUTION_PERCENTAGE_BASED_ON_COMMITS
-                                          comparator: '>='
-                                          threshold: 15
                                           window:
                                               period:
                                                   - unit: day
@@ -1430,14 +1423,6 @@ paths:
                                         - guaranteeTemplateName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
                                           comparator: '>='
                                           threshold: 10
-                                          window:
-                                              period:
-                                                  - unit: day
-                                                    value: 1
-                                              anchorDate: '2025-12-08T21:00:00.000Z'
-                                        - guaranteeTemplateName: GR_PART_xx_GITHUB_xx_MEMBER_CONTRIBUTION_PERCENTAGE_BASED_ON_COMMITS
-                                          comparator: '>='
-                                          threshold: 20
                                           window:
                                               period:
                                                   - unit: day
@@ -1830,12 +1815,14 @@ paths:
                                                             - unit: day
                                                               value: 1
                                                         anchorDate: '2025-12-08T21:00:00.000Z'
-                                                    metricsConfig:
+                                                    metricConfigs:
                                                         - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                                                          config: {}
+                                                          metricConfig:
+                                                              tag: feat
+                                                              branch: main
                                                 auditConfig:
                                                     owner: universidad-sevilla
-                                                    repo: L1-01-project
+                                                    repository: L1-01-project
                                 error: null
                 '404':
                     $ref: '#/components/responses/NotFound'
@@ -1951,12 +1938,14 @@ paths:
                                                           - unit: day
                                                             value: 1
                                                       anchorDate: '2025-12-08T21:00:00.000Z'
-                                                  metricsConfig:
+                                                  metricConfigs:
                                                       - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                                                        config: {}
+                                                        metricConfig:
+                                                            tag: feat
+                                                            branch: main
                                               auditConfig:
                                                   owner: universidad-sevilla
-                                                  repo: L1-01-project
+                                                  repository: L1-01-project
                                 error: null
                 '404':
                     $ref: '#/components/responses/NotFound'
@@ -2125,7 +2114,7 @@ components:
             description: Username of the member to remove
             schema:
                 type: string
-            example: johndoe
+            example: janedoe
         guaranteeName:
             name: guaranteeName
             in: path
@@ -2254,7 +2243,7 @@ components:
                     schema:
                         $ref: '#/components/schemas/MemberInput'
                     example:
-                        username: johndoe
+                        username: janedoe
 
         AgreementTemplateBody:
             description: Data to create or update an agreement template
@@ -2272,22 +2261,6 @@ components:
                             - guaranteeTemplateName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
                               comparator: '>='
                               threshold: 5
-                              window:
-                                  period:
-                                      - unit: day
-                                        value: 1
-                                  anchorDate: '2025-12-08T21:00:00.000Z'
-                            - guaranteeTemplateName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS_WITH_TAG_FEAT
-                              comparator: '>='
-                              threshold: 3
-                              window:
-                                  period:
-                                      - unit: day
-                                        value: 1
-                                  anchorDate: '2025-12-08T21:00:00.000Z'
-                            - guaranteeTemplateName: GR_PART_xx_GITHUB_xx_MEMBER_CONTRIBUTION_PERCENTAGE_BASED_ON_COMMITS
-                              comparator: '>='
-                              threshold: 15
                               window:
                                   period:
                                       - unit: day
@@ -2339,7 +2312,7 @@ components:
                             - guaranteeName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
                               auditConfig:
                                   owner: universidad-sevilla
-                                  repo: L1-01-project
+                                  repository: L1-01-project
 
         GuaranteeTemplateBody:
             description: Data to create a guarantee template
@@ -2358,9 +2331,11 @@ components:
                         comparator: null
                         threshold: null
                         window: null
-                        metricsConfig:
+                        metricConfigs:
                             - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                              config: {}
+                              metricConfig:
+                                  tag: feat
+                                  branch: main
 
         GuaranteeTemplateUpdateBody:
             description: Data to update a guarantee template
@@ -2376,9 +2351,11 @@ components:
                             description: Updated description.
                             example: Updated example.
                         numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                        metricsConfig:
+                        metricConfigs:
                             - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                              config: {}
+                              metricConfig:
+                                  tag: feat
+                                  branch: main
 
     # ── Reusable responses ────────────────────────
     responses:
@@ -2946,7 +2923,7 @@ components:
                 username:
                     type: string
                     description: Username of the user to add
-                    example: johndoe
+                    example: janedoe
 
         # ── Base field properties (shared) ──────
         FieldBase:
@@ -3452,7 +3429,7 @@ components:
                     type: integer
                     description: Mongoose version key
                     example: 0
-                metricsConfig:
+                metricConfigs:
                     type: array
                     description: Metric configurations associated with this template (assembled from MetricConfig documents)
                     items:
@@ -3463,7 +3440,7 @@ components:
             description: A metric configuration entry within a guarantee template
             required:
                 - name
-                - config
+                - metricConfig
             properties:
                 name:
                     type: string
@@ -3471,17 +3448,19 @@ components:
                     minLength: 3
                     maxLength: 100
                     example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                config:
+                metricConfig:
                     type: object
-                    description: Configuration for this metric. Can be empty ({}) if the metric requires no configuration.
-                    example: {}
+                    description: Configuration for this metric (e.g. tag, branch).
+                    example:
+                        tag: feat
+                        branch: main
 
         GuaranteeTemplateCreateInput:
             type: object
             description: |
                 Payload for creating a guarantee template.
                 Fields comparator, threshold and window must be explicitly set to null.
-                The numericExpression must reference exactly the metrics in metricsConfig.
+                The numericExpression must reference exactly the metrics in metricConfigs.
             required:
                 - name
                 - info
@@ -3489,7 +3468,7 @@ components:
                 - comparator
                 - threshold
                 - window
-                - metricsConfig
+                - metricConfigs
             properties:
                 name:
                     type: string
@@ -3536,7 +3515,7 @@ components:
                     nullable: true
                     enum: [null]
                     example: null
-                metricsConfig:
+                metricConfigs:
                     type: array
                     minItems: 1
                     items:
@@ -3800,7 +3779,7 @@ components:
                                     type: string
                                     format: date-time
                                     example: '2025-12-08T21:00:00.000Z'
-                        metricsConfig:
+                        metricConfigs:
                             type: array
                             items:
                                 $ref: '#/components/schemas/IMetricConfigEntry'
@@ -3809,7 +3788,7 @@ components:
                     description: Audit configuration for this signature
                     example:
                         owner: universidad-sevilla
-                        repo: L1-01-project
+                        repository: L1-01-project
 
         AgreementVersionInput:
             type: object
@@ -3874,7 +3853,7 @@ components:
                                 description: Audit configuration for this signature
                                 example:
                                     owner: universidad-sevilla
-                                    repo: L1-01-project
+                                    repository: L1-01-project
 
         GuaranteeTemplateUpdateInput:
             type: object
@@ -3885,7 +3864,7 @@ components:
                 - name
                 - info
                 - numericExpression
-                - metricsConfig
+                - metricConfigs
             properties:
                 name:
                     type: string
@@ -3917,7 +3896,7 @@ components:
                     type: string
                     maxLength: 500
                     example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                metricsConfig:
+                metricConfigs:
                     type: array
                     minItems: 1
                     items:

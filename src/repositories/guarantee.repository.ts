@@ -26,3 +26,7 @@ export const deleteGuaranteesByTemplateId = async (agreementTemplateId: Types.Ob
 export const resolveGuaranteeById = async (guaranteeId: Types.ObjectId) => {
     return await Guarantee.findOne({ _id: guaranteeId });
 };
+
+export const existsGuaranteeByGuaranteeTemplateId = async (guaranteeTemplateId: Types.ObjectId) => {
+    return await Guarantee.exists({ guaranteeTemplateId });
+};

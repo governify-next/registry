@@ -2,6 +2,7 @@ import { body, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError, DuplicateKeyError } from '../utils/customErrors.js';
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
+import * as guaranteeService from '../services/guarantee.service.js';
 import { bootEnv } from '../config/bootConfig.js';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -130,26 +131,26 @@ const numericExpressionValidation = body('numericExpression')
     .isLength({ max: 500 })
     .withMessage('numericExpression must be at most 500 characters');
 
-const metricsConfigStructureValidation = [
-    body('metricsConfig')
+const metricConfigsStructureValidation = [
+    body('metricConfigs')
         .exists({ checkNull: true })
-        .withMessage('metricsConfig is required')
+        .withMessage('metricConfigs is required')
         .isArray({ min: 1 })
-        .withMessage('metricsConfig must be an array with at least one entry'),
-    body('metricsConfig.*.name')
+        .withMessage('metricConfigs must be an array with at least one entry'),
+    body('metricConfigs.*.name')
         .exists({ checkNull: true })
-        .withMessage('Each metricsConfig entry must have a name')
+        .withMessage('Each metricConfigs entry must have a name')
         .isString()
-        .withMessage('metricsConfig name must be a string')
+        .withMessage('metricConfigs name must be a string')
         .notEmpty()
-        .withMessage('metricsConfig name must not be empty')
+        .withMessage('metricConfigs name must not be empty')
         .isLength({ min: 3, max: 100 })
-        .withMessage('metricsConfig name must be between 3 and 100 characters'),
-    body('metricsConfig.*.config')
+        .withMessage('metricConfigs name must be between 3 and 100 characters'),
+    body('metricConfigs.*.metricConfig')
         .exists({ checkNull: true })
-        .withMessage('Each metricsConfig entry must have a config')
+        .withMessage('Each metricConfigs entry must have a metricConfig')
         .isObject()
-        .withMessage('metricsConfig config must be an object'),
+        .withMessage('metricConfigs metricConfig must be an object'),
 ];
 
 // ─── Express-validator ─────────────────────────────
@@ -179,13 +180,13 @@ const uniqueGuaranteeTemplateName = async (req: Request, res: Response, next: Ne
 };
 
 const noDuplicateMetricNames = (req: Request, res: Response, next: NextFunction) => {
-    const names: string[] = req.body.metricsConfig.map((m: { name: string }) => m.name);
+    const names: string[] = req.body.metricConfigs.map((m: { name: string }) => m.name);
     const duplicates = names.filter((name, i) => names.indexOf(name) !== i);
 
     if (duplicates.length > 0)
         return next(
             new ValidationError(
-                `Duplicate metric names in metricsConfig: ${[...new Set(duplicates)].join(', ')}`,
+                `Duplicate metric names in metricConfigs: ${[...new Set(duplicates)].join(', ')}`,
             ),
         );
     next();
@@ -193,17 +194,17 @@ const noDuplicateMetricNames = (req: Request, res: Response, next: NextFunction)
 
 const validateMetricsInReporter = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const metricsConfig: { name: string; config: Record<string, unknown> }[] =
-            req.body.metricsConfig;
+        const metricConfigs: { name: string; metricConfig: Record<string, unknown> }[] =
+            req.body.metricConfigs;
         const errors: string[] = [];
 
-        for (const metric of metricsConfig) {
+        for (const metric of metricConfigs) {
             const response = await fetch(
                 `${bootEnv.REPORTER_URL}/api/v1/metrics/${metric.name}/validate`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ metricConfig: metric.config }),
+                    body: JSON.stringify({ metricConfig: metric.metricConfig }),
                 },
             );
             const result = await response.json();
@@ -223,7 +224,7 @@ const validateMetricsInReporter = async (req: Request, res: Response, next: Next
 
 const validNumericExpression = (req: Request, res: Response, next: NextFunction) => {
     const expression: string = req.body.numericExpression;
-    const metricNames: string[] = req.body.metricsConfig.map((m: { name: string }) => m.name);
+    const metricNames: string[] = req.body.metricConfigs.map((m: { name: string }) => m.name);
 
     // 1. Comprobamos que la expresión sea válida matemáticamente
     if (!isValidMathExpression(expression))
@@ -233,14 +234,14 @@ const validNumericExpression = (req: Request, res: Response, next: NextFunction)
             ),
         );
 
-    // 2. Comprobamos consistencia expresión <-> metricsConfig
+    // 2. Comprobamos consistencia expresión <-> metricConfigs
     const referencedMetrics = extractMetricNames(expression);
 
     const unusedMetrics = metricNames.filter((name) => !referencedMetrics.includes(name));
     if (unusedMetrics.length > 0)
         return next(
             new ValidationError(
-                `Metrics declared in metricsConfig but not used in numericExpression: ${unusedMetrics.join(', ')}`,
+                `Metrics declared in metricConfigs but not used in numericExpression: ${unusedMetrics.join(', ')}`,
             ),
         );
 
@@ -248,7 +249,7 @@ const validNumericExpression = (req: Request, res: Response, next: NextFunction)
     if (undeclaredMetrics.length > 0)
         return next(
             new ValidationError(
-                `Metrics referenced in numericExpression but not declared in metricsConfig: ${undeclaredMetrics.join(', ')}`,
+                `Metrics referenced in numericExpression but not declared in metricConfigs: ${undeclaredMetrics.join(', ')}`,
             ),
         );
 
@@ -274,6 +275,24 @@ export const existingGuaranteeTemplate = async (
     }
 };
 
+const guaranteeTemplateNotInUse = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const template = await guaranteeTemplateService.findGuaranteeTemplateByName(
+            req.params.guaranteeName,
+        );
+        const inUse = await guaranteeService.isGuaranteeTemplateInUse(template!._id);
+        if (inUse)
+            return next(
+                new ValidationError(
+                    `Guarantee template '${req.params.guaranteeName}' is in use by an agreement template and cannot be deleted`,
+                ),
+            );
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
 // ─── Middleware ────────────────────────────────────────────────────
 
 export const validateCreateGuaranteeTemplate = [
@@ -284,7 +303,7 @@ export const validateCreateGuaranteeTemplate = [
     nullFieldValidation('window'),
     ...infoValidation,
     numericExpressionValidation,
-    ...metricsConfigStructureValidation,
+    ...metricConfigsStructureValidation,
     collectValidationErrors,
     // 2. Validación de lógica
     uniqueGuaranteeTemplateName,
@@ -298,7 +317,7 @@ export const validateUpdateGuaranteeTemplate = [
     nameValidation,
     ...infoValidation,
     numericExpressionValidation,
-    ...metricsConfigStructureValidation,
+    ...metricConfigsStructureValidation,
     collectValidationErrors,
     // 2. Validación de lógica
     existingGuaranteeTemplate,
@@ -306,4 +325,9 @@ export const validateUpdateGuaranteeTemplate = [
     noDuplicateMetricNames,
     validateMetricsInReporter,
     validNumericExpression,
+];
+
+export const validateDeleteGuaranteeTemplate = [
+    existingGuaranteeTemplate,
+    guaranteeTemplateNotInUse,
 ];

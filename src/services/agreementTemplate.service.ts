@@ -97,6 +97,13 @@ export const getAgreementTemplatesByOrganization = async (orgId: Types.ObjectId)
     return await Promise.all(templates.map((t) => assembleAgreementTemplate(t)));
 };
 
+// TODO: Unificar ambas funciones con un atributo de control
+export const getCleanAgreementTemplatesByOrganization = async (orgId: Types.ObjectId) => {
+    const templates = await agreementTemplateRepository.getAgreementTemplatesByOrganization(orgId);
+
+    return templates;
+};
+
 export const updateAgreementTemplateByOrganization = async (
     orgId: Types.ObjectId,
     agreementTemplateName: string,

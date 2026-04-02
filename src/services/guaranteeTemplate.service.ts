@@ -12,24 +12,24 @@ const assembleGuaranteeTemplate = async (template: IGuaranteeTemplate) => {
     // 2. Montamos el array de respuesta
     const mappedMetricConfigs = metricConfigs.map((mc) => ({
         name: mc.metricName,
-        config: mc.metricConfig,
+        metricConfig: mc.metricConfig,
     }));
     // 3. Devolvemos la plantilla (el toObject permite añadir campos a la nueva instancia)
     return {
         ...template.toObject(),
-        metricsConfig: mappedMetricConfigs,
+        metricConfigs: mappedMetricConfigs,
     };
 };
 
 // Método reutilizable para crear las configuraciones de métricas
 const buildAndSaveMetricConfigs = async (
     templateId: Types.ObjectId,
-    metricsConfig: IMetricConfigEntry[],
+    metricConfigs: IMetricConfigEntry[],
 ) => {
-    const configToSave = metricsConfig.map((mConf) => ({
+    const configToSave = metricConfigs.map((mConf) => ({
         guaranteeTemplateId: templateId,
         metricName: mConf.name,
-        metricConfig: mConf.config,
+        metricConfig: mConf.metricConfig,
     }));
 
     await metricConfigService.createMetricConfigs(configToSave);
@@ -60,13 +60,13 @@ export const getGuaranteeTemplates = async () => {
 
 export const createGuaranteeTemplate = async (data: GuaranteeTemplatePayload) => {
     // 1. Extraemos cada parte del payload
-    const { metricsConfig, ...guaranteeData } = data;
+    const { metricConfigs, ...guaranteeData } = data;
 
     // 2. Creamos la guaranteeTemplate
     const newTemplate = await guaranteeTemplateRepository.createGuaranteeTemplate(guaranteeData);
 
-    // 3. Creamos las metricsConfigs asociadas
-    await buildAndSaveMetricConfigs(newTemplate._id, metricsConfig);
+    // 3. Creamos las metricConfigs asociadas
+    await buildAndSaveMetricConfigs(newTemplate._id, metricConfigs);
 
     return await getGuaranteeTemplate(guaranteeData.name);
 };
@@ -76,7 +76,7 @@ export const updateGuaranteeTemplate = async (
     data: GuaranteeTemplatePayload,
 ) => {
     // 1. Extraemos solo los campos modificables
-    const { metricsConfig, name, info, numericExpression } = data;
+    const { metricConfigs, name, info, numericExpression } = data;
 
     // 2. Actualizamos guaranteeTemplate
     const updatedTemplate = await guaranteeTemplateRepository.updateGuaranteeTemplate(
@@ -86,7 +86,7 @@ export const updateGuaranteeTemplate = async (
 
     // 3. Hacemos un wipe and replace de metricConfigs
     await metricConfigService.deleteMetricConfigsByTemplateId(updatedTemplate!._id);
-    await buildAndSaveMetricConfigs(updatedTemplate!._id, metricsConfig);
+    await buildAndSaveMetricConfigs(updatedTemplate!._id, metricConfigs);
 
     return await getGuaranteeTemplate(updatedTemplate!.name);
 };

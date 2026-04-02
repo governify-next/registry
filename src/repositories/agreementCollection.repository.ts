@@ -1,6 +1,10 @@
 import { Types } from 'mongoose';
 import AgreementCollection, { IAgreementCollection } from '../models/agreementCollection.model.js';
 
+export const getAgreementCollectionById = async (agColId: Types.ObjectId) => {
+    return await AgreementCollection.findById(agColId);
+};
+
 export const getAgreementCollectionsByElement = async (elementId: Types.ObjectId) => {
     return await AgreementCollection.find({ elementId: elementId });
 };

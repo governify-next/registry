@@ -1,4 +1,5 @@
 import * as elementRepository from '../repositories/element.repository.js';
+import * as agreementCollectionService from '../services/agreementCollection.service.js';
 import { IElement } from '../models/element.model.js';
 import { NotFoundError } from '../utils/customErrors.js';
 import { getOrganizationByName } from './organization.service.js';
@@ -44,10 +45,18 @@ export const updateElement = async (
 };
 
 export const deleteElement = async (organizationId: Types.ObjectId, elementName: string) => {
-    const deletedElement = await elementRepository.deleteElement(organizationId, elementName);
-    if (!deletedElement) {
+    const element = await elementRepository.getElementByName(organizationId, elementName);
+    if (!element) {
         throw new NotFoundError(`Element with name '${elementName}' not found in organization`);
     }
 
-    return deletedElement;
+    // Borramos las agreement collections asociadas al elemento
+    const collections = await agreementCollectionService.getAgreementCollectionsByElementId(
+        element._id,
+    );
+    await Promise.all(
+        collections.map((col) => agreementCollectionService.deleteAgreementCollectionById(col._id)),
+    );
+
+    return await elementRepository.deleteElement(organizationId, elementName);
 };

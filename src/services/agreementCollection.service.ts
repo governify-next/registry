@@ -1,7 +1,9 @@
+import { Types } from 'mongoose';
 import * as agreementCollectionRepository from '../repositories/agreementCollection.repository.js';
 import { resolveElementId } from './element.service.js';
 import { IAgreementCollection } from '../models/agreementCollection.model.js';
 import { assembleAgreementVersions } from './agreementVersion.service.js';
+import { deleteSignaturesByIds } from './signature.service.js';
 
 export const getAgreementCollectionsByElement = async (
     orgName: string,
@@ -94,21 +96,30 @@ export const updateAgreementCollectionByElement = async (
     );
 };
 
+export const getAgreementCollectionsByElementId = async (elementId: Types.ObjectId) => {
+    return await agreementCollectionRepository.getAgreementCollectionsByElement(elementId);
+};
+
+export const deleteAgreementCollectionById = async (agColId: Types.ObjectId) => {
+    // Obtenemos la collection para extraer los signatureIds de todas las versions
+    const collection = await agreementCollectionRepository.getAgreementCollectionById(agColId);
+    const signatureIds = collection!.agreementVersions.flatMap((v) => v.contract.signaturesId);
+    if (signatureIds.length > 0) {
+        await deleteSignaturesByIds(signatureIds);
+    }
+    return await agreementCollectionRepository.deleteAgreementCollectionByElement(agColId);
+};
+
 export const deleteAgreementCollectionByElement = async (
     orgName: string,
     elementName: string,
     agColName: string,
 ) => {
-    // Obtenemos el agreementCollection
     const agreementCollection = await getCleanAgreementCollectionByElement(
         orgName,
         elementName,
         agColName,
     );
 
-    // TODO: Borrar signatures relacionadas con las versions
-
-    return await agreementCollectionRepository.deleteAgreementCollectionByElement(
-        agreementCollection!._id,
-    );
+    return await deleteAgreementCollectionById(agreementCollection!._id);
 };

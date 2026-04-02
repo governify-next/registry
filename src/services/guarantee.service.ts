@@ -31,6 +31,10 @@ export const deleteGuaranteesByTemplateId = async (agreementTemplateId: Types.Ob
     return await guaranteeRepository.deleteGuaranteesByTemplateId(agreementTemplateId);
 };
 
+export const isGuaranteeTemplateInUse = async (guaranteeTemplateId: Types.ObjectId) => {
+    return await guaranteeRepository.existsGuaranteeByGuaranteeTemplateId(guaranteeTemplateId);
+};
+
 export const getGuaranteeByTemplateIds = async (
     agreementTemplateId: Types.ObjectId,
     guaranteeTemplateId: Types.ObjectId,

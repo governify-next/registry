@@ -14,10 +14,10 @@ export interface IGuaranteeTemplateData {
 
 export interface IMetricConfigEntry {
     name: string;
-    config: Record<string, unknown>;
+    metricConfig: Record<string, unknown>;
 }
 
 // Payload del POST/PUT: datos de la plantilla (guaranteeTemplate en sí) + configuración de métricas (metricConfigs)
 export interface GuaranteeTemplatePayload extends IGuaranteeTemplateData {
-    metricsConfig: IMetricConfigEntry[];
+    metricConfigs: IMetricConfigEntry[];
 }
