@@ -26,6 +26,12 @@ tags:
       description: Fields that define the structure of an organization's agreements
     - name: Members
       description: Member management within an organization
+    - name: Elements
+      description: Element management within an organization
+    - name: ElementParts
+      description: Part management within an element
+    - name: ElementPermissions
+      description: Permission management within an element
     - name: GuaranteeTemplates
       description: Guarantee template management
     - name: AgreementTemplates
@@ -1017,6 +1023,510 @@ paths:
                     $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/MemberNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    # ──────────────────────────────────────────────
+    # Elements
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/elements:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+        get:
+            tags:
+                - Elements
+            summary: List elements of an organization
+            operationId: getElementsByOrganization
+            security:
+                - BearerAuth: []
+            description: |
+                Returns all elements belonging to the specified organization.
+            responses:
+                '200':
+                    description: List of elements retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/Element'
+                '404':
+                    $ref: '#/components/responses/OrganizationNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        post:
+            tags:
+                - Elements
+            summary: Create an element
+            operationId: createElement
+            security:
+                - BearerAuth: []
+            description: |
+                Creates a new element within the specified organization.
+                The element name must be unique within the organization.
+                Fields must reference existing element fields defined in the organization.
+                Permission roles must reference existing roles in the organization.
+            requestBody:
+                $ref: '#/components/requestBodies/ElementBody'
+            responses:
+                '201':
+                    description: Element created successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Element'
+                            example:
+                                success: true
+                                message: Element created
+                                httpStatus: 201
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665b1c2d3e4f5a6b7c8d9e0f
+                                    name: L1-01
+                                    description: Equipo L1-01 de PSG2
+                                    organizationId: 665a1b2c3d4e5f6a7b8c9d0e
+                                    fields: []
+                                    permissions:
+                                        view: []
+                                        edit: []
+                                        delete: []
+                                        create: []
+                                    auditConfig:
+                                        owner: universidad-sevilla
+                                        repository: L1-01-project
+                                    parts:
+                                        - _id: 665c2d3e4f5a6b7c8d9e0f1a
+                                          auditConfig:
+                                              credentials:
+                                                  github:
+                                                      username: juan
+                                    createdAt: '2026-01-15T10:00:00.000Z'
+                                    updatedAt: '2026-01-15T10:00:00.000Z'
+                                    __v: 0
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/OrganizationNotFound'
+                '409':
+                    $ref: '#/components/responses/Conflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/elements/{elementName}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+        get:
+            tags:
+                - Elements
+            summary: Get an element by name
+            operationId: getElementByName
+            security:
+                - BearerAuth: []
+            description: |
+                Returns a specific element identified by its name within the organization.
+            responses:
+                '200':
+                    description: Element found
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Element'
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        put:
+            tags:
+                - Elements
+            summary: Update an element
+            operationId: updateElement
+            security:
+                - BearerAuth: []
+            description: |
+                Updates an existing element. All fields must be sent in the body.
+                Fields must reference existing element fields defined in the organization.
+                Permission roles must reference existing roles in the organization.
+            requestBody:
+                $ref: '#/components/requestBodies/ElementBody'
+            responses:
+                '200':
+                    description: Element updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Element'
+                            example:
+                                success: true
+                                message: Element updated
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665b1c2d3e4f5a6b7c8d9e0f
+                                    name: L1-01
+                                    description: Equipo L1-01 de PSG2 actualizado
+                                    organizationId: 665a1b2c3d4e5f6a7b8c9d0e
+                                    fields: []
+                                    permissions:
+                                        view: []
+                                        edit: []
+                                        delete: []
+                                        create: []
+                                    auditConfig:
+                                        owner: universidad-sevilla
+                                        repository: L1-01-project
+                                    parts:
+                                        - _id: 665c2d3e4f5a6b7c8d9e0f1a
+                                          auditConfig:
+                                              credentials:
+                                                  github:
+                                                      username: juan
+                                    createdAt: '2026-01-15T10:00:00.000Z'
+                                    updatedAt: '2026-01-15T12:00:00.000Z'
+                                    __v: 0
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '409':
+                    $ref: '#/components/responses/Conflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        delete:
+            tags:
+                - Elements
+            summary: Delete an element
+            operationId: deleteElement
+            security:
+                - BearerAuth: []
+            description: |
+                Permanently deletes an element and all its associated agreement collections
+                (which in turn delete their signatures).
+            responses:
+                '200':
+                    description: Element deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: object
+                                              nullable: true
+                                              example: null
+                            example:
+                                success: true
+                                message: Element deleted
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data: null
+                                error: null
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    # ──────────────────────────────────────────────
+    # Element Parts
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/elements/{elementName}/parts:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+        get:
+            tags:
+                - ElementParts
+            summary: List parts of an element
+            operationId: getElementParts
+            security:
+                - BearerAuth: []
+            description: |
+                Returns all parts belonging to the specified element.
+            responses:
+                '200':
+                    description: List of parts retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/ElementPart'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - _id: 665c2d3e4f5a6b7c8d9e0f1a
+                                      auditConfig:
+                                          owner: universidad-sevilla
+                                          repository: L1-01-project
+                                error: null
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        post:
+            tags:
+                - ElementParts
+            summary: Add a part to an element
+            operationId: addElementPart
+            security:
+                - BearerAuth: []
+            description: |
+                Adds a new part to the specified element.
+                Each part has its own auditConfig.
+            requestBody:
+                $ref: '#/components/requestBodies/ElementPartBody'
+            responses:
+                '201':
+                    description: Part created successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Element'
+                            example:
+                                success: true
+                                message: Element part created
+                                httpStatus: 201
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665b1c2d3e4f5a6b7c8d9e0f
+                                    name: L1-01
+                                    description: Equipo L1-01 de PSG2
+                                    organizationId: 665a1b2c3d4e5f6a7b8c9d0e
+                                    fields: []
+                                    permissions:
+                                        view: []
+                                        edit: []
+                                        delete: []
+                                        create: []
+                                    auditConfig:
+                                        owner: universidad-sevilla
+                                        repository: L1-01-project
+                                    parts:
+                                        - _id: 665c2d3e4f5a6b7c8d9e0f1a
+                                          auditConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                    createdAt: '2026-01-15T10:00:00.000Z'
+                                    updatedAt: '2026-01-15T11:00:00.000Z'
+                                    __v: 0
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/elements/{elementName}/parts/{partId}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/partId'
+        get:
+            tags:
+                - ElementParts
+            summary: Get a part by ID
+            operationId: getElementPartById
+            security:
+                - BearerAuth: []
+            description: |
+                Returns a specific part identified by its ID within the element.
+            responses:
+                '200':
+                    description: Part found
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/ElementPart'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665c2d3e4f5a6b7c8d9e0f1a
+                                    auditConfig:
+                                        owner: universidad-sevilla
+                                        repository: L1-01-project
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        put:
+            tags:
+                - ElementParts
+            summary: Update a part
+            operationId: updateElementPart
+            security:
+                - BearerAuth: []
+            description: |
+                Updates the auditConfig of an existing part.
+            requestBody:
+                $ref: '#/components/requestBodies/ElementPartBody'
+            responses:
+                '200':
+                    description: Part updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Element'
+                            example:
+                                success: true
+                                message: Element part updated
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665b1c2d3e4f5a6b7c8d9e0f
+                                    name: L1-01
+                                    description: Equipo L1-01 de PSG2
+                                    organizationId: 665a1b2c3d4e5f6a7b8c9d0e
+                                    fields: []
+                                    permissions:
+                                        view: []
+                                        edit: []
+                                        delete: []
+                                        create: []
+                                    auditConfig:
+                                        owner: universidad-sevilla
+                                        repository: L1-01-project
+                                    parts:
+                                        - _id: 665c2d3e4f5a6b7c8d9e0f1a
+                                          auditConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-updated
+                                    createdAt: '2026-01-15T10:00:00.000Z'
+                                    updatedAt: '2026-01-15T12:00:00.000Z'
+                                    __v: 0
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        delete:
+            tags:
+                - ElementParts
+            summary: Delete a part
+            operationId: deleteElementPart
+            security:
+                - BearerAuth: []
+            description: |
+                Permanently deletes a part from the element.
+            responses:
+                '200':
+                    description: Part deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: object
+                                              nullable: true
+                                              example: null
+                            example:
+                                success: true
+                                message: Element part deleted
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data: null
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    # ──────────────────────────────────────────────
+    # Element Permissions
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/elements/{elementName}/permissions/{permissionName}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/permissionName'
+        post:
+            tags:
+                - ElementPermissions
+            summary: Add roles to an element permission
+            operationId: addRoleToElementPermission
+            security:
+                - BearerAuth: []
+            description: |
+                Adds one or more roles to a specific permission (view, edit, delete, create) of the element.
+                The roles must exist in the organization.
+            requestBody:
+                $ref: '#/components/requestBodies/ElementPermissionRolesBody'
+            responses:
+                '200':
+                    description: Roles added to permission successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Element'
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
                 '500':
                     $ref: '#/components/responses/InternalError'
 
@@ -2156,6 +2666,23 @@ components:
                 type: integer
                 minimum: 1
             example: 1
+        partId:
+            name: partId
+            in: path
+            required: true
+            description: MongoDB ObjectId of the element part
+            schema:
+                type: string
+            example: 665c2d3e4f5a6b7c8d9e0f1a
+        permissionName:
+            name: permissionName
+            in: path
+            required: true
+            description: Permission type (view, edit, delete, create)
+            schema:
+                type: string
+                enum: [view, edit, delete, create]
+            example: view
 
     # ── Request Bodies ────────────────────────────
     requestBodies:
@@ -2244,6 +2771,62 @@ components:
                         $ref: '#/components/schemas/MemberInput'
                     example:
                         username: janedoe
+
+        ElementBody:
+            description: Data to create or update an element
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ElementInput'
+                    example:
+                        name: L1-01
+                        description: Equipo L1-01 de PSG2
+                        fields: []
+                        permissions:
+                            view: []
+                            edit: []
+                            delete: []
+                            create: []
+                        auditConfig:
+                            owner: universidad-sevilla
+                            repository: L1-01-project
+                        parts:
+                            - auditConfig:
+                                  credentials:
+                                      github:
+                                          username: juan
+
+        ElementPartBody:
+            description: Data to create or update an element part
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ElementPartInput'
+                    example:
+                        auditConfig:
+                            owner: universidad-sevilla
+                            repository: L1-01-project
+
+        ElementPermissionRolesBody:
+            description: Roles to add to an element permission
+            required: true
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        required:
+                            - roles
+                        properties:
+                            roles:
+                                type: array
+                                items:
+                                    type: string
+                                minItems: 1
+                    example:
+                        roles:
+                            - admin
 
         AgreementTemplateBody:
             description: Data to create or update an agreement template
@@ -2614,6 +3197,21 @@ components:
                         error:
                             message: "Guarantee template 'GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS' already exists"
                             details: null
+        ElementNotFound:
+            description: The element was not found in the organization
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: "Element with name 'L1-01' not found in organization"
+                        httpStatus: 404
+                        appCode: NOT_FOUND
+                        data: null
+                        error:
+                            message: "Element with name 'L1-01' not found in organization"
+                            details: null
         MemberNotFound:
             description: The user is not a member of the organization
             content:
@@ -2924,6 +3522,139 @@ components:
                     type: string
                     description: Username of the user to add
                     example: janedoe
+
+        # ── Element ─────────────────────────────
+        Element:
+            type: object
+            description: An element within an organization (e.g. a team or project)
+            required:
+                - _id
+                - name
+                - description
+                - organizationId
+            properties:
+                _id:
+                    type: string
+                    description: MongoDB internal identifier (ObjectId)
+                    example: 665b1c2d3e4f5a6b7c8d9e0f
+                name:
+                    type: string
+                    description: Unique element name within the organization
+                    example: L1-01
+                description:
+                    type: string
+                    example: Equipo L1-01 de PSG2
+                organizationId:
+                    type: string
+                    description: Organization ObjectId reference
+                    example: 665a1b2c3d4e5f6a7b8c9d0e
+                fields:
+                    type: array
+                    description: Element fields (must match organization's elementFields)
+                    items:
+                        type: object
+                    example: []
+                permissions:
+                    type: object
+                    description: Role-based permissions for this element (arrays of role ObjectIds)
+                auditConfig:
+                    type: object
+                    description: Audit configuration for this element
+                    example:
+                        owner: universidad-sevilla
+                        repository: L1-01-project
+                parts:
+                    type: array
+                    description: Sub-parts of this element, each with its own auditConfig
+                    items:
+                        $ref: '#/components/schemas/ElementPart'
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+                __v:
+                    type: integer
+                    example: 0
+
+        ElementPart:
+            type: object
+            description: A sub-part within an element
+            required:
+                - _id
+                - auditConfig
+            properties:
+                _id:
+                    type: string
+                    description: MongoDB internal identifier (ObjectId)
+                    example: 665c2d3e4f5a6b7c8d9e0f1a
+                auditConfig:
+                    type: object
+                    description: Audit configuration for this part
+                    example:
+                        owner: universidad-sevilla
+                        repository: L1-01-project
+
+        ElementInput:
+            type: object
+            description: Payload for creating or updating an element
+            required:
+                - name
+                - description
+                - fields
+                - permissions
+                - auditConfig
+                - parts
+            properties:
+                name:
+                    type: string
+                    maxLength: 100
+                    example: L1-01
+                description:
+                    type: string
+                    maxLength: 500
+                    example: Equipo L1-01 de PSG2
+                fields:
+                    type: array
+                    items:
+                        type: object
+                    example: []
+                permissions:
+                    type: object
+                    example:
+                        view: []
+                        edit: []
+                        delete: []
+                        create: []
+                auditConfig:
+                    type: object
+                    example:
+                        owner: universidad-sevilla
+                        repository: L1-01-project
+                parts:
+                    type: array
+                    items:
+                        type: object
+                        required:
+                            - auditConfig
+                        properties:
+                            auditConfig:
+                                type: object
+                    example: []
+
+        ElementPartInput:
+            type: object
+            description: Payload for creating or updating an element part
+            required:
+                - auditConfig
+            properties:
+                auditConfig:
+                    type: object
+                    description: Audit configuration for this part
+                    example:
+                        owner: universidad-sevilla
+                        repository: L1-01-project
 
         # ── Base field properties (shared) ──────
         FieldBase:
