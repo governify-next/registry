@@ -26,6 +26,20 @@ tags:
       description: Fields that define the structure of an organization's agreements
     - name: Members
       description: Member management within an organization
+    - name: Elements
+      description: Element management within an organization
+    - name: ElementParts
+      description: Part management within an element
+    - name: ElementPermissions
+      description: Permission management within an element
+    - name: GuaranteeTemplates
+      description: Guarantee template management
+    - name: AgreementTemplates
+      description: Agreement template management within an organization
+    - name: AgreementCollections
+      description: Agreement collection management within an element
+    - name: AgreementVersions
+      description: Agreement version management within a collection
 
 paths:
     # ──────────────────────────────────────────────
@@ -95,6 +109,25 @@ paths:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/UserInput'
+                        examples:
+                            john:
+                                summary: Usuario admin
+                                value:
+                                    username: johndoe
+                                    email: john@example.com
+                                    password: securePassword123
+                                    name: John
+                                    surname: Doe
+                                    systemRole: ADMIN
+                            jane:
+                                summary: Usuario estándar
+                                value:
+                                    username: janedoe
+                                    email: jane@example.com
+                                    password: securePassword456
+                                    name: Jane
+                                    surname: Doe
+                                    systemRole: USER
             responses:
                 '201':
                     description: User created successfully
@@ -993,6 +1026,1551 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
+    # ──────────────────────────────────────────────
+    # Elements
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/elements:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+        get:
+            tags:
+                - Elements
+            summary: List elements of an organization
+            operationId: getElementsByOrganization
+            security:
+                - BearerAuth: []
+            description: |
+                Returns all elements belonging to the specified organization.
+            responses:
+                '200':
+                    description: List of elements retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/Element'
+                '404':
+                    $ref: '#/components/responses/OrganizationNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        post:
+            tags:
+                - Elements
+            summary: Create an element
+            operationId: createElement
+            security:
+                - BearerAuth: []
+            description: |
+                Creates a new element within the specified organization.
+                The element name must be unique within the organization.
+                Fields must reference existing element fields defined in the organization.
+                Permission roles must reference existing roles in the organization.
+            requestBody:
+                $ref: '#/components/requestBodies/ElementBody'
+            responses:
+                '201':
+                    description: Element created successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Element'
+                            example:
+                                success: true
+                                message: Element created
+                                httpStatus: 201
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665b1c2d3e4f5a6b7c8d9e0f
+                                    name: L1-01
+                                    description: Equipo L1-01 de PSG2
+                                    organizationId: 665a1b2c3d4e5f6a7b8c9d0e
+                                    fields: []
+                                    permissions:
+                                        view: []
+                                        edit: []
+                                        delete: []
+                                        create: []
+                                    auditConfig:
+                                        owner: universidad-sevilla
+                                        repository: L1-01-project
+                                    parts:
+                                        - _id: 665c2d3e4f5a6b7c8d9e0f1a
+                                          auditConfig:
+                                              credentials:
+                                                  github:
+                                                      username: juan
+                                    createdAt: '2026-01-15T10:00:00.000Z'
+                                    updatedAt: '2026-01-15T10:00:00.000Z'
+                                    __v: 0
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/OrganizationNotFound'
+                '409':
+                    $ref: '#/components/responses/Conflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/elements/{elementName}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+        get:
+            tags:
+                - Elements
+            summary: Get an element by name
+            operationId: getElementByName
+            security:
+                - BearerAuth: []
+            description: |
+                Returns a specific element identified by its name within the organization.
+            responses:
+                '200':
+                    description: Element found
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Element'
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        put:
+            tags:
+                - Elements
+            summary: Update an element
+            operationId: updateElement
+            security:
+                - BearerAuth: []
+            description: |
+                Updates an existing element. All fields must be sent in the body.
+                Fields must reference existing element fields defined in the organization.
+                Permission roles must reference existing roles in the organization.
+            requestBody:
+                $ref: '#/components/requestBodies/ElementBody'
+            responses:
+                '200':
+                    description: Element updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Element'
+                            example:
+                                success: true
+                                message: Element updated
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665b1c2d3e4f5a6b7c8d9e0f
+                                    name: L1-01
+                                    description: Equipo L1-01 de PSG2 actualizado
+                                    organizationId: 665a1b2c3d4e5f6a7b8c9d0e
+                                    fields: []
+                                    permissions:
+                                        view: []
+                                        edit: []
+                                        delete: []
+                                        create: []
+                                    auditConfig:
+                                        owner: universidad-sevilla
+                                        repository: L1-01-project
+                                    parts:
+                                        - _id: 665c2d3e4f5a6b7c8d9e0f1a
+                                          auditConfig:
+                                              credentials:
+                                                  github:
+                                                      username: juan
+                                    createdAt: '2026-01-15T10:00:00.000Z'
+                                    updatedAt: '2026-01-15T12:00:00.000Z'
+                                    __v: 0
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '409':
+                    $ref: '#/components/responses/Conflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        delete:
+            tags:
+                - Elements
+            summary: Delete an element
+            operationId: deleteElement
+            security:
+                - BearerAuth: []
+            description: |
+                Permanently deletes an element and all its associated agreement collections
+                (which in turn delete their signatures).
+            responses:
+                '200':
+                    description: Element deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: object
+                                              nullable: true
+                                              example: null
+                            example:
+                                success: true
+                                message: Element deleted
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data: null
+                                error: null
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    # ──────────────────────────────────────────────
+    # Element Parts
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/elements/{elementName}/parts:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+        get:
+            tags:
+                - ElementParts
+            summary: List parts of an element
+            operationId: getElementParts
+            security:
+                - BearerAuth: []
+            description: |
+                Returns all parts belonging to the specified element.
+            responses:
+                '200':
+                    description: List of parts retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/ElementPart'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - _id: 665c2d3e4f5a6b7c8d9e0f1a
+                                      auditConfig:
+                                          owner: universidad-sevilla
+                                          repository: L1-01-project
+                                error: null
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        post:
+            tags:
+                - ElementParts
+            summary: Add a part to an element
+            operationId: addElementPart
+            security:
+                - BearerAuth: []
+            description: |
+                Adds a new part to the specified element.
+                Each part has its own auditConfig.
+            requestBody:
+                $ref: '#/components/requestBodies/ElementPartBody'
+            responses:
+                '201':
+                    description: Part created successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Element'
+                            example:
+                                success: true
+                                message: Element part created
+                                httpStatus: 201
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665b1c2d3e4f5a6b7c8d9e0f
+                                    name: L1-01
+                                    description: Equipo L1-01 de PSG2
+                                    organizationId: 665a1b2c3d4e5f6a7b8c9d0e
+                                    fields: []
+                                    permissions:
+                                        view: []
+                                        edit: []
+                                        delete: []
+                                        create: []
+                                    auditConfig:
+                                        owner: universidad-sevilla
+                                        repository: L1-01-project
+                                    parts:
+                                        - _id: 665c2d3e4f5a6b7c8d9e0f1a
+                                          auditConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                    createdAt: '2026-01-15T10:00:00.000Z'
+                                    updatedAt: '2026-01-15T11:00:00.000Z'
+                                    __v: 0
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/elements/{elementName}/parts/{partId}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/partId'
+        get:
+            tags:
+                - ElementParts
+            summary: Get a part by ID
+            operationId: getElementPartById
+            security:
+                - BearerAuth: []
+            description: |
+                Returns a specific part identified by its ID within the element.
+            responses:
+                '200':
+                    description: Part found
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/ElementPart'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665c2d3e4f5a6b7c8d9e0f1a
+                                    auditConfig:
+                                        owner: universidad-sevilla
+                                        repository: L1-01-project
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        put:
+            tags:
+                - ElementParts
+            summary: Update a part
+            operationId: updateElementPart
+            security:
+                - BearerAuth: []
+            description: |
+                Updates the auditConfig of an existing part.
+            requestBody:
+                $ref: '#/components/requestBodies/ElementPartBody'
+            responses:
+                '200':
+                    description: Part updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Element'
+                            example:
+                                success: true
+                                message: Element part updated
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665b1c2d3e4f5a6b7c8d9e0f
+                                    name: L1-01
+                                    description: Equipo L1-01 de PSG2
+                                    organizationId: 665a1b2c3d4e5f6a7b8c9d0e
+                                    fields: []
+                                    permissions:
+                                        view: []
+                                        edit: []
+                                        delete: []
+                                        create: []
+                                    auditConfig:
+                                        owner: universidad-sevilla
+                                        repository: L1-01-project
+                                    parts:
+                                        - _id: 665c2d3e4f5a6b7c8d9e0f1a
+                                          auditConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-updated
+                                    createdAt: '2026-01-15T10:00:00.000Z'
+                                    updatedAt: '2026-01-15T12:00:00.000Z'
+                                    __v: 0
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        delete:
+            tags:
+                - ElementParts
+            summary: Delete a part
+            operationId: deleteElementPart
+            security:
+                - BearerAuth: []
+            description: |
+                Permanently deletes a part from the element.
+            responses:
+                '200':
+                    description: Part deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: object
+                                              nullable: true
+                                              example: null
+                            example:
+                                success: true
+                                message: Element part deleted
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data: null
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    # ──────────────────────────────────────────────
+    # Element Permissions
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/elements/{elementName}/permissions/{permissionName}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/permissionName'
+        post:
+            tags:
+                - ElementPermissions
+            summary: Add roles to an element permission
+            operationId: addRoleToElementPermission
+            security:
+                - BearerAuth: []
+            description: |
+                Adds one or more roles to a specific permission (view, edit, delete, create) of the element.
+                The roles must exist in the organization.
+            requestBody:
+                $ref: '#/components/requestBodies/ElementPermissionRolesBody'
+            responses:
+                '200':
+                    description: Roles added to permission successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/Element'
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/ElementNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    # ──────────────────────────────────────────────
+    # GuaranteeTemplates
+    # ──────────────────────────────────────────────
+    /api/v1/guaranteeTemplates:
+        get:
+            tags:
+                - GuaranteeTemplates
+            summary: List all guarantee templates
+            operationId: getGuaranteeTemplates
+            description: |
+                Returns all guarantee templates in the system, each one assembled
+                with its associated metricConfigs array.
+            responses:
+                '200':
+                    description: List of guarantee templates retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/GuaranteeTemplate'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - _id: 665e5f6a7b8c9d0e1f2a3b4c
+                                      name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                      info:
+                                          title: Number of Commits by Team
+                                          description: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
+                                          example: If a team has made 150 commits to the repository over the last month, this number reflects the team's overall contribution.
+                                      numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                      comparator: null
+                                      threshold: null
+                                      window: null
+                                      __v: 0
+                                      metricConfigs:
+                                          - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                            metricConfig:
+                                                tag: feat
+                                                branch: main
+                                error: null
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        post:
+            tags:
+                - GuaranteeTemplates
+            summary: Create a guarantee template
+            operationId: createGuaranteeTemplate
+            description: |
+                Creates a new guarantee template along with its metric configurations.
+                The fields `comparator`, `threshold` and `window` must be explicitly set to `null`,
+                as these values are injected later by the AgreementTemplate.
+                The `numericExpression` must be a valid mathematical expression referencing
+                exactly the metrics declared in `metricConfigs` (bidirectional consistency).
+            requestBody:
+                $ref: '#/components/requestBodies/GuaranteeTemplateBody'
+            responses:
+                '200':
+                    description: Guarantee template created successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/GuaranteeTemplate'
+                            example:
+                                success: true
+                                message: Guarantee template created
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665e5f6a7b8c9d0e1f2a3b4c
+                                    name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                    info:
+                                        title: Number of Commits by Team
+                                        description: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
+                                        example: If a team has made 150 commits to the repository over the last month, this number reflects the team's overall contribution.
+                                    numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                    comparator: null
+                                    threshold: null
+                                    window: null
+                                    __v: 0
+                                    metricConfigs:
+                                        - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                          metricConfig:
+                                              tag: feat
+                                              branch: main
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '409':
+                    $ref: '#/components/responses/GuaranteeTemplateConflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/guaranteeTemplates/{guaranteeName}:
+        parameters:
+            - $ref: '#/components/parameters/guaranteeName'
+        get:
+            tags:
+                - GuaranteeTemplates
+            summary: Get a guarantee template by name
+            operationId: getGuaranteeTemplate
+            description: |
+                Returns a specific guarantee template identified by its unique name,
+                assembled with its associated metricConfigs array.
+            responses:
+                '200':
+                    description: Guarantee template found
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/GuaranteeTemplate'
+                '400':
+                    $ref: '#/components/responses/GuaranteeTemplateNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        put:
+            tags:
+                - GuaranteeTemplates
+            summary: Update a guarantee template
+            operationId: updateGuaranteeTemplate
+            description: |
+                Updates an existing guarantee template. All modifiable fields must be sent
+                in the body: `name`, `info`, `numericExpression` and `metricConfigs`.
+                Fields `comparator`, `threshold` and `window` are not modifiable and are
+                silently ignored if sent.
+                If the `name` changes, the new name must be unique in the system.
+                The metricConfigs array is fully replaced (wipe-and-replace strategy).
+            requestBody:
+                $ref: '#/components/requestBodies/GuaranteeTemplateUpdateBody'
+            responses:
+                '200':
+                    description: Guarantee template updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/GuaranteeTemplate'
+                            example:
+                                success: true
+                                message: Guarantee template updated
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665e5f6a7b8c9d0e1f2a3b4c
+                                    name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                    info:
+                                        title: Updated Title
+                                        description: Updated description.
+                                        example: Updated example.
+                                    numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                    comparator: null
+                                    threshold: null
+                                    window: null
+                                    __v: 0
+                                    metricConfigs:
+                                        - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                          metricConfig:
+                                              tag: feat
+                                              branch: main
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/GuaranteeTemplateNotFound'
+                '409':
+                    $ref: '#/components/responses/GuaranteeTemplateConflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        delete:
+            tags:
+                - GuaranteeTemplates
+            summary: Delete a guarantee template
+            operationId: deleteGuaranteeTemplate
+            description: |
+                Permanently deletes a guarantee template and all its associated
+                metric configurations (MetricConfig documents).
+            responses:
+                '200':
+                    description: Guarantee template deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: object
+                                              nullable: true
+                                              example: null
+                            example:
+                                success: true
+                                message: Guarantee template deleted
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data: null
+                                error: null
+                '400':
+                    $ref: '#/components/responses/GuaranteeTemplateNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    # ──────────────────────────────────────────────
+    # AgreementTemplates
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/agreementTemplates:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+        get:
+            tags:
+                - AgreementTemplates
+            summary: List all agreement templates in an organization
+            operationId: getAgreementTemplatesByOrganization
+            description: |
+                Returns all agreement templates belonging to the specified organization,
+                each one assembled with its associated guarantees array.
+            responses:
+                '200':
+                    description: List of agreement templates retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/AgreementTemplate'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - _id: 665f1a2b3c4d5e6f7a8b9c0d
+                                      name: PSG2-2526
+                                      displayName: PSG2-2526 Agreement
+                                      description: This is a sample agreement template for PSG2-2526.
+                                      orgId: 665a1b2c3d4e5f6a7b8c9d0e
+                                      isPublic: true
+                                      __v: 0
+                                      guarantees:
+                                          - guaranteeTemplateName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                            comparator: '>='
+                                            threshold: 5
+                                            window:
+                                                period:
+                                                    - unit: day
+                                                      value: 1
+                                                anchorDate: '2025-12-08T21:00:00.000Z'
+                                error: null
+                '404':
+                    $ref: '#/components/responses/OrganizationNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        post:
+            tags:
+                - AgreementTemplates
+            summary: Create an agreement template
+            operationId: createAgreementTemplateByOrganization
+            description: |
+                Creates a new agreement template within the specified organization,
+                along with its associated guarantees. Each guarantee references an existing
+                GuaranteeTemplate by name and injects the concrete comparator, threshold and window when the agreement is enforced.
+                The template name must be unique within the organization.
+            requestBody:
+                $ref: '#/components/requestBodies/AgreementTemplateBody'
+            responses:
+                '200':
+                    description: Agreement template created successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementTemplate'
+                            example:
+                                success: true
+                                message: Agreement template created
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665f1a2b3c4d5e6f7a8b9c0d
+                                    name: PSG2-2526
+                                    displayName: PSG2-2526 Agreement
+                                    description: This is a sample agreement template for PSG2-2526.
+                                    orgId: 665a1b2c3d4e5f6a7b8c9d0e
+                                    isPublic: true
+                                    __v: 0
+                                    guarantees:
+                                        - guaranteeTemplateName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                          comparator: '>='
+                                          threshold: 5
+                                          window:
+                                              period:
+                                                  - unit: day
+                                                    value: 1
+                                              anchorDate: '2025-12-08T21:00:00.000Z'
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/OrganizationNotFound'
+                '409':
+                    $ref: '#/components/responses/AgreementTemplateConflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/agreementTemplates/{agreementTemplateName}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/agreementTemplateName'
+        get:
+            tags:
+                - AgreementTemplates
+            summary: Get an agreement template by name
+            operationId: getAgreementTemplateByOrganization
+            description: |
+                Returns a specific agreement template identified by its name within the
+                organization, assembled with its associated guarantees array.
+            responses:
+                '200':
+                    description: Agreement template found
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementTemplate'
+                '404':
+                    $ref: '#/components/responses/AgreementTemplateNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        put:
+            tags:
+                - AgreementTemplates
+            summary: Update an agreement template
+            operationId: updateAgreementTemplateByOrganization
+            description: |
+                Updates an existing agreement template. All fields must be sent in the body.
+                If the name changes, the new name must be unique within the organization.
+                The guarantees array is fully replaced (wipe-and-replace strategy).
+            requestBody:
+                $ref: '#/components/requestBodies/AgreementTemplateBody'
+            responses:
+                '200':
+                    description: Agreement template updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementTemplate'
+                            example:
+                                success: true
+                                message: Agreement template updated
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 665f1a2b3c4d5e6f7a8b9c0d
+                                    name: PSG2-2526-v2
+                                    displayName: PSG2-2526 Agreement V2
+                                    description: Updated agreement template for PSG2-2526.
+                                    orgId: 665a1b2c3d4e5f6a7b8c9d0e
+                                    isPublic: false
+                                    __v: 0
+                                    guarantees:
+                                        - guaranteeTemplateName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                          comparator: '>='
+                                          threshold: 10
+                                          window:
+                                              period:
+                                                  - unit: day
+                                                    value: 1
+                                              anchorDate: '2025-12-08T21:00:00.000Z'
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/AgreementTemplateNotFound'
+                '409':
+                    $ref: '#/components/responses/AgreementTemplateConflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        delete:
+            tags:
+                - AgreementTemplates
+            summary: Delete an agreement template
+            operationId: deleteAgreementTemplateByOrganization
+            description: |
+                Permanently deletes an agreement template and all its associated
+                guarantees (Guarantee documents).
+            responses:
+                '200':
+                    description: Agreement template deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: object
+                                              nullable: true
+                                              example: null
+                            example:
+                                success: true
+                                message: Agreement template deleted
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data: null
+                                error: null
+                '404':
+                    $ref: '#/components/responses/AgreementTemplateNotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/agreementTemplates/public:
+        get:
+            tags:
+                - AgreementTemplates
+            summary: List all public agreement templates
+            operationId: getPublicAgreementTemplates
+            description: |
+                Returns all agreement templates marked as public, regardless of organization.
+            responses:
+                '200':
+                    description: List of public agreement templates
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/AgreementTemplate'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    # ──────────────────────────────────────────────
+    # AgreementCollections
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+        get:
+            tags:
+                - AgreementCollections
+            summary: List all agreement collections in an element
+            operationId: getAgreementCollectionsByElement
+            description: |
+                Returns all agreement collections belonging to the specified element.
+            responses:
+                '200':
+                    description: List of agreement collections retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/AgreementCollection'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - _id: 69cbe9901d5009a04361925d
+                                      name: acuerdo-PSG2-2526
+                                      displayName: Acuerdo PSG2 2025-2026
+                                      elementId: 69cbdee759092b362376ca17
+                                      auditableVersionNumber: 1
+                                      agreementVersions:
+                                          - contract:
+                                                validity:
+                                                    timezone: Europe/Madrid
+                                                    initial: '2026-03-31T00:00:00.000Z'
+                                                    end: '2026-12-31T23:59:59.000Z'
+                                                    earlyTermination: null
+                                                agreementTemplateId: 69cbd30332c8b7152e9aa73a
+                                                signaturesId:
+                                                    - 69cbea571d5009a043619276
+                                            versionNumber: 1
+                                      fields: []
+                                      permissions: []
+                                      __v: 0
+                                error: null
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        post:
+            tags:
+                - AgreementCollections
+            summary: Create an agreement collection
+            operationId: createAgreementCollectionByElement
+            description: |
+                Creates a new agreement collection within the specified element.
+                The collection is created empty (no versions). Versions are added later
+                through the agreement version endpoints.
+            requestBody:
+                $ref: '#/components/requestBodies/AgreementCollectionBody'
+            responses:
+                '200':
+                    description: Agreement collection created successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementCollection'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 69cbe9901d5009a04361925d
+                                    name: acuerdo-PSG2-2526
+                                    displayName: Acuerdo PSG2 2025-2026
+                                    elementId: 69cbdee759092b362376ca17
+                                    auditableVersionNumber: null
+                                    agreementVersions: []
+                                    fields: []
+                                    permissions: []
+                                    __v: 0
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '409':
+                    $ref: '#/components/responses/Conflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/agColName'
+        get:
+            tags:
+                - AgreementCollections
+            summary: Get an agreement collection by name
+            operationId: getAgreementCollectionByElement
+            description: |
+                Returns a specific agreement collection by name within the element.
+                Supports an optional `expand` query parameter to assemble version data
+                with resolved signatures, guarantees and metric configurations.
+            parameters:
+                - in: query
+                  name: expand
+                  schema:
+                      type: string
+                      enum: ['true', 'false']
+                      default: 'false'
+                  description: If `true`, returns versions with fully assembled signature and guarantee data.
+            responses:
+                '200':
+                    description: Agreement collection found
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementCollection'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 69cbe9901d5009a04361925d
+                                    name: acuerdo-PSG2-2526
+                                    displayName: Acuerdo PSG2 2025-2026
+                                    elementId: 69cbdee759092b362376ca17
+                                    auditableVersionNumber: 1
+                                    agreementVersions:
+                                        - contract:
+                                              validity:
+                                                  timezone: Europe/Madrid
+                                                  initial: '2026-03-31T00:00:00.000Z'
+                                                  end: '2026-12-31T23:59:59.000Z'
+                                                  earlyTermination: null
+                                              agreementTemplateId: 69cbd30332c8b7152e9aa73a
+                                              signaturesId:
+                                                  - 69cbea571d5009a043619276
+                                          versionNumber: 1
+                                    fields: []
+                                    permissions: []
+                                    __v: 0
+                                error: null
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        put:
+            tags:
+                - AgreementCollections
+            summary: Update an agreement collection
+            operationId: updateAgreementCollectionByElement
+            description: |
+                Updates an existing agreement collection within the element.
+                The `auditableVersionNumber` can be changed to point to a different version
+                or set to `null` if no version should be auditable.
+            requestBody:
+                $ref: '#/components/requestBodies/AgreementCollectionUpdateBody'
+            responses:
+                '200':
+                    description: Agreement collection updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementCollection'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 69cbe9901d5009a04361925d
+                                    name: acuerdo-PSG2-2526
+                                    displayName: Acuerdo PSG2 2025-2026 (actualizado)
+                                    elementId: 69cbdee759092b362376ca17
+                                    auditableVersionNumber: null
+                                    agreementVersions:
+                                        - contract:
+                                              validity:
+                                                  timezone: Europe/Madrid
+                                                  initial: '2026-03-31T00:00:00.000Z'
+                                                  end: '2026-12-31T23:59:59.000Z'
+                                                  earlyTermination: null
+                                              agreementTemplateId: 69cbd30332c8b7152e9aa73a
+                                              signaturesId:
+                                                  - 69cbea571d5009a043619276
+                                          versionNumber: 1
+                                    fields: []
+                                    permissions: []
+                                    __v: 0
+                                    updatedAt: '2026-03-31T18:26:00.438Z'
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '409':
+                    $ref: '#/components/responses/Conflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        delete:
+            tags:
+                - AgreementCollections
+            summary: Delete an agreement collection
+            operationId: deleteAgreementCollectionByElement
+            description: |
+                Deletes an agreement collection and all its associated versions and signatures.
+            responses:
+                '200':
+                    description: Agreement collection deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: object
+                                              nullable: true
+                                              example: null
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    # ──────────────────────────────────────────────
+    # AgreementVersions
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}/agreementVersions:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/agColName'
+        get:
+            tags:
+                - AgreementVersions
+            summary: List all versions in a collection
+            operationId: getAgreementVersionsByCollection
+            description: |
+                Returns all agreement versions within the specified collection.
+                Supports an optional `expand` query parameter to assemble version data
+                with resolved signatures, guarantees and metric configurations.
+            parameters:
+                - in: query
+                  name: expand
+                  schema:
+                      type: string
+                      enum: ['true', 'false']
+                      default: 'false'
+                  description: If `true`, returns versions with fully assembled signature and guarantee data.
+            responses:
+                '200':
+                    description: List of agreement versions
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/AgreementVersionExpanded'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - versionNumber: 1
+                                      contract:
+                                          agreementTemplateName: PSG2-2526
+                                          validity:
+                                              timezone: Europe/Madrid
+                                              initial: '2026-03-31T00:00:00.000Z'
+                                              end: '2026-12-31T23:59:59.000Z'
+                                              earlyTermination: null
+                                          signatures:
+                                              - signatureId: 69cbea571d5009a043619276
+                                                guarantee:
+                                                    name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                                    numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                    comparator: '>='
+                                                    threshold: 5
+                                                    window:
+                                                        period:
+                                                            - unit: day
+                                                              value: 1
+                                                        anchorDate: '2025-12-08T21:00:00.000Z'
+                                                    metricConfigs:
+                                                        - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                          metricConfig:
+                                                              tag: feat
+                                                              branch: main
+                                                auditConfig:
+                                                    owner: universidad-sevilla
+                                                    repository: L1-01-project
+                                error: null
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        post:
+            tags:
+                - AgreementVersions
+            summary: Create a new version in a collection
+            operationId: createAgreementVersionByCollection
+            description: |
+                Creates a new agreement version within the specified collection.
+                The version number is auto-incremented. The new version becomes the
+                auditable version automatically. Each signature must reference an existing
+                guarantee template by name and include its audit configuration.
+            requestBody:
+                $ref: '#/components/requestBodies/AgreementVersionBody'
+            responses:
+                '200':
+                    description: Agreement version created successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementVersionRaw'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    contract:
+                                        validity:
+                                            timezone: Europe/Madrid
+                                            initial: '2026-03-31T00:00:00.000Z'
+                                            end: '2026-12-31T23:59:59.000Z'
+                                            earlyTermination: null
+                                        agreementTemplateId: 69cbd30332c8b7152e9aa73a
+                                        signaturesId:
+                                            - 69cbea571d5009a043619276
+                                    versionNumber: 1
+                                    createdAt: '2026-03-31T16:00:00.000Z'
+                                    updatedAt: '2026-03-31T16:00:00.000Z'
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}/agreementVersions/auditableVersion:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/agColName'
+        get:
+            tags:
+                - AgreementVersions
+            summary: Get the auditable version of a collection
+            operationId: getAuditableVersionByCollection
+            description: |
+                Returns the currently auditable version of the collection.
+                If no auditable version is set (auditableVersionNumber is null),
+                returns a 404 error.
+            parameters:
+                - in: query
+                  name: expand
+                  schema:
+                      type: string
+                      enum: ['true', 'false']
+                      default: 'false'
+                  description: If `true`, returns the version with fully assembled signature and guarantee data.
+            responses:
+                '200':
+                    description: Auditable version found
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementVersionExpanded'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    versionNumber: 1
+                                    contract:
+                                        agreementTemplateName: PSG2-2526
+                                        validity:
+                                            timezone: Europe/Madrid
+                                            initial: '2026-03-31T00:00:00.000Z'
+                                            end: '2026-12-31T23:59:59.000Z'
+                                            earlyTermination: null
+                                        signatures:
+                                            - signatureId: 69cbea571d5009a043619276
+                                              guarantee:
+                                                  name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                                  numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                  comparator: '>='
+                                                  threshold: 5
+                                                  window:
+                                                      period:
+                                                          - unit: day
+                                                            value: 1
+                                                      anchorDate: '2025-12-08T21:00:00.000Z'
+                                                  metricConfigs:
+                                                      - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                        metricConfig:
+                                                            tag: feat
+                                                            branch: main
+                                              auditConfig:
+                                                  owner: universidad-sevilla
+                                                  repository: L1-01-project
+                                error: null
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}/agreementVersions/{versionNumber}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/agColName'
+            - $ref: '#/components/parameters/versionNumber'
+        delete:
+            tags:
+                - AgreementVersions
+            summary: Delete a version from a collection
+            operationId: deleteAgreementVersionByCollection
+            description: |
+                Deletes a specific agreement version by its version number.
+                Also deletes all associated signatures.
+            responses:
+                '200':
+                    description: Agreement version deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: object
+                                              nullable: true
+                                              example: null
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}/agreementVersions/activeVersion/terminate:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/agColName'
+        post:
+            tags:
+                - AgreementVersions
+            summary: Terminate the active version
+            operationId: terminateActiveVersion
+            description: |
+                Terminates the currently auditable version by setting its `earlyTermination`
+                to the provided date and setting `auditableVersionNumber` to null.
+                The `earlyTermination` date must be after `validity.initial` and before `validity.end`.
+                Returns 404 if there is no auditable version.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - earlyTermination
+                            properties:
+                                earlyTermination:
+                                    type: string
+                                    format: date-time
+                                    description: Termination date (ISO8601). Must be after validity.initial and before validity.end.
+                                    example: '2026-06-15T12:00:00.000Z'
+                        example:
+                            earlyTermination: '2026-06-15T12:00:00.000Z'
+            responses:
+                '200':
+                    description: Active version terminated successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementCollection'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 69cbe9901d5009a04361925d
+                                    name: acuerdo-PSG2-2526
+                                    displayName: Acuerdo PSG2 2025-2026
+                                    elementId: 69cbdee759092b362376ca17
+                                    auditableVersionNumber: null
+                                    agreementVersions:
+                                        - contract:
+                                              validity:
+                                                  timezone: Europe/Madrid
+                                                  initial: '2026-03-31T00:00:00.000Z'
+                                                  end: '2026-12-31T23:59:59.000Z'
+                                                  earlyTermination: '2026-06-15T12:00:00.000Z'
+                                              agreementTemplateId: 69cbd30332c8b7152e9aa73a
+                                              signaturesId:
+                                                  - 69cbf256cf7ba204e4725122
+                                          versionNumber: 1
+                                    fields: []
+                                    permissions: []
+                                    __v: 0
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
 # ──────────────────────────────────────────────
 # Reusable components
 # ──────────────────────────────────────────────
@@ -1046,7 +2624,65 @@ components:
             description: Username of the member to remove
             schema:
                 type: string
-            example: johndoe
+            example: janedoe
+        guaranteeName:
+            name: guaranteeName
+            in: path
+            required: true
+            description: Unique name of the guarantee template
+            schema:
+                type: string
+            example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+        agreementTemplateName:
+            name: agreementTemplateName
+            in: path
+            required: true
+            description: Unique name of the agreement template within the organization
+            schema:
+                type: string
+            example: PSG2-2526
+        elementName:
+            name: elementName
+            in: path
+            required: true
+            description: Unique name of the element within the organization
+            schema:
+                type: string
+            example: L1-01
+        agColName:
+            name: agColName
+            in: path
+            required: true
+            description: Unique name of the agreement collection within the element
+            schema:
+                type: string
+            example: acuerdo-PSG2-2526
+        versionNumber:
+            name: versionNumber
+            in: path
+            required: true
+            description: Version number of the agreement version
+            schema:
+                type: integer
+                minimum: 1
+            example: 1
+        partId:
+            name: partId
+            in: path
+            required: true
+            description: MongoDB ObjectId of the element part
+            schema:
+                type: string
+            example: 665c2d3e4f5a6b7c8d9e0f1a
+        permissionName:
+            name: permissionName
+            in: path
+            required: true
+            description: Permission type (view, edit, delete, create)
+            schema:
+                type: string
+                enum: [view, edit, delete, create]
+            example: view
 
     # ── Request Bodies ────────────────────────────
     requestBodies:
@@ -1134,7 +2770,175 @@ components:
                     schema:
                         $ref: '#/components/schemas/MemberInput'
                     example:
-                        username: johndoe
+                        username: janedoe
+
+        ElementBody:
+            description: Data to create or update an element
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ElementInput'
+                    example:
+                        name: L1-01
+                        description: Equipo L1-01 de PSG2
+                        fields: []
+                        permissions:
+                            view: []
+                            edit: []
+                            delete: []
+                            create: []
+                        auditConfig:
+                            owner: universidad-sevilla
+                            repository: L1-01-project
+                        parts:
+                            - auditConfig:
+                                  credentials:
+                                      github:
+                                          username: juan
+
+        ElementPartBody:
+            description: Data to create or update an element part
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ElementPartInput'
+                    example:
+                        auditConfig:
+                            owner: universidad-sevilla
+                            repository: L1-01-project
+
+        ElementPermissionRolesBody:
+            description: Roles to add to an element permission
+            required: true
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        required:
+                            - roles
+                        properties:
+                            roles:
+                                type: array
+                                items:
+                                    type: string
+                                minItems: 1
+                    example:
+                        roles:
+                            - admin
+
+        AgreementTemplateBody:
+            description: Data to create or update an agreement template
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/AgreementTemplateInput'
+                    example:
+                        name: PSG2-2526
+                        displayName: PSG2-2526 Agreement
+                        description: This is a sample agreement template for PSG2-2526.
+                        isPublic: true
+                        guarantees:
+                            - guaranteeTemplateName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                              comparator: '>='
+                              threshold: 5
+                              window:
+                                  period:
+                                      - unit: day
+                                        value: 1
+                                  anchorDate: '2025-12-08T21:00:00.000Z'
+
+        AgreementCollectionBody:
+            description: Data to create an agreement collection
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/AgreementCollectionInput'
+                    example:
+                        name: acuerdo-PSG2-2526
+                        displayName: Acuerdo PSG2 2025-2026
+                        fields: []
+                        permissions: []
+
+        AgreementCollectionUpdateBody:
+            description: Data to update an agreement collection
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/AgreementCollectionUpdateInput'
+                    example:
+                        name: acuerdo-PSG2-2526
+                        displayName: Acuerdo PSG2 2025-2026 (actualizado)
+                        fields: []
+                        permissions: []
+                        auditableVersionNumber: null
+
+        AgreementVersionBody:
+            description: Data to create an agreement version
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/AgreementVersionInput'
+                    example:
+                        contract:
+                            agreementTemplateName: PSG2-2526
+                            validity:
+                                timezone: Europe/Madrid
+                                initial: '2026-03-31T00:00:00.000Z'
+                                end: '2026-12-31T23:59:59.000Z'
+                        signatures:
+                            - guaranteeName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                              auditConfig:
+                                  owner: universidad-sevilla
+                                  repository: L1-01-project
+
+        GuaranteeTemplateBody:
+            description: Data to create a guarantee template
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/GuaranteeTemplateCreateInput'
+                    example:
+                        name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                        info:
+                            title: Number of Commits by Team
+                            description: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
+                            example: If a team has made 150 commits to the repository over the last month, this number reflects the team's overall contribution.
+                        numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                        comparator: null
+                        threshold: null
+                        window: null
+                        metricConfigs:
+                            - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                              metricConfig:
+                                  tag: feat
+                                  branch: main
+
+        GuaranteeTemplateUpdateBody:
+            description: Data to update a guarantee template
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/GuaranteeTemplateUpdateInput'
+                    example:
+                        name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                        info:
+                            title: Updated Title
+                            description: Updated description.
+                            example: Updated example.
+                        numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                        metricConfigs:
+                            - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                              metricConfig:
+                                  tag: feat
+                                  branch: main
 
     # ── Reusable responses ────────────────────────
     responses:
@@ -1332,6 +3136,81 @@ components:
                         data: null
                         error:
                             message: "The user 'johndoe' already exists in organization 'universidad-sevilla'"
+                            details: null
+        AgreementTemplateNotFound:
+            description: The agreement template does not exist in the organization
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: 'The AgreementTemplate to be updated could not be found!'
+                        httpStatus: 404
+                        appCode: NOT_FOUND
+                        data: null
+                        error:
+                            message: 'The AgreementTemplate to be updated could not be found!'
+                            details: null
+        AgreementTemplateConflict:
+            description: An agreement template with that name already exists in the organization
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: 'An AgreementTemplate with that name already exists in the organization!'
+                        httpStatus: 409
+                        appCode: DUPLICATE_KEY
+                        data: null
+                        error:
+                            message: 'An AgreementTemplate with that name already exists in the organization!'
+                            details: null
+        GuaranteeTemplateNotFound:
+            description: The guarantee template does not exist
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: "Guarantee template 'GR_NONEXISTENT' not found"
+                        httpStatus: 400
+                        appCode: VALIDATION_ERROR
+                        data: null
+                        error:
+                            message: "Guarantee template 'GR_NONEXISTENT' not found"
+                            details: null
+        GuaranteeTemplateConflict:
+            description: A guarantee template with that name already exists
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: "Guarantee template 'GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS' already exists"
+                        httpStatus: 409
+                        appCode: DUPLICATE_KEY
+                        data: null
+                        error:
+                            message: "Guarantee template 'GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS' already exists"
+                            details: null
+        ElementNotFound:
+            description: The element was not found in the organization
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: "Element with name 'L1-01' not found in organization"
+                        httpStatus: 404
+                        appCode: NOT_FOUND
+                        data: null
+                        error:
+                            message: "Element with name 'L1-01' not found in organization"
                             details: null
         MemberNotFound:
             description: The user is not a member of the organization
@@ -1642,7 +3521,140 @@ components:
                 username:
                     type: string
                     description: Username of the user to add
-                    example: johndoe
+                    example: janedoe
+
+        # ── Element ─────────────────────────────
+        Element:
+            type: object
+            description: An element within an organization (e.g. a team or project)
+            required:
+                - _id
+                - name
+                - description
+                - organizationId
+            properties:
+                _id:
+                    type: string
+                    description: MongoDB internal identifier (ObjectId)
+                    example: 665b1c2d3e4f5a6b7c8d9e0f
+                name:
+                    type: string
+                    description: Unique element name within the organization
+                    example: L1-01
+                description:
+                    type: string
+                    example: Equipo L1-01 de PSG2
+                organizationId:
+                    type: string
+                    description: Organization ObjectId reference
+                    example: 665a1b2c3d4e5f6a7b8c9d0e
+                fields:
+                    type: array
+                    description: Element fields (must match organization's elementFields)
+                    items:
+                        type: object
+                    example: []
+                permissions:
+                    type: object
+                    description: Role-based permissions for this element (arrays of role ObjectIds)
+                auditConfig:
+                    type: object
+                    description: Audit configuration for this element
+                    example:
+                        owner: universidad-sevilla
+                        repository: L1-01-project
+                parts:
+                    type: array
+                    description: Sub-parts of this element, each with its own auditConfig
+                    items:
+                        $ref: '#/components/schemas/ElementPart'
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+                __v:
+                    type: integer
+                    example: 0
+
+        ElementPart:
+            type: object
+            description: A sub-part within an element
+            required:
+                - _id
+                - auditConfig
+            properties:
+                _id:
+                    type: string
+                    description: MongoDB internal identifier (ObjectId)
+                    example: 665c2d3e4f5a6b7c8d9e0f1a
+                auditConfig:
+                    type: object
+                    description: Audit configuration for this part
+                    example:
+                        owner: universidad-sevilla
+                        repository: L1-01-project
+
+        ElementInput:
+            type: object
+            description: Payload for creating or updating an element
+            required:
+                - name
+                - description
+                - fields
+                - permissions
+                - auditConfig
+                - parts
+            properties:
+                name:
+                    type: string
+                    maxLength: 100
+                    example: L1-01
+                description:
+                    type: string
+                    maxLength: 500
+                    example: Equipo L1-01 de PSG2
+                fields:
+                    type: array
+                    items:
+                        type: object
+                    example: []
+                permissions:
+                    type: object
+                    example:
+                        view: []
+                        edit: []
+                        delete: []
+                        create: []
+                auditConfig:
+                    type: object
+                    example:
+                        owner: universidad-sevilla
+                        repository: L1-01-project
+                parts:
+                    type: array
+                    items:
+                        type: object
+                        required:
+                            - auditConfig
+                        properties:
+                            auditConfig:
+                                type: object
+                    example: []
+
+        ElementPartInput:
+            type: object
+            description: Payload for creating or updating an element part
+            required:
+                - auditConfig
+            properties:
+                auditConfig:
+                    type: object
+                    description: Audit configuration for this part
+                    example:
+                        owner: universidad-sevilla
+                        repository: L1-01-project
 
         # ── Base field properties (shared) ──────
         FieldBase:
@@ -1938,3 +3950,685 @@ components:
                     description: User password (minimum 6 characters)
                     minLength: 6
                     example: securePassword123
+
+        # ── AgreementTemplate ──────────────────────
+        AgreementTemplate:
+            type: object
+            description: |
+                An agreement template defines a set of guarantees for an organization.
+                Each guarantee references a GuaranteeTemplate and injects concrete values
+                for comparator, threshold and window.
+            required:
+                - _id
+                - name
+                - orgId
+            properties:
+                _id:
+                    type: string
+                    description: MongoDB internal identifier (ObjectId)
+                    example: 665f1a2b3c4d5e6f7a8b9c0d
+                name:
+                    type: string
+                    description: Template name, unique within the organization. Only letters, numbers, hyphens and underscores.
+                    pattern: '^[A-Za-z0-9_-]+$'
+                    minLength: 3
+                    maxLength: 100
+                    example: PSG2-2526
+                displayName:
+                    type: string
+                    description: Human-readable display name (max 200 characters)
+                    maxLength: 200
+                    example: PSG2-2526 Agreement
+                description:
+                    type: string
+                    description: Template description (max 500 characters)
+                    maxLength: 500
+                    example: This is a sample agreement template for PSG2-2526.
+                orgId:
+                    type: string
+                    description: ObjectId of the organization this template belongs to
+                    example: 665a1b2c3d4e5f6a7b8c9d0e
+                isPublic:
+                    type: boolean
+                    description: Whether this template is publicly visible
+                    example: true
+                __v:
+                    type: integer
+                    description: Mongoose version key
+                    example: 0
+                guarantees:
+                    type: array
+                    description: Guarantees associated with this template (assembled from Guarantee documents)
+                    items:
+                        $ref: '#/components/schemas/IGuaranteeEntry'
+
+        IGuaranteeEntry:
+            type: object
+            description: A guarantee entry within an agreement template
+            required:
+                - guaranteeTemplateName
+                - comparator
+                - threshold
+                - window
+            properties:
+                guaranteeTemplateName:
+                    type: string
+                    description: Name of the referenced GuaranteeTemplate (3-100 characters)
+                    minLength: 3
+                    maxLength: 100
+                    example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                comparator:
+                    type: string
+                    description: Comparison operator for the guarantee condition
+                    enum: ['<', '>', '<=', '>=', '==', '!=']
+                    example: '>='
+                threshold:
+                    type: number
+                    description: Numeric threshold for the guarantee condition
+                    example: 100
+                window:
+                    type: object
+                    description: Time window for evaluating the guarantee
+                    required:
+                        - period
+                        - anchorDate
+                    properties:
+                        period:
+                            type: array
+                            description: Time period components
+                            minItems: 1
+                            items:
+                                type: object
+                                required:
+                                    - unit
+                                    - value
+                                properties:
+                                    unit:
+                                        type: string
+                                        enum: [millisecond, second, minute, hour, day, week]
+                                        example: day
+                                    value:
+                                        type: integer
+                                        minimum: 1
+                                        description: Duration value (strictly greater than 0)
+                                        example: 7
+                        anchorDate:
+                            type: string
+                            format: date-time
+                            description: ISO 8601 anchor date (between year 2000 and 2100)
+                            example: '2025-01-01T00:00:00.000Z'
+
+        AgreementTemplateInput:
+            type: object
+            description: |
+                Payload for creating or updating an agreement template.
+                Each guarantee must reference an existing GuaranteeTemplate by name.
+                No duplicate GuaranteeTemplate names are allowed within the same agreement.
+            required:
+                - name
+                - displayName
+                - description
+                - isPublic
+                - guarantees
+            properties:
+                name:
+                    type: string
+                    pattern: '^[A-Za-z0-9_-]+$'
+                    minLength: 3
+                    maxLength: 100
+                    example: PSG2-2526
+                displayName:
+                    type: string
+                    maxLength: 200
+                    example: PSG2-2526 Agreement
+                description:
+                    type: string
+                    maxLength: 500
+                    example: This is a sample agreement template for PSG2-2526.
+                isPublic:
+                    type: boolean
+                    example: true
+                guarantees:
+                    type: array
+                    minItems: 1
+                    items:
+                        $ref: '#/components/schemas/IGuaranteeEntry'
+
+        # ── GuaranteeTemplate ──────────────────────
+        GuaranteeTemplate:
+            type: object
+            description: |
+                Theoretical definition of a guarantee condition. By itself it has no specific
+                objective — the comparator, threshold and window are injected by the
+                AgreementTemplate when it references this template.
+            required:
+                - _id
+                - name
+                - info
+                - numericExpression
+            properties:
+                _id:
+                    type: string
+                    description: MongoDB internal identifier (ObjectId)
+                    example: 665e5f6a7b8c9d0e1f2a3b4c
+                name:
+                    type: string
+                    description: Unique template name. Only letters, numbers, hyphens and underscores.
+                    pattern: '^[A-Za-z0-9_-]+$'
+                    minLength: 3
+                    maxLength: 100
+                    example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                info:
+                    type: object
+                    description: Human-readable information about the guarantee
+                    required:
+                        - title
+                    properties:
+                        title:
+                            type: string
+                            description: Guarantee title (3-200 characters)
+                            example: Number of Commits by Team
+                        description:
+                            type: string
+                            description: Guarantee description (max 500 characters)
+                            example: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
+                        example:
+                            type: string
+                            description: Usage example (max 500 characters)
+                            example: If a team has made 150 commits to the repository over the last month, this number reflects the team's overall contribution.
+                numericExpression:
+                    type: string
+                    description: Mathematical expression referencing metric names. No spaces allowed. Operators allowed are +-/*().
+                    maxLength: 500
+                    example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                comparator:
+                    type: string
+                    nullable: true
+                    description: Always null in the template. Injected by AgreementTemplate.
+                    example: null
+                threshold:
+                    type: number
+                    nullable: true
+                    description: Always null in the template. Injected by AgreementTemplate.
+                    example: null
+                window:
+                    type: object
+                    nullable: true
+                    description: Always null in the template. Injected by AgreementTemplate.
+                    example: null
+                __v:
+                    type: integer
+                    description: Mongoose version key
+                    example: 0
+                metricConfigs:
+                    type: array
+                    description: Metric configurations associated with this template (assembled from MetricConfig documents)
+                    items:
+                        $ref: '#/components/schemas/IMetricConfigEntry'
+
+        IMetricConfigEntry:
+            type: object
+            description: A metric configuration entry within a guarantee template
+            required:
+                - name
+                - metricConfig
+            properties:
+                name:
+                    type: string
+                    description: Name of the referenced metric (3-100 characters)
+                    minLength: 3
+                    maxLength: 100
+                    example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                metricConfig:
+                    type: object
+                    description: Configuration for this metric (e.g. tag, branch).
+                    example:
+                        tag: feat
+                        branch: main
+
+        GuaranteeTemplateCreateInput:
+            type: object
+            description: |
+                Payload for creating a guarantee template.
+                Fields comparator, threshold and window must be explicitly set to null.
+                The numericExpression must reference exactly the metrics in metricConfigs.
+            required:
+                - name
+                - info
+                - numericExpression
+                - comparator
+                - threshold
+                - window
+                - metricConfigs
+            properties:
+                name:
+                    type: string
+                    pattern: '^[A-Za-z0-9_-]+$'
+                    minLength: 3
+                    maxLength: 100
+                    example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                info:
+                    type: object
+                    required:
+                        - title
+                        - description
+                        - example
+                    properties:
+                        title:
+                            type: string
+                            minLength: 3
+                            maxLength: 200
+                            example: Number of Commits by Team
+                        description:
+                            type: string
+                            maxLength: 500
+                            example: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
+                        example:
+                            type: string
+                            maxLength: 500
+                            example: If a team has made 150 commits to the repository over the last month, this number reflects the team's overall contribution.
+                numericExpression:
+                    type: string
+                    maxLength: 500
+                    example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                comparator:
+                    type: string
+                    nullable: true
+                    enum: [null]
+                    example: null
+                threshold:
+                    type: number
+                    nullable: true
+                    enum: [null]
+                    example: null
+                window:
+                    type: object
+                    nullable: true
+                    enum: [null]
+                    example: null
+                metricConfigs:
+                    type: array
+                    minItems: 1
+                    items:
+                        $ref: '#/components/schemas/IMetricConfigEntry'
+
+        # ── AgreementCollection ──────────────────────
+        AgreementCollection:
+            type: object
+            description: |
+                An agreement collection groups multiple agreement versions for an element.
+                Only one version can be auditable at a time, tracked by `auditableVersionNumber`.
+            required:
+                - _id
+                - name
+                - elementId
+            properties:
+                _id:
+                    type: string
+                    description: MongoDB internal identifier (ObjectId)
+                    example: 69cbe9901d5009a04361925d
+                name:
+                    type: string
+                    description: Collection name, unique within the element. Only letters, numbers, hyphens and underscores.
+                    pattern: '^[A-Za-z0-9_-]+$'
+                    minLength: 3
+                    maxLength: 100
+                    example: mi-collection
+                displayName:
+                    type: string
+                    description: Human-readable display name (max 200 characters)
+                    maxLength: 200
+                    example: Mi Collection
+                elementId:
+                    type: string
+                    description: ObjectId of the element this collection belongs to
+                    example: 69cbdee759092b362376ca17
+                auditableVersionNumber:
+                    type: integer
+                    nullable: true
+                    description: Version number of the currently auditable version, or null if none
+                    example: 1
+                agreementVersions:
+                    type: array
+                    description: Embedded agreement versions
+                    items:
+                        $ref: '#/components/schemas/AgreementVersionRaw'
+                fields:
+                    type: array
+                    description: Collection fields
+                    items:
+                        type: object
+                permissions:
+                    type: array
+                    description: Collection permissions
+                    items:
+                        type: object
+                __v:
+                    type: integer
+                    description: Mongoose version key
+                    example: 0
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+
+        AgreementCollectionInput:
+            type: object
+            description: Payload for creating an agreement collection
+            required:
+                - name
+                - displayName
+                - fields
+                - permissions
+            properties:
+                name:
+                    type: string
+                    pattern: '^[A-Za-z0-9_-]+$'
+                    minLength: 3
+                    maxLength: 100
+                    example: mi-collection
+                displayName:
+                    type: string
+                    maxLength: 200
+                    example: Mi Collection
+                fields:
+                    type: array
+                    items:
+                        type: object
+                permissions:
+                    type: array
+                    items:
+                        type: object
+
+        AgreementCollectionUpdateInput:
+            type: object
+            description: Payload for updating an agreement collection
+            required:
+                - name
+                - displayName
+                - fields
+                - permissions
+                - auditableVersionNumber
+            properties:
+                name:
+                    type: string
+                    pattern: '^[A-Za-z0-9_-]+$'
+                    minLength: 3
+                    maxLength: 100
+                    example: mi-collection2
+                displayName:
+                    type: string
+                    maxLength: 200
+                    example: Acuerdo PSG2 2025-2026 (actualizado)
+                fields:
+                    type: array
+                    items:
+                        type: object
+                permissions:
+                    type: array
+                    items:
+                        type: object
+                auditableVersionNumber:
+                    type: integer
+                    nullable: true
+                    description: Version number to set as auditable, or null to unset
+                    example: null
+
+        # ── AgreementVersion ──────────────────────
+        AgreementVersionRaw:
+            type: object
+            description: Raw agreement version as stored in the database (with ObjectId references)
+            properties:
+                versionNumber:
+                    type: integer
+                    description: Auto-incremented version number
+                    example: 1
+                contract:
+                    type: object
+                    properties:
+                        validity:
+                            type: object
+                            properties:
+                                timezone:
+                                    type: string
+                                    description: IANA timezone
+                                    example: Europe/Madrid
+                                initial:
+                                    type: string
+                                    format: date-time
+                                    example: '2026-03-31T00:00:00.000Z'
+                                end:
+                                    type: string
+                                    format: date-time
+                                    example: '2026-12-31T23:59:59.000Z'
+                                earlyTermination:
+                                    type: string
+                                    format: date-time
+                                    nullable: true
+                                    description: Set when the version is terminated early
+                                    example: null
+                        agreementTemplateId:
+                            type: string
+                            description: ObjectId of the referenced agreement template
+                            example: 69cbd30332c8b7152e9aa73a
+                        signaturesId:
+                            type: array
+                            description: Array of Signature ObjectId references
+                            items:
+                                type: string
+                            example:
+                                - 69cbea571d5009a043619276
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+
+        AgreementVersionExpanded:
+            type: object
+            description: Assembled agreement version with resolved signatures, guarantees and metric configurations
+            properties:
+                versionNumber:
+                    type: integer
+                    example: 1
+                contract:
+                    type: object
+                    properties:
+                        agreementTemplateName:
+                            type: string
+                            description: Resolved name of the agreement template
+                            example: PSG2-2526
+                        validity:
+                            type: object
+                            properties:
+                                timezone:
+                                    type: string
+                                    example: Europe/Madrid
+                                initial:
+                                    type: string
+                                    format: date-time
+                                    example: '2026-03-31T00:00:00.000Z'
+                                end:
+                                    type: string
+                                    format: date-time
+                                    example: '2026-12-31T23:59:59.000Z'
+                                earlyTermination:
+                                    type: string
+                                    format: date-time
+                                    nullable: true
+                                    example: null
+                        signatures:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/ExpandedSignature'
+
+        ExpandedSignature:
+            type: object
+            description: A fully assembled signature with guarantee and metric data
+            properties:
+                signatureId:
+                    type: string
+                    description: ObjectId of the signature
+                    example: 69cbea571d5009a043619276
+                guarantee:
+                    type: object
+                    properties:
+                        name:
+                            type: string
+                            description: Guarantee template name
+                            example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                        numericExpression:
+                            type: string
+                            description: Numeric expression from the guarantee template
+                            example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                        comparator:
+                            type: string
+                            enum: ['<', '>', '<=', '>=', '==', '!=']
+                            example: '>='
+                        threshold:
+                            type: number
+                            example: 5
+                        window:
+                            type: object
+                            properties:
+                                period:
+                                    type: array
+                                    items:
+                                        type: object
+                                        properties:
+                                            unit:
+                                                type: string
+                                                enum: [millisecond, second, minute, hour, day, week]
+                                                example: day
+                                            value:
+                                                type: integer
+                                                example: 1
+                                anchorDate:
+                                    type: string
+                                    format: date-time
+                                    example: '2025-12-08T21:00:00.000Z'
+                        metricConfigs:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/IMetricConfigEntry'
+                auditConfig:
+                    type: object
+                    description: Audit configuration for this signature
+                    example:
+                        owner: universidad-sevilla
+                        repository: L1-01-project
+
+        AgreementVersionInput:
+            type: object
+            description: |
+                Payload for creating an agreement version.
+                Each signature references an existing guarantee template by name.
+            required:
+                - contract
+                - signatures
+            properties:
+                contract:
+                    type: object
+                    required:
+                        - agreementTemplateName
+                        - validity
+                    properties:
+                        agreementTemplateName:
+                            type: string
+                            description: Name of an existing agreement template in the organization
+                            minLength: 3
+                            maxLength: 100
+                            example: PSG2-2526
+                        validity:
+                            type: object
+                            required:
+                                - timezone
+                                - initial
+                                - end
+                            properties:
+                                timezone:
+                                    type: string
+                                    description: Valid IANA timezone
+                                    example: Europe/Madrid
+                                initial:
+                                    type: string
+                                    format: date-time
+                                    description: Start date (ISO8601). Must be before `end`.
+                                    example: '2026-03-31T00:00:00.000Z'
+                                end:
+                                    type: string
+                                    format: date-time
+                                    description: End date (ISO8601). Must be after `initial`.
+                                    example: '2026-12-31T23:59:59.000Z'
+                signatures:
+                    type: array
+                    description: At least one signature is required
+                    minItems: 1
+                    items:
+                        type: object
+                        required:
+                            - guaranteeName
+                            - auditConfig
+                        properties:
+                            guaranteeName:
+                                type: string
+                                description: Name of an existing guarantee template
+                                minLength: 3
+                                maxLength: 100
+                                example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                            auditConfig:
+                                type: object
+                                description: Audit configuration for this signature
+                                example:
+                                    owner: universidad-sevilla
+                                    repository: L1-01-project
+
+        GuaranteeTemplateUpdateInput:
+            type: object
+            description: |
+                Payload for updating a guarantee template. Only modifiable fields are required.
+                Fields comparator, threshold and window are silently ignored if sent.
+            required:
+                - name
+                - info
+                - numericExpression
+                - metricConfigs
+            properties:
+                name:
+                    type: string
+                    pattern: '^[A-Za-z0-9_-]+$'
+                    minLength: 3
+                    maxLength: 100
+                    example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                info:
+                    type: object
+                    required:
+                        - title
+                        - description
+                        - example
+                    properties:
+                        title:
+                            type: string
+                            minLength: 3
+                            maxLength: 200
+                            example: Updated Title
+                        description:
+                            type: string
+                            maxLength: 500
+                            example: Updated description.
+                        example:
+                            type: string
+                            maxLength: 500
+                            example: Updated example.
+                numericExpression:
+                    type: string
+                    maxLength: 500
+                    example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                metricConfigs:
+                    type: array
+                    minItems: 1
+                    items:
+                        $ref: '#/components/schemas/IMetricConfigEntry'

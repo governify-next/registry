@@ -119,8 +119,6 @@ export const validateField = [
 ];
 
 export const existingOrganization = async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.params.orgName) return next(new ValidationError('Organization name is required'));
-
     try {
         await getOrganizationOrFail(req.params.orgName);
         next();
@@ -132,7 +130,6 @@ export const existingOrganization = async (req: Request, res: Response, next: Ne
 export const existingRole = (source: 'body' | 'params') => {
     return async (req: Request, res: Response, next: NextFunction) => {
         const roleName = req[source].roleName;
-        if (!req.params.orgName) return next(new ValidationError('Organization name is required'));
         if (!roleName) return next(new ValidationError('Role name is required'));
 
         try {
@@ -154,9 +151,6 @@ export const existingRole = (source: 'body' | 'params') => {
 
 export const existingField = (arrayName: 'elementFields' | 'agreementFields') => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        if (!req.params.orgName) return next(new ValidationError('Organization name is required'));
-        if (!req.params.fieldName) return next(new ValidationError('Field name is required'));
-
         try {
             const organization = await getOrganizationOrFail(req.params.orgName);
             const field = organization[arrayName].find((f) => f.name === req.params.fieldName);
@@ -175,7 +169,6 @@ export const existingField = (arrayName: 'elementFields' | 'agreementFields') =>
 };
 
 export const uniqueRole = async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.params.orgName) return next(new ValidationError('Organization name is required'));
     const { roleName } = req.params;
     const newName = req.body.name;
     // Si es update y el nombre no cambió, no hay conflicto
@@ -197,7 +190,6 @@ export const uniqueRole = async (req: Request, res: Response, next: NextFunction
 };
 
 export const maxRoles = async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.params.orgName) return next(new ValidationError('Organization name is required'));
     try {
         const max = bootEnv.MAX_ROLES_PER_ORGANIZATION;
         const organization = await getOrganizationOrFail(req.params.orgName);
@@ -215,7 +207,6 @@ export const maxRoles = async (req: Request, res: Response, next: NextFunction) 
 
 export const uniqueField = (arrayName: 'elementFields' | 'agreementFields') => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        if (!req.params.orgName) return next(new ValidationError('Organization name is required'));
         const { fieldName } = req.params;
         const newName = req.body.name;
         // Si es update y el nombre no cambió, no hay conflicto
@@ -239,7 +230,6 @@ export const uniqueField = (arrayName: 'elementFields' | 'agreementFields') => {
 
 export const hasOrgRole = (roleName: string) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        if (!req.params.orgName) return next(new ValidationError('Organization name is required'));
         try {
             const organization = await getOrganizationOrFail(req.params.orgName);
             const roleId = organization.roles.find((r) => r.name === roleName)?._id;
@@ -266,7 +256,6 @@ export const hasOrgRole = (roleName: string) => {
 };
 
 export const notAdminRole = async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.params.roleName) return next(new ValidationError('Role name is required'));
     if (req.params.roleName === 'admin')
         return next(
             new ForbiddenError(`Admin role can not be removed/modified from organizations`),

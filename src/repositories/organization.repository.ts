@@ -27,6 +27,10 @@ export const getOrganizations = async () => {
     return await Organization.find();
 };
 
+export const getOrganizationById = async (organizationId: string) => {
+    return await Organization.findById(organizationId);
+};
+
 // Para trabajo interno en la organización
 export const getOrganizationByName = async (orgName: string) => {
     return await Organization.findOne({ name: orgName });

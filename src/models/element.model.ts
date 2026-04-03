@@ -2,19 +2,11 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 // Subdocuments
 
-const partSchema = new Schema({
-    auditConfig: { type: Schema.Types.Mixed, default: {} },
-});
-
-const permissionsSchema = new Schema(
+const partSchema = new Schema(
     {
-        view: { type: [String], default: [] },
-        edit: { type: [String], default: [] },
-        delete: { type: [String], default: [] },
-        create: { type: [String], default: [] },
-        notify: { type: [String], default: [] },
+        auditConfig: { type: Schema.Types.Mixed, default: {} },
     },
-    { _id: false, strict: false }, // allow additional permission types
+    { _id: true },
 );
 
 // TypeScript Interface
@@ -25,15 +17,14 @@ export interface IElement extends Document {
     organizationId: Types.ObjectId; // Reference by _id, not name
     fields: Record<string, unknown>[];
     permissions: {
-        view?: string[];
-        edit?: string[];
-        delete?: string[];
-        create?: string[];
-        notify?: string[];
-        [key: string]: string[] | undefined; // allow additional permission types
+        view: Types.ObjectId[];
+        edit: Types.ObjectId[];
+        delete: Types.ObjectId[];
+        create: Types.ObjectId[];
     };
     auditConfig: Record<string, unknown>;
     parts: {
+        _id: Types.ObjectId;
         auditConfig: Record<string, unknown>;
     }[];
 }
@@ -46,7 +37,12 @@ const elementSchema = new Schema<IElement>(
         description: { type: String, required: true },
         organizationId: { type: Schema.Types.ObjectId, ref: 'Organization', required: true },
         fields: [{ type: Schema.Types.Mixed }],
-        permissions: { type: permissionsSchema, default: {} },
+        permissions: {
+            view: { type: [Schema.Types.ObjectId], required: true },
+            edit: { type: [Schema.Types.ObjectId], required: true },
+            delete: { type: [Schema.Types.ObjectId], required: true },
+            create: { type: [Schema.Types.ObjectId], required: true },
+        },
         auditConfig: { type: Schema.Types.Mixed, default: {} },
         parts: { type: [partSchema], default: [] },
     },

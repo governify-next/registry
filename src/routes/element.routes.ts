@@ -1,11 +1,81 @@
 import { Router } from 'express';
 import * as elementController from '../controllers/element.controller.js';
-import { validateElement } from '../middlewares/element.validator.js';
+import {
+    validateElement,
+    validateElementPart,
+    validateElementPartId,
+    validateElementPermissionRoles,
+} from '../middlewares/element.validator.js';
+import { existingOrganization } from '../middlewares/organization.validator.js';
 
-export const elementRoutes = Router({ mergeParams: true });
+export const elementRoutes = Router();
 
-elementRoutes.post('/', validateElement, elementController.createElement);
-elementRoutes.get('/', elementController.getElementsByOrganization);
-elementRoutes.get('/:elementName', elementController.getElementByName);
-elementRoutes.put('/:elementName', validateElement, elementController.updateElement);
-elementRoutes.delete('/:elementName', elementController.deleteElement);
+elementRoutes.post(
+    '/organizations/:orgName/elements',
+    existingOrganization,
+    validateElement,
+    elementController.createElement,
+);
+elementRoutes.get(
+    '/organizations/:orgName/elements',
+    existingOrganization,
+    elementController.getElementsByOrganization,
+);
+elementRoutes.get(
+    '/organizations/:orgName/elements/:elementName',
+    existingOrganization,
+    elementController.getElementByName,
+);
+elementRoutes.put(
+    '/organizations/:orgName/elements/:elementName',
+    existingOrganization,
+    validateElement,
+    elementController.updateElement,
+);
+elementRoutes.delete(
+    '/organizations/:orgName/elements/:elementName',
+    existingOrganization,
+    elementController.deleteElement,
+);
+
+elementRoutes.get(
+    '/organizations/:orgName/elements/:elementName/parts',
+    existingOrganization,
+    elementController.getElementParts,
+);
+
+elementRoutes.post(
+    '/organizations/:orgName/elements/:elementName/parts',
+    existingOrganization,
+    validateElementPart,
+    elementController.addElementPart,
+);
+
+elementRoutes.get(
+    '/organizations/:orgName/elements/:elementName/parts/:partId',
+    existingOrganization,
+    validateElementPartId,
+    elementController.getElementPartById,
+);
+
+elementRoutes.put(
+    '/organizations/:orgName/elements/:elementName/parts/:partId',
+    existingOrganization,
+    validateElementPartId,
+    validateElementPart,
+    elementController.updateElementPart,
+);
+
+elementRoutes.delete(
+    '/organizations/:orgName/elements/:elementName/parts/:partId',
+    existingOrganization,
+    validateElementPartId,
+    elementController.deleteElementPart,
+);
+
+elementRoutes.post(
+    '/organizations/:orgName/elements/:elementName/permissions/:permissionName',
+    existingOrganization,
+    validateElementPermissionRoles,
+    elementController.addRoleToElementPermission,
+);

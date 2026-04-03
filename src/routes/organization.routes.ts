@@ -181,5 +181,3 @@ organizationRoutes.delete(
     existingRole('params'),
     organizationController.removeRoleFromUser,
 );
-
-organizationRoutes.use('/organizations/:orgName/elements', existingOrganization, elementRoutes);
