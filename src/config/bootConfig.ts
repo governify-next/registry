@@ -22,6 +22,6 @@ export const bootEnv = {
     REPORTER_URL: process.env.REPORTER_URL || 'http://localhost:5901',
 
     // Application-specific settings
-    MAX_ROLES_PER_ORGANIZATION: parseInt(process.env.MAX_ROLES_PER_ORGANIZATION || '100', 10),
-    MAX_MEMBERS_PER_ORGANIZATION: parseInt(process.env.MAX_MEMBERS_PER_ORGANIZATION || '1000', 10),
+    MAX_ROLES_PER_ORGANIZATION: Number(process.env.MAX_ROLES_PER_ORGANIZATION || '100'),
+    MAX_MEMBERS_PER_ORGANIZATION: Number(process.env.MAX_MEMBERS_PER_ORGANIZATION || '1000'),
 };
