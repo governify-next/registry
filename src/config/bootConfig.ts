@@ -18,6 +18,13 @@ export const bootEnv = {
     // JWT configuration
     JWT_SECRET: process.env.JWT_SECRET || 'governify_secret_key',
 
+    // OpenID Connect configuration
+    OIDC_ISSUER_URL: new URL(process.env.OIDC_ISSUER_URL || ''),
+    OIDC_CLIENT_ID: process.env.OIDC_CLIENT_ID || '',
+    OIDC_CLIENT_SECRET: process.env.OIDC_CLIENT_SECRET || '',
+    OIDC_REDIRECT_URI: process.env.OIDC_REDIRECT_URI || '',
+    OIDC_SCOPE: process.env.OIDC_SCOPE || 'openid email profile',
+
     // External services
     REPORTER_URL: process.env.REPORTER_URL || 'http://localhost:5901',
 
