@@ -62,7 +62,16 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
 export const oidcLogin = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const token = await userService.oidcLogin(req.body);
+        const loginUrl = await userService.oidcLogin();
+        return sendSuccess(res, { data: { loginUrl } });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const oidcCallback = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const token = await userService.oidcCallback(req);
         return sendSuccess(res, { data: { token } });
     } catch (err) {
         next(err);
