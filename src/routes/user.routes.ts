@@ -33,3 +33,4 @@ userRoutes.delete(
 );
 
 userRoutes.post('/users/login', validateLogin, userController.login);
+userRoutes.post('/users/oidcLogin', userController.oidcLogin);

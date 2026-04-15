@@ -59,3 +59,12 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         next(err);
     }
 };
+
+export const oidcLogin = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const token = await userService.oidcLogin(req.body);
+        return sendSuccess(res, { data: { token } });
+    } catch (err) {
+        next(err);
+    }
+};
