@@ -44,6 +44,10 @@ export const getUserByUsername = async (username: string) => {
     return await User.findOne({ username });
 };
 
+export const getUserByEmail = async (email: string) => {
+    return await User.findOne({ email });
+};
+
 export const updateUser = async (username: string, data: Partial<IUser>) => {
     try {
         return await User.findOneAndUpdate({ username }, data, { new: true });
