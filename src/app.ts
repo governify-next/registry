@@ -1,7 +1,5 @@
 import express from 'express';
 import helmet from 'helmet';
-import { userRoutes } from './routes/user.routes.js';
-import { organizationRoutes } from './routes/organization.routes.js';
 import { healthRoutes } from './routes/health.routes.js';
 import { guaranteeTemplateRoutes } from './routes/guaranteeTemplate.routes.js';
 import { agreementTemplateRoutes } from './routes/agreementTemplate.routes.js';
@@ -11,7 +9,6 @@ import { errorHandler } from './middlewares/errorHandler.js';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import path from 'path';
-import { elementRoutes } from './routes/element.routes.js';
 
 const app = express();
 
@@ -24,13 +21,10 @@ const swaggerDocument = YAML.load(swaggerPath);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(healthRoutes);
-app.use('/api/v1', userRoutes);
-app.use('/api/v1', organizationRoutes);
 app.use('/api/v1', guaranteeTemplateRoutes);
 app.use('/api/v1', agreementTemplateRoutes);
 app.use('/api/v1', agreementCollectionRoutes);
 app.use('/api/v1', agreementVersionRoutes);
-app.use('/api/v1', elementRoutes);
 app.use(errorHandler);
 
 export default app;

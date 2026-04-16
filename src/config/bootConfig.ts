@@ -20,4 +20,5 @@ export const bootEnv = {
 
     // External services
     REPORTER_URL: process.env.REPORTER_URL || 'http://localhost:5901',
+    SCOPE_MANAGER_URL: process.env.SCOPE_MANAGER_URL || 'http://localhost:5902',
 };
