@@ -1,6 +1,3 @@
-import { Types } from 'mongoose';
-import { ISignature } from '../models/signature.model.js';
-
 export interface IAgreementVersionData {
     contract: {
         agreementTemplateName: string;
@@ -15,7 +12,14 @@ export interface IAgreementVersionData {
 
 export interface ISignatureEntry {
     guaranteeName: string;
-    auditConfig: Record<string, unknown>;
+    metrics: {
+        metricName: string;
+        fetcherConfigs: {
+            fetcherId: string;
+            fetcherConfig: Record<string, unknown>;
+        }[];
+        processConfig: Record<string, unknown>;
+    }[];
 }
 
 export interface AgreementVersionPayload extends IAgreementVersionData {

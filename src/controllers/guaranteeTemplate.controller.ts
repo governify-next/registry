@@ -4,7 +4,7 @@ import * as guaranteeTemplateService from '../services/guaranteeTemplate.service
 
 export const getGuaranteeTemplate = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const guaranteeTemplate = await guaranteeTemplateService.getGuaranteeTemplate(
+        const guaranteeTemplate = await guaranteeTemplateService.getGuaranteeTemplateByName(
             req.params.guaranteeName,
         );
         return sendSuccess(res, { data: guaranteeTemplate });

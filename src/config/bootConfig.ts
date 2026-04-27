@@ -19,6 +19,7 @@ export const bootEnv = {
     JWT_SECRET: process.env.JWT_SECRET || 'governify_secret_key',
 
     // External services
-    REPORTER_URL: process.env.REPORTER_URL || 'http://localhost:5901',
-    SCOPE_MANAGER_URL: process.env.SCOPE_MANAGER_URL || 'http://localhost:5902',
+    COMPUTER_URL: process.env.COMPUTER_URL || 'http://localhost:5901',
+    COLLECTOR_URL: process.env.COLLECTOR_URL || 'http://localhost:5902',
+    SCOPE_MANAGER_URL: process.env.SCOPE_MANAGER_URL || 'http://localhost:5903',
 };

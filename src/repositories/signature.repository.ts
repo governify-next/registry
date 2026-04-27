@@ -1,11 +1,11 @@
 import { Types } from 'mongoose';
-import Signature from '../models/signature.model.js';
+import Signature, { ISignature } from '../models/signature.model.js';
 
 export const createSignature = async (
     guaranteeId: Types.ObjectId,
-    auditConfig: Record<string, unknown>,
+    metrics: ISignature['metrics'],
 ) => {
-    return await Signature.create({ guaranteeId, auditConfig });
+    return await Signature.create({ guaranteeId, metrics });
 };
 
 export const getSignaturesByIds = async (signatureIds: Types.ObjectId[]) => {

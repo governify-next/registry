@@ -53,8 +53,8 @@ paths:
             summary: List all guarantee templates
             operationId: getGuaranteeTemplates
             description: |
-                Returns all guarantee templates in the system, each one assembled
-                with its associated metricConfigs array.
+                Returns all guarantee templates in the system, each one with its
+                embedded metrics array.
             responses:
                 '200':
                     description: List of guarantee templates retrieved successfully
@@ -86,11 +86,17 @@ paths:
                                       threshold: null
                                       window: null
                                       __v: 0
-                                      metricConfigs:
-                                          - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                                            metricConfig:
-                                                tag: feat
-                                                branch: main
+                                      metrics:
+                                          - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                            event:
+                                                eventId: EV_GITHUB_COMMITS
+                                                fetcherConfigs:
+                                                    - fetcherId: FT_REST_GITHUB_COMMITS
+                                                      fetcherConfig: null
+                                                processConfig: null
+                                            aggregation:
+                                                aggregatorType: count
+                                                aggregatorConfig: {}
                                 error: null
                 '500':
                     $ref: '#/components/responses/InternalError'
@@ -100,11 +106,12 @@ paths:
             summary: Create a guarantee template
             operationId: createGuaranteeTemplate
             description: |
-                Creates a new guarantee template along with its metric configurations.
+                Creates a new guarantee template with embedded metrics.
                 The fields `comparator`, `threshold` and `window` must be explicitly set to `null`,
                 as these values are injected later by the AgreementTemplate.
                 The `numericExpression` must be a valid mathematical expression referencing
-                exactly the metrics declared in `metricConfigs` (bidirectional consistency).
+                exactly the metrics declared in `metrics` (bidirectional consistency).
+                Each metric's eventId, fetcherId and aggregatorType are validated against the computer and collector.
             requestBody:
                 $ref: '#/components/requestBodies/GuaranteeTemplateBody'
             responses:
@@ -136,11 +143,17 @@ paths:
                                     threshold: null
                                     window: null
                                     __v: 0
-                                    metricConfigs:
-                                        - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                                          metricConfig:
-                                              tag: feat
-                                              branch: main
+                                    metrics:
+                                        - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                          event:
+                                              eventId: EV_GITHUB_COMMITS
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_REST_GITHUB_COMMITS
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
@@ -159,7 +172,7 @@ paths:
             operationId: getGuaranteeTemplate
             description: |
                 Returns a specific guarantee template identified by its unique name,
-                assembled with its associated metricConfigs array.
+                with its embedded metrics array.
             responses:
                 '200':
                     description: Guarantee template found
@@ -183,11 +196,10 @@ paths:
             operationId: updateGuaranteeTemplate
             description: |
                 Updates an existing guarantee template. All modifiable fields must be sent
-                in the body: `name`, `info`, `numericExpression` and `metricConfigs`.
+                in the body: `name`, `info`, `numericExpression` and `metrics`.
                 Fields `comparator`, `threshold` and `window` are not modifiable and are
                 silently ignored if sent.
                 If the `name` changes, the new name must be unique in the system.
-                The metricConfigs array is fully replaced (wipe-and-replace strategy).
             requestBody:
                 $ref: '#/components/requestBodies/GuaranteeTemplateUpdateBody'
             responses:
@@ -219,11 +231,17 @@ paths:
                                     threshold: null
                                     window: null
                                     __v: 0
-                                    metricConfigs:
-                                        - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                                          metricConfig:
-                                              tag: feat
-                                              branch: main
+                                    metrics:
+                                        - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                          event:
+                                              eventId: EV_GITHUB_COMMITS
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_REST_GITHUB_COMMITS
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
@@ -239,8 +257,7 @@ paths:
             summary: Delete a guarantee template
             operationId: deleteGuaranteeTemplate
             description: |
-                Permanently deletes a guarantee template and all its associated
-                metric configurations (MetricConfig documents).
+                Permanently deletes a guarantee template.
             responses:
                 '200':
                     description: Guarantee template deleted successfully
@@ -838,14 +855,26 @@ paths:
                                                             - unit: day
                                                               value: 1
                                                         anchorDate: '2025-12-08T21:00:00.000Z'
-                                                    metricConfigs:
-                                                        - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                                                          metricConfig:
-                                                              tag: feat
-                                                              branch: main
-                                                auditConfig:
-                                                    owner: universidad-sevilla
-                                                    repository: L1-01-project
+                                                    metrics:
+                                                        - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                          event:
+                                                              eventId: EV_GITHUB_COMMITS
+                                                              fetcherConfigs:
+                                                                  - fetcherId: FT_REST_GITHUB_COMMITS
+                                                                    fetcherConfig: null
+                                                              processConfig: null
+                                                          aggregation:
+                                                              aggregatorType: count
+                                                              aggregatorConfig: {}
+                                                metrics:
+                                                    - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                      fetcherConfigs:
+                                                          - fetcherId: FT_REST_GITHUB_COMMITS
+                                                            fetcherConfig:
+                                                                owner: universidad-sevilla
+                                                                repository: L1-01-project
+                                                      processConfig:
+                                                          member: member1
                                 error: null
                 '404':
                     $ref: '#/components/responses/NotFound'
@@ -961,14 +990,26 @@ paths:
                                                           - unit: day
                                                             value: 1
                                                       anchorDate: '2025-12-08T21:00:00.000Z'
-                                                  metricConfigs:
-                                                      - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                                                        metricConfig:
-                                                            tag: feat
-                                                            branch: main
-                                              auditConfig:
-                                                  owner: universidad-sevilla
-                                                  repository: L1-01-project
+                                                  metrics:
+                                                      - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                        event:
+                                                            eventId: EV_GITHUB_COMMITS
+                                                            fetcherConfigs:
+                                                                - fetcherId: FT_REST_GITHUB_COMMITS
+                                                                  fetcherConfig: null
+                                                            processConfig: null
+                                                        aggregation:
+                                                            aggregatorType: count
+                                                            aggregatorConfig: {}
+                                              metrics:
+                                                  - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                    fetcherConfigs:
+                                                        - fetcherId: FT_REST_GITHUB_COMMITS
+                                                          fetcherConfig:
+                                                              owner: universidad-sevilla
+                                                              repository: L1-01-project
+                                                    processConfig:
+                                                        member: member1
                                 error: null
                 '404':
                     $ref: '#/components/responses/NotFound'
@@ -1398,9 +1439,15 @@ components:
                                 end: '2026-12-31T23:59:59.000Z'
                         signatures:
                             - guaranteeName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
-                              auditConfig:
-                                  owner: universidad-sevilla
-                                  repository: L1-01-project
+                              metrics:
+                                  - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                    fetcherConfigs:
+                                        - fetcherId: FT_REST_GITHUB_COMMITS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                    processConfig:
+                                        member: member1
 
         GuaranteeTemplateBody:
             description: Data to create a guarantee template
@@ -1419,11 +1466,17 @@ components:
                         comparator: null
                         threshold: null
                         window: null
-                        metricConfigs:
-                            - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                              metricConfig:
-                                  tag: feat
-                                  branch: main
+                        metrics:
+                            - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                              event:
+                                  eventId: EV_GITHUB_COMMITS
+                                  fetcherConfigs:
+                                      - fetcherId: FT_REST_GITHUB_COMMITS
+                                        fetcherConfig: null
+                                  processConfig: null
+                              aggregation:
+                                  aggregatorType: count
+                                  aggregatorConfig: {}
 
         GuaranteeTemplateUpdateBody:
             description: Data to update a guarantee template
@@ -1439,11 +1492,17 @@ components:
                             description: Updated description.
                             example: Updated example.
                         numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                        metricConfigs:
-                            - name: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                              metricConfig:
-                                  tag: feat
-                                  branch: main
+                        metrics:
+                            - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                              event:
+                                  eventId: EV_GITHUB_COMMITS
+                                  fetcherConfigs:
+                                      - fetcherId: FT_REST_GITHUB_COMMITS
+                                        fetcherConfig: null
+                                  processConfig: null
+                              aggregation:
+                                  aggregatorType: count
+                                  aggregatorConfig: {}
 
     # ── Reusable responses ────────────────────────
     responses:
@@ -2665,38 +2724,79 @@ components:
                     type: integer
                     description: Mongoose version key
                     example: 0
-                metricConfigs:
+                metrics:
                     type: array
-                    description: Metric configurations associated with this template (assembled from MetricConfig documents)
+                    description: Embedded metrics for this guarantee template
                     items:
-                        $ref: '#/components/schemas/IMetricConfigEntry'
+                        $ref: '#/components/schemas/MetricEntry'
 
-        IMetricConfigEntry:
+        MetricEntry:
             type: object
-            description: A metric configuration entry within a guarantee template
+            description: A metric entry within a guarantee template
             required:
-                - name
-                - metricConfig
+                - metricName
+                - event
+                - aggregation
             properties:
-                name:
+                metricName:
                     type: string
-                    description: Name of the referenced metric (3-100 characters)
+                    description: Name of the metric (3-100 characters)
                     minLength: 3
                     maxLength: 100
                     example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                metricConfig:
+                event:
                     type: object
-                    description: Configuration for this metric (e.g. tag, branch).
-                    example:
-                        tag: feat
-                        branch: main
+                    required:
+                        - eventId
+                        - fetcherConfigs
+                    properties:
+                        eventId:
+                            type: string
+                            description: Event ID registered in the computer
+                            example: EV_GITHUB_COMMITS
+                        fetcherConfigs:
+                            type: array
+                            minItems: 1
+                            items:
+                                type: object
+                                required:
+                                    - fetcherId
+                                properties:
+                                    fetcherId:
+                                        type: string
+                                        description: Fetcher ID registered in the collector
+                                        example: FT_REST_GITHUB_COMMITS
+                                    fetcherConfig:
+                                        type: object
+                                        nullable: true
+                                        description: Fetcher configuration. Null in templates (placeholder).
+                                        example: null
+                        processConfig:
+                            type: object
+                            nullable: true
+                            description: Process configuration. Null in templates (placeholder).
+                            example: null
+                aggregation:
+                    type: object
+                    required:
+                        - aggregatorType
+                        - aggregatorConfig
+                    properties:
+                        aggregatorType:
+                            type: string
+                            description: Aggregator type registered in the computer
+                            example: count
+                        aggregatorConfig:
+                            type: object
+                            description: Aggregator configuration
+                            example: {}
 
         GuaranteeTemplateCreateInput:
             type: object
             description: |
                 Payload for creating a guarantee template.
                 Fields comparator, threshold and window must be explicitly set to null.
-                The numericExpression must reference exactly the metrics in metricConfigs.
+                The numericExpression must reference exactly the metrics in metrics.
             required:
                 - name
                 - info
@@ -2704,7 +2804,7 @@ components:
                 - comparator
                 - threshold
                 - window
-                - metricConfigs
+                - metrics
             properties:
                 name:
                     type: string
@@ -2751,11 +2851,47 @@ components:
                     nullable: true
                     enum: [null]
                     example: null
-                metricConfigs:
+                metrics:
                     type: array
                     minItems: 1
                     items:
-                        $ref: '#/components/schemas/IMetricConfigEntry'
+                        $ref: '#/components/schemas/MetricEntry'
+
+        SignatureMetricEntry:
+            type: object
+            description: A metric entry within a signature, with full configuration
+            required:
+                - metricName
+                - fetcherConfigs
+                - processConfig
+            properties:
+                metricName:
+                    type: string
+                    description: Name of the metric (must match a metric in the guarantee template)
+                    example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                fetcherConfigs:
+                    type: array
+                    minItems: 1
+                    items:
+                        type: object
+                        required:
+                            - fetcherId
+                            - fetcherConfig
+                        properties:
+                            fetcherId:
+                                type: string
+                                example: FT_REST_GITHUB_COMMITS
+                            fetcherConfig:
+                                type: object
+                                description: Full fetcher configuration (credentials, repository, etc.)
+                                example:
+                                    owner: universidad-sevilla
+                                    repository: L1-01-project
+                processConfig:
+                    type: object
+                    description: Full process configuration (member, status, etc.)
+                    example:
+                        member: member1
 
         # ── AgreementCollection ──────────────────────
         AgreementCollection:
@@ -3015,16 +3151,16 @@ components:
                                     type: string
                                     format: date-time
                                     example: '2025-12-08T21:00:00.000Z'
-                        metricConfigs:
+                        metrics:
                             type: array
+                            description: Metrics from the guarantee template
                             items:
-                                $ref: '#/components/schemas/IMetricConfigEntry'
-                auditConfig:
-                    type: object
-                    description: Audit configuration for this signature
-                    example:
-                        owner: universidad-sevilla
-                        repository: L1-01-project
+                                $ref: '#/components/schemas/MetricEntry'
+                metrics:
+                    type: array
+                    description: Signature metrics with full fetcher and process configuration
+                    items:
+                        $ref: '#/components/schemas/SignatureMetricEntry'
 
         AgreementVersionInput:
             type: object
@@ -3076,7 +3212,7 @@ components:
                         type: object
                         required:
                             - guaranteeName
-                            - auditConfig
+                            - metrics
                         properties:
                             guaranteeName:
                                 type: string
@@ -3084,12 +3220,12 @@ components:
                                 minLength: 3
                                 maxLength: 100
                                 example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
-                            auditConfig:
-                                type: object
-                                description: Audit configuration for this signature
-                                example:
-                                    owner: universidad-sevilla
-                                    repository: L1-01-project
+                            metrics:
+                                type: array
+                                description: Metrics with full fetcher and process configuration
+                                minItems: 1
+                                items:
+                                    $ref: '#/components/schemas/SignatureMetricEntry'
 
         GuaranteeTemplateUpdateInput:
             type: object
@@ -3100,7 +3236,7 @@ components:
                 - name
                 - info
                 - numericExpression
-                - metricConfigs
+                - metrics
             properties:
                 name:
                     type: string
@@ -3132,8 +3268,8 @@ components:
                     type: string
                     maxLength: 500
                     example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                metricConfigs:
+                metrics:
                     type: array
                     minItems: 1
                     items:
-                        $ref: '#/components/schemas/IMetricConfigEntry'
+                        $ref: '#/components/schemas/MetricEntry'
