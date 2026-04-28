@@ -164,6 +164,20 @@ const metricsStructureValidation = [
         .withMessage('fetcherId must be a string')
         .notEmpty()
         .withMessage('fetcherId must not be empty'),
+    body('metrics.*.event.fetcherConfigs.*.fetcherConfig')
+        .exists({ checkNull: false })
+        .withMessage('Each fetcherConfig entry must include fetcherConfig field')
+        .custom((value) => {
+            if (value !== null) throw new Error('fetcherConfig must be null in guarantee template');
+            return true;
+        }),
+    body('metrics.*.event.processConfig')
+        .exists({ checkNull: false })
+        .withMessage('Each metric must include event.processConfig field')
+        .custom((value) => {
+            if (value !== null) throw new Error('processConfig must be null in guarantee template');
+            return true;
+        }),
     body('metrics.*.aggregation.aggregatorType')
         .exists({ checkNull: true })
         .withMessage('Each metric must have an aggregation.aggregatorType')

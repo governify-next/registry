@@ -9,7 +9,7 @@ export const validateEventExists = async (eventId: string): Promise<string | nul
         });
         if (response.ok) return null;
         const data = await response.json();
-        return data.error || `eventId '${eventId}' not found in computer`;
+        return data.error?.message || `eventId '${eventId}' not found in computer`;
     } catch {
         return `Could not connect to computer to validate eventId '${eventId}'`;
     }

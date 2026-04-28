@@ -9,7 +9,7 @@ export const validateFetcherExists = async (fetcherId: string): Promise<string |
         });
         if (response.ok) return null;
         const data = await response.json();
-        return data.error || `fetcherId '${fetcherId}' not found in collector`;
+        return data.error?.message || `fetcherId '${fetcherId}' not found in collector`;
     } catch {
         return `Could not connect to collector to validate fetcherId '${fetcherId}'`;
     }

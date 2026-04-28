@@ -76,22 +76,32 @@ paths:
                                 appCode: SUCCESS
                                 data:
                                     - _id: 665e5f6a7b8c9d0e1f2a3b4c
-                                      name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                      name: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                                       info:
-                                          title: Number of Commits by Team
-                                          description: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
-                                          example: If a team has made 150 commits to the repository over the last month, this number reflects the team's overall contribution.
-                                      numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                          title: Correlation In Progress Issues with New Branch
+                                          description: 'TPa - When an issue is moved to In progress, a branch associated with this issue must be created. (by Team, Hourly)'
+                                          example: 'If 4 out of 5 In Progress issues have an associated branch, the value would be (4/5)*100 = 80%'
+                                      numericExpression: (COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES/COUNT_INPROGRESS_ISSUES*100)
                                       comparator: null
                                       threshold: null
                                       window: null
                                       __v: 0
                                       metrics:
-                                          - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                          - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                             event:
-                                                eventId: EV_GITHUB_COMMITS
+                                                eventId: EV_GITHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
                                                 fetcherConfigs:
-                                                    - fetcherId: FT_REST_GITHUB_COMMITS
+                                                    - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                      fetcherConfig: null
+                                                processConfig: null
+                                            aggregation:
+                                                aggregatorType: count
+                                                aggregatorConfig: {}
+                                          - metricName: COUNT_INPROGRESS_ISSUES
+                                            event:
+                                                eventId: EV_GITHUB_ISSUES_BY_COLUMN
+                                                fetcherConfigs:
+                                                    - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
                                                       fetcherConfig: null
                                                 processConfig: null
                                             aggregation:
@@ -133,22 +143,32 @@ paths:
                                 appCode: SUCCESS
                                 data:
                                     _id: 665e5f6a7b8c9d0e1f2a3b4c
-                                    name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                    name: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                                     info:
-                                        title: Number of Commits by Team
-                                        description: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
-                                        example: If a team has made 150 commits to the repository over the last month, this number reflects the team's overall contribution.
-                                    numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                        title: Correlation In Progress Issues with New Branch
+                                        description: 'TPa - When an issue is moved to In progress, a branch associated with this issue must be created. (by Team, Hourly)'
+                                        example: 'If 4 out of 5 In Progress issues have an associated branch, the value would be (4/5)*100 = 80%'
+                                    numericExpression: (COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES/COUNT_INPROGRESS_ISSUES*100)
                                     comparator: null
                                     threshold: null
                                     window: null
                                     __v: 0
                                     metrics:
-                                        - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                        - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                           event:
-                                              eventId: EV_GITHUB_COMMITS
+                                              eventId: EV_GITHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
                                               fetcherConfigs:
-                                                  - fetcherId: FT_REST_GITHUB_COMMITS
+                                                  - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
+                                        - metricName: COUNT_INPROGRESS_ISSUES
+                                          event:
+                                              eventId: EV_GITHUB_ISSUES_BY_COLUMN
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -221,22 +241,32 @@ paths:
                                 appCode: SUCCESS
                                 data:
                                     _id: 665e5f6a7b8c9d0e1f2a3b4c
-                                    name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                    name: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                                     info:
                                         title: Updated Title
                                         description: Updated description.
                                         example: Updated example.
-                                    numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                    numericExpression: (COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES/COUNT_INPROGRESS_ISSUES*100)
                                     comparator: null
                                     threshold: null
                                     window: null
                                     __v: 0
                                     metrics:
-                                        - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                        - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                           event:
-                                              eventId: EV_GITHUB_COMMITS
+                                              eventId: EV_GITHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
                                               fetcherConfigs:
-                                                  - fetcherId: FT_REST_GITHUB_COMMITS
+                                                  - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
+                                        - metricName: COUNT_INPROGRESS_ISSUES
+                                          event:
+                                              eventId: EV_GITHUB_ISSUES_BY_COLUMN
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -319,21 +349,101 @@ paths:
                                 appCode: SUCCESS
                                 data:
                                     - _id: 665f1a2b3c4d5e6f7a8b9c0d
-                                      name: PSG2-2526
-                                      displayName: PSG2-2526 Agreement
-                                      description: This is a sample agreement template for PSG2-2526.
+                                      name: CS169L-Sp26
+                                      displayName: TPA UCBerkeley CS169L Spring 2026
+                                      description: Team Practices Agreement for UCBerkeley CS169L Spring 2026
                                       orgId: 665a1b2c3d4e5f6a7b8c9d0e
                                       isPublic: true
                                       __v: 0
                                       guarantees:
-                                          - guaranteeTemplateName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                          - guaranteeTemplateName: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                                             comparator: '>='
-                                            threshold: 5
+                                            threshold: 75
                                             window:
                                                 period:
-                                                    - unit: day
+                                                    - unit: hour
                                                       value: 1
-                                                anchorDate: '2025-12-08T21:00:00.000Z'
+                                                anchorDate: '2024-01-01T00:00:00.000Z'
+                                          - guaranteeTemplateName: CORRELATION_BRANCHESASSOCIATED_INPROGRESSISSUES
+                                            comparator: '>='
+                                            threshold: 75
+                                            window:
+                                                period:
+                                                    - unit: hour
+                                                      value: 1
+                                                anchorDate: '2024-01-01T00:00:00.000Z'
+                                          - guaranteeTemplateName: CORRELATION_INREVIEWISSUES_OPENPR
+                                            comparator: '>='
+                                            threshold: 75
+                                            window:
+                                                period:
+                                                    - unit: hour
+                                                      value: 1
+                                                anchorDate: '2024-01-01T00:00:00.000Z'
+                                          - guaranteeTemplateName: CORRELATION_DONEISSUES_MERGEDPR
+                                            comparator: '>='
+                                            threshold: 75
+                                            window:
+                                                period:
+                                                    - unit: hour
+                                                      value: 1
+                                                anchorDate: '2024-01-01T00:00:00.000Z'
+                                          - guaranteeTemplateName: NUMBER_INPROGRESSISSUES_HOURLY_UNDER_1
+                                            comparator: '<='
+                                            threshold: 1
+                                            window:
+                                                period:
+                                                    - unit: hour
+                                                      value: 1
+                                                anchorDate: '2024-01-01T00:00:00.000Z'
+                                          - guaranteeTemplateName: NUMBER_DONEISSUES_WEEKLY_OVER_1
+                                            comparator: '>='
+                                            threshold: 1
+                                            window:
+                                                period:
+                                                    - unit: week
+                                                      value: 1
+                                                anchorDate: '2024-01-01T00:00:00.000Z'
+                                          - guaranteeTemplateName: CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_TEAM
+                                            comparator: '>='
+                                            threshold: 75
+                                            window:
+                                                period:
+                                                    - unit: week
+                                                      value: 1
+                                                anchorDate: '2024-01-01T00:00:00.000Z'
+                                          - guaranteeTemplateName: CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_MEMBER
+                                            comparator: '>='
+                                            threshold: 75
+                                            window:
+                                                period:
+                                                    - unit: week
+                                                      value: 1
+                                                anchorDate: '2024-01-01T00:00:00.000Z'
+                                          - guaranteeTemplateName: NUMBER_APPROVEDMERGEDPULLREQUEST_MEMBER
+                                            comparator: '>='
+                                            threshold: 1
+                                            window:
+                                                period:
+                                                    - unit: week
+                                                      value: 1
+                                                anchorDate: '2024-01-01T00:00:00.000Z'
+                                          - guaranteeTemplateName: CORRELATION_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER_AND_COUNTPR
+                                            comparator: '>='
+                                            threshold: 20
+                                            window:
+                                                period:
+                                                    - unit: week
+                                                      value: 1
+                                                anchorDate: '2024-01-01T00:00:00.000Z'
+                                          - guaranteeTemplateName: NUMBER_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER
+                                            comparator: '>='
+                                            threshold: 1
+                                            window:
+                                                period:
+                                                    - unit: week
+                                                      value: 1
+                                                anchorDate: '2024-01-01T00:00:00.000Z'
                                 error: null
                 '404':
                     $ref: '#/components/responses/OrganizationNotFound'
@@ -370,21 +480,101 @@ paths:
                                 appCode: SUCCESS
                                 data:
                                     _id: 665f1a2b3c4d5e6f7a8b9c0d
-                                    name: PSG2-2526
-                                    displayName: PSG2-2526 Agreement
-                                    description: This is a sample agreement template for PSG2-2526.
+                                    name: CS169L-Sp26
+                                    displayName: TPA UCBerkeley CS169L Spring 2026
+                                    description: Team Practices Agreement for UCBerkeley CS169L Spring 2026
                                     orgId: 665a1b2c3d4e5f6a7b8c9d0e
                                     isPublic: true
                                     __v: 0
                                     guarantees:
-                                        - guaranteeTemplateName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                        - guaranteeTemplateName: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                                           comparator: '>='
-                                          threshold: 5
+                                          threshold: 75
                                           window:
                                               period:
-                                                  - unit: day
+                                                  - unit: hour
                                                     value: 1
-                                              anchorDate: '2025-12-08T21:00:00.000Z'
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: CORRELATION_BRANCHESASSOCIATED_INPROGRESSISSUES
+                                          comparator: '>='
+                                          threshold: 75
+                                          window:
+                                              period:
+                                                  - unit: hour
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: CORRELATION_INREVIEWISSUES_OPENPR
+                                          comparator: '>='
+                                          threshold: 75
+                                          window:
+                                              period:
+                                                  - unit: hour
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: CORRELATION_DONEISSUES_MERGEDPR
+                                          comparator: '>='
+                                          threshold: 75
+                                          window:
+                                              period:
+                                                  - unit: hour
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: NUMBER_INPROGRESSISSUES_HOURLY_UNDER_1
+                                          comparator: '<='
+                                          threshold: 1
+                                          window:
+                                              period:
+                                                  - unit: hour
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: NUMBER_DONEISSUES_WEEKLY_OVER_1
+                                          comparator: '>='
+                                          threshold: 1
+                                          window:
+                                              period:
+                                                  - unit: week
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_TEAM
+                                          comparator: '>='
+                                          threshold: 75
+                                          window:
+                                              period:
+                                                  - unit: week
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_MEMBER
+                                          comparator: '>='
+                                          threshold: 75
+                                          window:
+                                              period:
+                                                  - unit: week
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: NUMBER_APPROVEDMERGEDPULLREQUEST_MEMBER
+                                          comparator: '>='
+                                          threshold: 1
+                                          window:
+                                              period:
+                                                  - unit: week
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: CORRELATION_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER_AND_COUNTPR
+                                          comparator: '>='
+                                          threshold: 20
+                                          window:
+                                              period:
+                                                  - unit: week
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: NUMBER_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER
+                                          comparator: '>='
+                                          threshold: 1
+                                          window:
+                                              period:
+                                                  - unit: week
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
@@ -453,21 +643,101 @@ paths:
                                 appCode: SUCCESS
                                 data:
                                     _id: 665f1a2b3c4d5e6f7a8b9c0d
-                                    name: PSG2-2526-v2
-                                    displayName: PSG2-2526 Agreement V2
-                                    description: Updated agreement template for PSG2-2526.
+                                    name: CS169L-Sp26-v2
+                                    displayName: TPA UCBerkeley CS169L Spring 2026 V2
+                                    description: Updated Team Practices Agreement for UCBerkeley CS169L Spring 2026.
                                     orgId: 665a1b2c3d4e5f6a7b8c9d0e
                                     isPublic: false
                                     __v: 0
                                     guarantees:
-                                        - guaranteeTemplateName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                        - guaranteeTemplateName: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                                           comparator: '>='
-                                          threshold: 10
+                                          threshold: 75
                                           window:
                                               period:
-                                                  - unit: day
+                                                  - unit: hour
                                                     value: 1
-                                              anchorDate: '2025-12-08T21:00:00.000Z'
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: CORRELATION_BRANCHESASSOCIATED_INPROGRESSISSUES
+                                          comparator: '>='
+                                          threshold: 75
+                                          window:
+                                              period:
+                                                  - unit: hour
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: CORRELATION_INREVIEWISSUES_OPENPR
+                                          comparator: '>='
+                                          threshold: 75
+                                          window:
+                                              period:
+                                                  - unit: hour
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: CORRELATION_DONEISSUES_MERGEDPR
+                                          comparator: '>='
+                                          threshold: 75
+                                          window:
+                                              period:
+                                                  - unit: hour
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: NUMBER_INPROGRESSISSUES_HOURLY_UNDER_1
+                                          comparator: '<='
+                                          threshold: 1
+                                          window:
+                                              period:
+                                                  - unit: hour
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: NUMBER_DONEISSUES_WEEKLY_OVER_1
+                                          comparator: '>='
+                                          threshold: 1
+                                          window:
+                                              period:
+                                                  - unit: week
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_TEAM
+                                          comparator: '>='
+                                          threshold: 75
+                                          window:
+                                              period:
+                                                  - unit: week
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_MEMBER
+                                          comparator: '>='
+                                          threshold: 75
+                                          window:
+                                              period:
+                                                  - unit: week
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: NUMBER_APPROVEDMERGEDPULLREQUEST_MEMBER
+                                          comparator: '>='
+                                          threshold: 1
+                                          window:
+                                              period:
+                                                  - unit: week
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: CORRELATION_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER_AND_COUNTPR
+                                          comparator: '>='
+                                          threshold: 20
+                                          window:
+                                              period:
+                                                  - unit: week
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
+                                        - guaranteeTemplateName: NUMBER_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER
+                                          comparator: '>='
+                                          threshold: 1
+                                          window:
+                                              period:
+                                                  - unit: week
+                                                    value: 1
+                                              anchorDate: '2024-01-01T00:00:00.000Z'
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
@@ -571,16 +841,16 @@ paths:
                                 appCode: SUCCESS
                                 data:
                                     - _id: 69cbe9901d5009a04361925d
-                                      name: acuerdo-PSG2-2526
-                                      displayName: Acuerdo PSG2 2025-2026
+                                      name: acuerdo-CS169L-Sp26
+                                      displayName: Acuerdo CS169L Spring 2026
                                       elementId: 69cbdee759092b362376ca17
                                       auditableVersionNumber: 1
                                       agreementVersions:
                                           - contract:
                                                 validity:
-                                                    timezone: Europe/Madrid
-                                                    initial: '2026-03-31T00:00:00.000Z'
-                                                    end: '2026-12-31T23:59:59.000Z'
+                                                    timezone: America/Los_Angeles
+                                                    initial: '2024-01-01T00:00:00.000Z'
+                                                    end: '2024-12-31T23:59:59.000Z'
                                                     earlyTermination: null
                                                 agreementTemplateId: 69cbd30332c8b7152e9aa73a
                                                 signaturesId:
@@ -624,8 +894,8 @@ paths:
                                 appCode: SUCCESS
                                 data:
                                     _id: 69cbe9901d5009a04361925d
-                                    name: acuerdo-PSG2-2526
-                                    displayName: Acuerdo PSG2 2025-2026
+                                    name: acuerdo-CS169L-Sp26
+                                    displayName: Acuerdo CS169L Spring 2026
                                     elementId: 69cbdee759092b362376ca17
                                     auditableVersionNumber: null
                                     agreementVersions: []
@@ -683,16 +953,16 @@ paths:
                                 appCode: SUCCESS
                                 data:
                                     _id: 69cbe9901d5009a04361925d
-                                    name: acuerdo-PSG2-2526
-                                    displayName: Acuerdo PSG2 2025-2026
+                                    name: acuerdo-CS169L-Sp26
+                                    displayName: Acuerdo CS169L Spring 2026
                                     elementId: 69cbdee759092b362376ca17
                                     auditableVersionNumber: 1
                                     agreementVersions:
                                         - contract:
                                               validity:
-                                                  timezone: Europe/Madrid
-                                                  initial: '2026-03-31T00:00:00.000Z'
-                                                  end: '2026-12-31T23:59:59.000Z'
+                                                  timezone: America/Los_Angeles
+                                                  initial: '2024-01-01T00:00:00.000Z'
+                                                  end: '2024-12-31T23:59:59.000Z'
                                                   earlyTermination: null
                                               agreementTemplateId: 69cbd30332c8b7152e9aa73a
                                               signaturesId:
@@ -736,16 +1006,16 @@ paths:
                                 appCode: SUCCESS
                                 data:
                                     _id: 69cbe9901d5009a04361925d
-                                    name: acuerdo-PSG2-2526
-                                    displayName: Acuerdo PSG2 2025-2026 (actualizado)
+                                    name: acuerdo-CS169L-Sp26
+                                    displayName: Acuerdo CS169L Spring 2026 (actualizado)
                                     elementId: 69cbdee759092b362376ca17
                                     auditableVersionNumber: null
                                     agreementVersions:
                                         - contract:
                                               validity:
-                                                  timezone: Europe/Madrid
-                                                  initial: '2026-03-31T00:00:00.000Z'
-                                                  end: '2026-12-31T23:59:59.000Z'
+                                                  timezone: America/Los_Angeles
+                                                  initial: '2024-01-01T00:00:00.000Z'
+                                                  end: '2024-12-31T23:59:59.000Z'
                                                   earlyTermination: null
                                               agreementTemplateId: 69cbd30332c8b7152e9aa73a
                                               signaturesId:
@@ -754,7 +1024,7 @@ paths:
                                     fields: []
                                     permissions: []
                                     __v: 0
-                                    updatedAt: '2026-03-31T18:26:00.438Z'
+                                    updatedAt: '2024-01-01T12:00:00.000Z'
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
@@ -837,44 +1107,66 @@ paths:
                                 data:
                                     - versionNumber: 1
                                       contract:
-                                          agreementTemplateName: PSG2-2526
+                                          agreementTemplateName: CS169L-Sp26
                                           validity:
-                                              timezone: Europe/Madrid
-                                              initial: '2026-03-31T00:00:00.000Z'
-                                              end: '2026-12-31T23:59:59.000Z'
+                                              timezone: America/Los_Angeles
+                                              initial: '2024-01-01T00:00:00.000Z'
+                                              end: '2024-12-31T23:59:59.000Z'
                                               earlyTermination: null
                                           signatures:
                                               - signatureId: 69cbea571d5009a043619276
                                                 guarantee:
-                                                    name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
-                                                    numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                    name: CORRELATION_INPROGRESSISSUES_NEWBRANCH
+                                                    numericExpression: (COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES/COUNT_INPROGRESS_ISSUES*100)
                                                     comparator: '>='
-                                                    threshold: 5
+                                                    threshold: 75
                                                     window:
                                                         period:
-                                                            - unit: day
+                                                            - unit: hour
                                                               value: 1
-                                                        anchorDate: '2025-12-08T21:00:00.000Z'
+                                                        anchorDate: '2024-01-01T00:00:00.000Z'
                                                     metrics:
-                                                        - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                        - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                                           event:
-                                                              eventId: EV_GITHUB_COMMITS
+                                                              eventId: EV_GITHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
                                                               fetcherConfigs:
-                                                                  - fetcherId: FT_REST_GITHUB_COMMITS
+                                                                  - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                                    fetcherConfig: null
+                                                              processConfig: null
+                                                          aggregation:
+                                                              aggregatorType: count
+                                                              aggregatorConfig: {}
+                                                        - metricName: COUNT_INPROGRESS_ISSUES
+                                                          event:
+                                                              eventId: EV_GITHUB_ISSUES_BY_COLUMN
+                                                              fetcherConfigs:
+                                                                  - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
                                                                     fetcherConfig: null
                                                               processConfig: null
                                                           aggregation:
                                                               aggregatorType: count
                                                               aggregatorConfig: {}
                                                 metrics:
-                                                    - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                    - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                                       fetcherConfigs:
-                                                          - fetcherId: FT_REST_GITHUB_COMMITS
+                                                          - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
                                                             fetcherConfig:
                                                                 owner: universidad-sevilla
                                                                 repository: L1-01-project
+                                                                token: YOUR_GITHUB_TOKEN
                                                       processConfig:
-                                                          member: member1
+                                                          columns:
+                                                              - In progress
+                                                    - metricName: COUNT_INPROGRESS_ISSUES
+                                                      fetcherConfigs:
+                                                          - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                            fetcherConfig:
+                                                                owner: universidad-sevilla
+                                                                repository: L1-01-project
+                                                                token: YOUR_GITHUB_TOKEN
+                                                      processConfig:
+                                                          columns:
+                                                              - In progress
                                 error: null
                 '404':
                     $ref: '#/components/responses/NotFound'
@@ -912,16 +1204,16 @@ paths:
                                 data:
                                     contract:
                                         validity:
-                                            timezone: Europe/Madrid
-                                            initial: '2026-03-31T00:00:00.000Z'
-                                            end: '2026-12-31T23:59:59.000Z'
+                                            timezone: America/Los_Angeles
+                                            initial: '2024-01-01T00:00:00.000Z'
+                                            end: '2024-12-31T23:59:59.000Z'
                                             earlyTermination: null
                                         agreementTemplateId: 69cbd30332c8b7152e9aa73a
                                         signaturesId:
                                             - 69cbea571d5009a043619276
                                     versionNumber: 1
-                                    createdAt: '2026-03-31T16:00:00.000Z'
-                                    updatedAt: '2026-03-31T16:00:00.000Z'
+                                    createdAt: '2024-01-01T12:00:00.000Z'
+                                    updatedAt: '2024-01-01T12:00:00.000Z'
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
@@ -972,44 +1264,66 @@ paths:
                                 data:
                                     versionNumber: 1
                                     contract:
-                                        agreementTemplateName: PSG2-2526
+                                        agreementTemplateName: CS169L-Sp26
                                         validity:
-                                            timezone: Europe/Madrid
-                                            initial: '2026-03-31T00:00:00.000Z'
-                                            end: '2026-12-31T23:59:59.000Z'
+                                            timezone: America/Los_Angeles
+                                            initial: '2024-01-01T00:00:00.000Z'
+                                            end: '2024-12-31T23:59:59.000Z'
                                             earlyTermination: null
                                         signatures:
                                             - signatureId: 69cbea571d5009a043619276
                                               guarantee:
-                                                  name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
-                                                  numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                  name: CORRELATION_INPROGRESSISSUES_NEWBRANCH
+                                                  numericExpression: (COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES/COUNT_INPROGRESS_ISSUES*100)
                                                   comparator: '>='
-                                                  threshold: 5
+                                                  threshold: 75
                                                   window:
                                                       period:
-                                                          - unit: day
+                                                          - unit: hour
                                                             value: 1
-                                                      anchorDate: '2025-12-08T21:00:00.000Z'
+                                                      anchorDate: '2024-01-01T00:00:00.000Z'
                                                   metrics:
-                                                      - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                      - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                                         event:
-                                                            eventId: EV_GITHUB_COMMITS
+                                                            eventId: EV_GITHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
                                                             fetcherConfigs:
-                                                                - fetcherId: FT_REST_GITHUB_COMMITS
+                                                                - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                                  fetcherConfig: null
+                                                            processConfig: null
+                                                        aggregation:
+                                                            aggregatorType: count
+                                                            aggregatorConfig: {}
+                                                      - metricName: COUNT_INPROGRESS_ISSUES
+                                                        event:
+                                                            eventId: EV_GITHUB_ISSUES_BY_COLUMN
+                                                            fetcherConfigs:
+                                                                - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
                                                                   fetcherConfig: null
                                                             processConfig: null
                                                         aggregation:
                                                             aggregatorType: count
                                                             aggregatorConfig: {}
                                               metrics:
-                                                  - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                                  - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                                     fetcherConfigs:
-                                                        - fetcherId: FT_REST_GITHUB_COMMITS
+                                                        - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
                                                           fetcherConfig:
                                                               owner: universidad-sevilla
                                                               repository: L1-01-project
+                                                              token: YOUR_GITHUB_TOKEN
                                                     processConfig:
-                                                        member: member1
+                                                        columns:
+                                                            - In progress
+                                                  - metricName: COUNT_INPROGRESS_ISSUES
+                                                    fetcherConfigs:
+                                                        - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                          fetcherConfig:
+                                                              owner: universidad-sevilla
+                                                              repository: L1-01-project
+                                                              token: YOUR_GITHUB_TOKEN
+                                                    processConfig:
+                                                        columns:
+                                                            - In progress
                                 error: null
                 '404':
                     $ref: '#/components/responses/NotFound'
@@ -1077,9 +1391,9 @@ paths:
                                     type: string
                                     format: date-time
                                     description: Termination date (ISO8601). Must be after validity.initial and before validity.end.
-                                    example: '2026-06-15T12:00:00.000Z'
+                                    example: '2024-06-15T12:00:00.000Z'
                         example:
-                            earlyTermination: '2026-06-15T12:00:00.000Z'
+                            earlyTermination: '2024-06-15T12:00:00.000Z'
             responses:
                 '200':
                     description: Active version terminated successfully
@@ -1099,17 +1413,17 @@ paths:
                                 appCode: SUCCESS
                                 data:
                                     _id: 69cbe9901d5009a04361925d
-                                    name: acuerdo-PSG2-2526
-                                    displayName: Acuerdo PSG2 2025-2026
+                                    name: acuerdo-CS169L-Sp26
+                                    displayName: Acuerdo CS169L Spring 2026
                                     elementId: 69cbdee759092b362376ca17
                                     auditableVersionNumber: null
                                     agreementVersions:
                                         - contract:
                                               validity:
-                                                  timezone: Europe/Madrid
-                                                  initial: '2026-03-31T00:00:00.000Z'
-                                                  end: '2026-12-31T23:59:59.000Z'
-                                                  earlyTermination: '2026-06-15T12:00:00.000Z'
+                                                  timezone: America/Los_Angeles
+                                                  initial: '2024-01-01T00:00:00.000Z'
+                                                  end: '2024-12-31T23:59:59.000Z'
+                                                  earlyTermination: '2024-06-15T12:00:00.000Z'
                                               agreementTemplateId: 69cbd30332c8b7152e9aa73a
                                               signaturesId:
                                                   - 69cbf256cf7ba204e4725122
@@ -1178,7 +1492,7 @@ components:
             description: Unique name of the guarantee template
             schema:
                 type: string
-            example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+            example: CORRELATION_INPROGRESSISSUES_NEWBRANCH
         agreementTemplateName:
             name: agreementTemplateName
             in: path
@@ -1186,7 +1500,7 @@ components:
             description: Unique name of the agreement template within the organization
             schema:
                 type: string
-            example: PSG2-2526
+            example: CS169L-Sp26
         elementName:
             name: elementName
             in: path
@@ -1202,7 +1516,7 @@ components:
             description: Unique name of the agreement collection within the element
             schema:
                 type: string
-            example: acuerdo-PSG2-2526
+            example: acuerdo-CS169L-Sp26
         versionNumber:
             name: versionNumber
             in: path
@@ -1382,19 +1696,99 @@ components:
                     schema:
                         $ref: '#/components/schemas/AgreementTemplateInput'
                     example:
-                        name: PSG2-2526
-                        displayName: PSG2-2526 Agreement
-                        description: This is a sample agreement template for PSG2-2526.
+                        name: CS169L-Sp26
+                        displayName: TPA UCBerkeley CS169L Spring 2026
+                        description: Team Practices Agreement for UCBerkeley CS169L Spring 2026
                         isPublic: true
                         guarantees:
-                            - guaranteeTemplateName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                            - guaranteeTemplateName: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                               comparator: '>='
-                              threshold: 5
+                              threshold: 75
                               window:
                                   period:
-                                      - unit: day
+                                      - unit: hour
                                         value: 1
-                                  anchorDate: '2025-12-08T21:00:00.000Z'
+                                  anchorDate: '2024-01-01T00:00:00.000Z'
+                            - guaranteeTemplateName: CORRELATION_BRANCHESASSOCIATED_INPROGRESSISSUES
+                              comparator: '>='
+                              threshold: 75
+                              window:
+                                  period:
+                                      - unit: hour
+                                        value: 1
+                                  anchorDate: '2024-01-01T00:00:00.000Z'
+                            - guaranteeTemplateName: CORRELATION_INREVIEWISSUES_OPENPR
+                              comparator: '>='
+                              threshold: 75
+                              window:
+                                  period:
+                                      - unit: hour
+                                        value: 1
+                                  anchorDate: '2024-01-01T00:00:00.000Z'
+                            - guaranteeTemplateName: CORRELATION_DONEISSUES_MERGEDPR
+                              comparator: '>='
+                              threshold: 75
+                              window:
+                                  period:
+                                      - unit: hour
+                                        value: 1
+                                  anchorDate: '2024-01-01T00:00:00.000Z'
+                            - guaranteeTemplateName: NUMBER_INPROGRESSISSUES_HOURLY_UNDER_1
+                              comparator: '<='
+                              threshold: 1
+                              window:
+                                  period:
+                                      - unit: hour
+                                        value: 1
+                                  anchorDate: '2024-01-01T00:00:00.000Z'
+                            - guaranteeTemplateName: NUMBER_DONEISSUES_WEEKLY_OVER_1
+                              comparator: '>='
+                              threshold: 1
+                              window:
+                                  period:
+                                      - unit: week
+                                        value: 1
+                                  anchorDate: '2024-01-01T00:00:00.000Z'
+                            - guaranteeTemplateName: CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_TEAM
+                              comparator: '>='
+                              threshold: 75
+                              window:
+                                  period:
+                                      - unit: week
+                                        value: 1
+                                  anchorDate: '2024-01-01T00:00:00.000Z'
+                            - guaranteeTemplateName: CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_MEMBER
+                              comparator: '>='
+                              threshold: 75
+                              window:
+                                  period:
+                                      - unit: week
+                                        value: 1
+                                  anchorDate: '2024-01-01T00:00:00.000Z'
+                            - guaranteeTemplateName: NUMBER_APPROVEDMERGEDPULLREQUEST_MEMBER
+                              comparator: '>='
+                              threshold: 1
+                              window:
+                                  period:
+                                      - unit: week
+                                        value: 1
+                                  anchorDate: '2024-01-01T00:00:00.000Z'
+                            - guaranteeTemplateName: CORRELATION_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER_AND_COUNTPR
+                              comparator: '>='
+                              threshold: 20
+                              window:
+                                  period:
+                                      - unit: week
+                                        value: 1
+                                  anchorDate: '2024-01-01T00:00:00.000Z'
+                            - guaranteeTemplateName: NUMBER_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER
+                              comparator: '>='
+                              threshold: 1
+                              window:
+                                  period:
+                                      - unit: week
+                                        value: 1
+                                  anchorDate: '2024-01-01T00:00:00.000Z'
 
         AgreementCollectionBody:
             description: Data to create an agreement collection
@@ -1404,8 +1798,8 @@ components:
                     schema:
                         $ref: '#/components/schemas/AgreementCollectionInput'
                     example:
-                        name: acuerdo-PSG2-2526
-                        displayName: Acuerdo PSG2 2025-2026
+                        name: acuerdo-CS169L-Sp26
+                        displayName: Acuerdo CS169L Spring 2026
                         fields: []
                         permissions: []
 
@@ -1417,8 +1811,8 @@ components:
                     schema:
                         $ref: '#/components/schemas/AgreementCollectionUpdateInput'
                     example:
-                        name: acuerdo-PSG2-2526
-                        displayName: Acuerdo PSG2 2025-2026 (actualizado)
+                        name: acuerdo-CS169L-Sp26
+                        displayName: Acuerdo CS169L Spring 2026 (actualizado)
                         fields: []
                         permissions: []
                         auditableVersionNumber: null
@@ -1432,22 +1826,305 @@ components:
                         $ref: '#/components/schemas/AgreementVersionInput'
                     example:
                         contract:
-                            agreementTemplateName: PSG2-2526
+                            agreementTemplateName: CS169L-Sp26
                             validity:
-                                timezone: Europe/Madrid
-                                initial: '2026-03-31T00:00:00.000Z'
-                                end: '2026-12-31T23:59:59.000Z'
+                                timezone: America/Los_Angeles
+                                initial: '2024-01-01T00:00:00.000Z'
+                                end: '2024-12-31T23:59:59.000Z'
                         signatures:
-                            - guaranteeName: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                            - guaranteeName: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                               metrics:
-                                  - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                                  - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                     fetcherConfigs:
-                                        - fetcherId: FT_REST_GITHUB_COMMITS
+                                        - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
                                     processConfig:
-                                        member: member1
+                                        columns:
+                                            - In progress
+                                  - metricName: COUNT_INPROGRESS_ISSUES
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        columns:
+                                            - In progress
+                            - guaranteeName: CORRELATION_BRANCHESASSOCIATED_INPROGRESSISSUES
+                              metrics:
+                                  - metricName: COUNT_BRANCHES_ASSOCIATED_TO_INPROGRESS_ISSUES
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        columns:
+                                            - In progress
+                                  - metricName: COUNT_INPROGRESS_ISSUES
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        columns:
+                                            - In progress
+                            - guaranteeName: CORRELATION_INREVIEWISSUES_OPENPR
+                              metrics:
+                                  - metricName: COUNT_INREVIEW_ISSUES_WITH_ASSOCIATED_OPEN_PR
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        columns:
+                                            - In review
+                                        status: OPEN
+                                  - metricName: COUNT_INREVIEW_ISSUES
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        columns:
+                                            - In review
+                            - guaranteeName: CORRELATION_DONEISSUES_MERGEDPR
+                              metrics:
+                                  - metricName: COUNT_DONE_ISSUES_WITH_ASSOCIATED_CLOSED_PR
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        columns:
+                                            - Closed
+                                            - Done
+                                        status: MERGED
+                                  - metricName: COUNT_DONE_ISSUES
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        columns:
+                                            - Closed
+                                            - Done
+                            - guaranteeName: CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_TEAM
+                              metrics:
+                                  - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_TEAM
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        reviewState: APPROVED
+                                  - metricName: COUNT_PR_MERGED_TEAM
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig: {}
+                            - guaranteeName: NUMBER_INPROGRESSISSUES_HOURLY_UNDER_1
+                              metrics:
+                                  - metricName: COUNT_INPROGRESSISSUES_MEMBER
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        columns:
+                                            - In progress
+                                        username: member1
+                            - guaranteeName: NUMBER_INPROGRESSISSUES_HOURLY_UNDER_1
+                              metrics:
+                                  - metricName: COUNT_INPROGRESSISSUES_MEMBER
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        columns:
+                                            - In progress
+                                        username: member2
+                            - guaranteeName: NUMBER_DONEISSUES_WEEKLY_OVER_1
+                              metrics:
+                                  - metricName: COUNT_DONEISSUES_MEMBER
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        columns:
+                                            - Closed
+                                            - Done
+                                        username: member1
+                            - guaranteeName: NUMBER_DONEISSUES_WEEKLY_OVER_1
+                              metrics:
+                                  - metricName: COUNT_DONEISSUES_MEMBER
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        columns:
+                                            - Closed
+                                            - Done
+                                        username: member2
+                            - guaranteeName: CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_MEMBER
+                              metrics:
+                                  - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        reviewState: APPROVED
+                                        username: member1
+                                  - metricName: COUNT_PR_MERGED_MEMBER
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        username: member1
+                            - guaranteeName: CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_MEMBER
+                              metrics:
+                                  - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        reviewState: APPROVED
+                                        username: member2
+                                  - metricName: COUNT_PR_MERGED_MEMBER
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        username: member2
+                            - guaranteeName: NUMBER_APPROVEDMERGEDPULLREQUEST_MEMBER
+                              metrics:
+                                  - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        reviewState: APPROVED
+                                        username: member1
+                            - guaranteeName: NUMBER_APPROVEDMERGEDPULLREQUEST_MEMBER
+                              metrics:
+                                  - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        reviewState: APPROVED
+                                        username: member2
+                            - guaranteeName: CORRELATION_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER_AND_COUNTPR
+                              metrics:
+                                  - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        username: member1
+                                  - metricName: COUNT_PR
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        username: member1
+                            - guaranteeName: CORRELATION_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER_AND_COUNTPR
+                              metrics:
+                                  - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        username: member2
+                                  - metricName: COUNT_PR
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        username: member2
+                            - guaranteeName: NUMBER_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER
+                              metrics:
+                                  - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        username: member1
+                            - guaranteeName: NUMBER_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER
+                              metrics:
+                                  - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
+                                    fetcherConfigs:
+                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                          fetcherConfig:
+                                              owner: universidad-sevilla
+                                              repository: L1-01-project
+                                              token: YOUR_GITHUB_TOKEN
+                                    processConfig:
+                                        username: member2
 
         GuaranteeTemplateBody:
             description: Data to create a guarantee template
@@ -1456,27 +2133,330 @@ components:
                 application/json:
                     schema:
                         $ref: '#/components/schemas/GuaranteeTemplateCreateInput'
-                    example:
-                        name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
-                        info:
-                            title: Number of Commits by Team
-                            description: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
-                            example: If a team has made 150 commits to the repository over the last month, this number reflects the team's overall contribution.
-                        numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                        comparator: null
-                        threshold: null
-                        window: null
-                        metrics:
-                            - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
-                              event:
-                                  eventId: EV_GITHUB_COMMITS
-                                  fetcherConfigs:
-                                      - fetcherId: FT_REST_GITHUB_COMMITS
-                                        fetcherConfig: null
-                                  processConfig: null
-                              aggregation:
-                                  aggregatorType: count
-                                  aggregatorConfig: {}
+                    examples:
+                        TPa_CORRELATION_INPROGRESSISSUES_NEWBRANCH:
+                            summary: 'TPa - Correlation In Progress Issues with New Branch'
+                            value:
+                                name: CORRELATION_INPROGRESSISSUES_NEWBRANCH
+                                info:
+                                    title: Correlation In Progress Issues with New Branch
+                                    description: 'TPa - When an issue is moved to In progress, a branch associated with this issue must be created. (by Team, Hourly)'
+                                    example: 'If 4 out of 5 In Progress issues have an associated branch, the value would be (4/5)*100 = 80%'
+                                numericExpression: (COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES/COUNT_INPROGRESS_ISSUES*100)
+                                comparator: null
+                                threshold: null
+                                window: null
+                                metrics:
+                                    - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
+                                      event:
+                                          eventId: EV_GITHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                                    - metricName: COUNT_INPROGRESS_ISSUES
+                                      event:
+                                          eventId: EV_GITHUB_ISSUES_BY_COLUMN
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                        TPb_CORRELATION_BRANCHESASSOCIATED_INPROGRESSISSUES:
+                            summary: 'TPb - Correlation Branches Associated to In Progress Issues'
+                            value:
+                                name: CORRELATION_BRANCHESASSOCIATED_INPROGRESSISSUES
+                                info:
+                                    title: Correlation Branches Associated to In Progress Issues
+                                    description: 'TPb - Each issue In progress must have a different branch associated with it. (by Team, Hourly)'
+                                    example: 'If 3 unique branches are linked to 4 In Progress issues, the value would be (3/4)*100 = 75%'
+                                numericExpression: (COUNT_BRANCHES_ASSOCIATED_TO_INPROGRESS_ISSUES/COUNT_INPROGRESS_ISSUES*100)
+                                comparator: null
+                                threshold: null
+                                window: null
+                                metrics:
+                                    - metricName: COUNT_BRANCHES_ASSOCIATED_TO_INPROGRESS_ISSUES
+                                      event:
+                                          eventId: EV_GITHUB_ISSUES_WITH_DIFFERENT_BRANCHES_BY_COLUMN
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                                    - metricName: COUNT_INPROGRESS_ISSUES
+                                      event:
+                                          eventId: EV_GITHUB_ISSUES_BY_COLUMN
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                        TPc_CORRELATION_INREVIEWISSUES_OPENPR:
+                            summary: 'TPc - Correlation In Review Issues with Open PR'
+                            value:
+                                name: CORRELATION_INREVIEWISSUES_OPENPR
+                                info:
+                                    title: Correlation In Review Issues with Open PR
+                                    description: 'TPc - When an issue is moved to In review, a Pull Request associated with that issue must be created. (by Team, Hourly)'
+                                    example: 'If 3 out of 4 In Review issues have an associated open PR, the value would be (3/4)*100 = 75%'
+                                numericExpression: (COUNT_INREVIEW_ISSUES_WITH_ASSOCIATED_OPEN_PR/COUNT_INREVIEW_ISSUES*100)
+                                comparator: null
+                                threshold: null
+                                window: null
+                                metrics:
+                                    - metricName: COUNT_INREVIEW_ISSUES_WITH_ASSOCIATED_OPEN_PR
+                                      event:
+                                          eventId: EV_GITHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_PULL_REQUESTS_BY_STATUS
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                                    - metricName: COUNT_INREVIEW_ISSUES
+                                      event:
+                                          eventId: EV_GITHUB_ISSUES_BY_COLUMN
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                        TPd_CORRELATION_DONEISSUES_MERGEDPR:
+                            summary: 'TPd - Correlation Done Issues with Merged PR'
+                            value:
+                                name: CORRELATION_DONEISSUES_MERGEDPR
+                                info:
+                                    title: Correlation Done Issues with Merged PR
+                                    description: 'TPd - When an issue is moved to Done, the Pull Request associated to the issue must be merged. (by Team, Hourly)'
+                                    example: 'If 3 out of 4 Done issues have an associated merged PR, the value would be (3/4)*100 = 75%'
+                                numericExpression: (COUNT_DONE_ISSUES_WITH_ASSOCIATED_CLOSED_PR/COUNT_DONE_ISSUES*100)
+                                comparator: null
+                                threshold: null
+                                window: null
+                                metrics:
+                                    - metricName: COUNT_DONE_ISSUES_WITH_ASSOCIATED_CLOSED_PR
+                                      event:
+                                          eventId: EV_GITHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_PULL_REQUESTS_BY_STATUS
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                                    - metricName: COUNT_DONE_ISSUES
+                                      event:
+                                          eventId: EV_GITHUB_ISSUES_BY_COLUMN
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                        TPe_NUMBER_INPROGRESSISSUES_HOURLY_UNDER_1:
+                            summary: 'TPe - Number of In Progress Issues per Member'
+                            value:
+                                name: NUMBER_INPROGRESSISSUES_HOURLY_UNDER_1
+                                info:
+                                    title: Number of In Progress Issues per Member
+                                    description: 'TPe - Each developer should only be working on one issue at a time. (by Member, Hourly)'
+                                    example: 'If a member has 2 issues In Progress, the value would be 2'
+                                numericExpression: COUNT_INPROGRESSISSUES_MEMBER
+                                comparator: null
+                                threshold: null
+                                window: null
+                                metrics:
+                                    - metricName: COUNT_INPROGRESSISSUES_MEMBER
+                                      event:
+                                          eventId: EV_GITHUB_ISSUES_BY_COLUMN_ASSOCIATED_TO_MEMBER
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                        TPf_NUMBER_DONEISSUES_WEEKLY_OVER_1:
+                            summary: 'TPf - Number of Done Issues per Member Weekly'
+                            value:
+                                name: NUMBER_DONEISSUES_WEEKLY_OVER_1
+                                info:
+                                    title: Number of Done Issues per Member Weekly
+                                    description: 'TPf - Each developer should be finishing at least one issue per week. (by Member, Weekly)'
+                                    example: 'If a member completed 2 issues this week, the value would be 2'
+                                numericExpression: COUNT_DONEISSUES_MEMBER
+                                comparator: null
+                                threshold: null
+                                window: null
+                                metrics:
+                                    - metricName: COUNT_DONEISSUES_MEMBER
+                                      event:
+                                          eventId: EV_GITHUB_ISSUES_BY_COLUMN_FILTERED_BY_UPDATED_AT_DATE_ASSOCIATED_TO_MEMBER
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                        TPg_CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_TEAM:
+                            summary: 'TPg - Correlation Approved Merged PRs vs Total Merged PRs (Team)'
+                            value:
+                                name: CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_TEAM
+                                info:
+                                    title: 'Correlation Approved Merged PRs vs Total Merged PRs (Team)'
+                                    description: 'TPg - Each Pull Request should be approved before merging. (by Team, Weekly)'
+                                    example: 'If 6 out of 8 merged PRs have at least one approved review, the value would be (6/8)*100 = 75%'
+                                numericExpression: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_TEAM/COUNT_PR_MERGED_TEAM*100
+                                comparator: null
+                                threshold: null
+                                window: null
+                                metrics:
+                                    - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_TEAM
+                                      event:
+                                          eventId: EV_GITHUB_MERGED_PR_BY_REVIEW_STATE
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                                    - metricName: COUNT_PR_MERGED_TEAM
+                                      event:
+                                          eventId: EV_GITHUB_PR_MERGED
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                        TPh1_CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_MEMBER:
+                            summary: 'TPh.1 - Correlation Approved Merged PRs vs Total Merged PRs (Member)'
+                            value:
+                                name: CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_MEMBER
+                                info:
+                                    title: 'Correlation Approved Merged PRs vs Total Merged PRs (Member)'
+                                    description: 'TPh.1 - Each developer should only merge a Pull Request if it is approved. (by Member, Weekly)'
+                                    example: 'If a member merged 4 PRs and 3 had approved reviews, the value would be (3/4)*100 = 75%'
+                                numericExpression: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER/COUNT_PR_MERGED_MEMBER*100
+                                comparator: null
+                                threshold: null
+                                window: null
+                                metrics:
+                                    - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
+                                      event:
+                                          eventId: EV_GITHUB_MERGED_PR_BY_REVIEW_STATE
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                                    - metricName: COUNT_PR_MERGED_MEMBER
+                                      event:
+                                          eventId: EV_GITHUB_PR_MERGED
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                        TPh2_NUMBER_APPROVEDMERGEDPULLREQUEST_MEMBER:
+                            summary: 'TPh.2 - Number of Approved Merged PRs per Member'
+                            value:
+                                name: NUMBER_APPROVEDMERGEDPULLREQUEST_MEMBER
+                                info:
+                                    title: Number of Approved Merged PRs per Member
+                                    description: 'TPh.2 - Each developer should only merge a Pull Request if it is approved. (by Member, Weekly)'
+                                    example: 'If a member merged 3 PRs and 2 had approved reviews, the value would be 2'
+                                numericExpression: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
+                                comparator: null
+                                threshold: null
+                                window: null
+                                metrics:
+                                    - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
+                                      event:
+                                          eventId: EV_GITHUB_MERGED_PR_BY_REVIEW_STATE
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                        TPi1_CORRELATION_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER_AND_COUNTPR:
+                            summary: 'TPi.1 - Correlation PRs Commented/Approved by Member vs Total PRs from Others'
+                            value:
+                                name: CORRELATION_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER_AND_COUNTPR
+                                info:
+                                    title: 'Correlation PRs Commented/Approved by Member vs Total PRs from Others'
+                                    description: "TPi.1 - Each developer should add comments or approve several other teammates' open Pull Requests each week. (by Member, Weekly)"
+                                    example: 'If there are 10 PRs from others and the member commented on 3, the value would be (3/10)*100 = 30%'
+                                numericExpression: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER/COUNT_PR*100
+                                comparator: null
+                                threshold: null
+                                window: null
+                                metrics:
+                                    - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
+                                      event:
+                                          eventId: EV_GITHUB_PRS_WITH_COMMENT_OR_REVIEW_BY_MEMBER
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                                    - metricName: COUNT_PR
+                                      event:
+                                          eventId: EV_GITHUB_PRS_FROM_OTHERS
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
+                        TPi2_NUMBER_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER:
+                            summary: 'TPi.2 - Number of PRs Commented/Approved by Member'
+                            value:
+                                name: NUMBER_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER
+                                info:
+                                    title: Number of PRs Commented/Approved by Member
+                                    description: "TPi.2 - Each developer should add comments or approve several other teammates' open Pull Requests each week. (by Member, Weekly)"
+                                    example: 'If a member commented or approved 3 PRs from others, the value would be 3'
+                                numericExpression: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
+                                comparator: null
+                                threshold: null
+                                window: null
+                                metrics:
+                                    - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
+                                      event:
+                                          eventId: EV_GITHUB_PRS_WITH_COMMENT_OR_REVIEW_BY_MEMBER
+                                          fetcherConfigs:
+                                              - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                fetcherConfig: null
+                                          processConfig: null
+                                      aggregation:
+                                          aggregatorType: count
+                                          aggregatorConfig: {}
 
         GuaranteeTemplateUpdateBody:
             description: Data to update a guarantee template
@@ -1486,18 +2466,28 @@ components:
                     schema:
                         $ref: '#/components/schemas/GuaranteeTemplateUpdateInput'
                     example:
-                        name: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                        name: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                         info:
                             title: Updated Title
                             description: Updated description.
                             example: Updated example.
-                        numericExpression: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                        numericExpression: (COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES/COUNT_INPROGRESS_ISSUES*100)
                         metrics:
-                            - metricName: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                            - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                               event:
-                                  eventId: EV_GITHUB_COMMITS
+                                  eventId: EV_GITHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
                                   fetcherConfigs:
-                                      - fetcherId: FT_REST_GITHUB_COMMITS
+                                      - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
+                                        fetcherConfig: null
+                                  processConfig: null
+                              aggregation:
+                                  aggregatorType: count
+                                  aggregatorConfig: {}
+                            - metricName: COUNT_INPROGRESS_ISSUES
+                              event:
+                                  eventId: EV_GITHUB_ISSUES_BY_COLUMN
+                                  fetcherConfigs:
+                                      - fetcherId: FT_GQL_GITHUB_PROJECTV2_ITEMS
                                         fetcherConfig: null
                                   processConfig: null
                               aggregation:
@@ -1754,12 +2744,12 @@ components:
                         $ref: '#/components/schemas/ErrorResponse'
                     example:
                         success: false
-                        message: "Guarantee template 'GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS' already exists"
+                        message: "Guarantee template 'CORRELATION_INPROGRESSISSUES_NEWBRANCH' already exists"
                         httpStatus: 409
                         appCode: DUPLICATE_KEY
                         data: null
                         error:
-                            message: "Guarantee template 'GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS' already exists"
+                            message: "Guarantee template 'CORRELATION_INPROGRESSISSUES_NEWBRANCH' already exists"
                             details: null
         ElementNotFound:
             description: The element was not found in the organization
@@ -2537,17 +3527,17 @@ components:
                     pattern: '^[A-Za-z0-9_-]+$'
                     minLength: 3
                     maxLength: 100
-                    example: PSG2-2526
+                    example: CS169L-Sp26
                 displayName:
                     type: string
                     description: Human-readable display name (max 200 characters)
                     maxLength: 200
-                    example: PSG2-2526 Agreement
+                    example: TPA UCBerkeley CS169L Spring 2026
                 description:
                     type: string
                     description: Template description (max 500 characters)
                     maxLength: 500
-                    example: This is a sample agreement template for PSG2-2526.
+                    example: Team Practices Agreement for UCBerkeley CS169L Spring 2026
                 orgId:
                     type: string
                     description: ObjectId of the organization this template belongs to
@@ -2580,7 +3570,7 @@ components:
                     description: Name of the referenced GuaranteeTemplate (3-100 characters)
                     minLength: 3
                     maxLength: 100
-                    example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                    example: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                 comparator:
                     type: string
                     description: Comparison operator for the guarantee condition
@@ -2589,7 +3579,7 @@ components:
                 threshold:
                     type: number
                     description: Numeric threshold for the guarantee condition
-                    example: 100
+                    example: 75
                 window:
                     type: object
                     description: Time window for evaluating the guarantee
@@ -2640,15 +3630,15 @@ components:
                     pattern: '^[A-Za-z0-9_-]+$'
                     minLength: 3
                     maxLength: 100
-                    example: PSG2-2526
+                    example: CS169L-Sp26
                 displayName:
                     type: string
                     maxLength: 200
-                    example: PSG2-2526 Agreement
+                    example: TPA UCBerkeley CS169L Spring 2026
                 description:
                     type: string
                     maxLength: 500
-                    example: This is a sample agreement template for PSG2-2526.
+                    example: Team Practices Agreement for UCBerkeley CS169L Spring 2026
                 isPublic:
                     type: boolean
                     example: true
@@ -2681,7 +3671,7 @@ components:
                     pattern: '^[A-Za-z0-9_-]+$'
                     minLength: 3
                     maxLength: 100
-                    example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                    example: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                 info:
                     type: object
                     description: Human-readable information about the guarantee
@@ -2691,20 +3681,20 @@ components:
                         title:
                             type: string
                             description: Guarantee title (3-200 characters)
-                            example: Number of Commits by Team
+                            example: Correlation In Progress Issues with New Branch
                         description:
                             type: string
                             description: Guarantee description (max 500 characters)
-                            example: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
+                            example: 'TPa - When an issue is moved to In progress, a branch associated with this issue must be created. (by Team, Hourly)'
                         example:
                             type: string
                             description: Usage example (max 500 characters)
-                            example: If a team has made 150 commits to the repository over the last month, this number reflects the team's overall contribution.
+                            example: 'If 4 out of 5 In Progress issues have an associated branch, the value would be (4/5)*100 = 80%'
                 numericExpression:
                     type: string
                     description: Mathematical expression referencing metric names. No spaces allowed. Operators allowed are +-/*().
                     maxLength: 500
-                    example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                    example: (COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES/COUNT_INPROGRESS_ISSUES*100)
                 comparator:
                     type: string
                     nullable: true
@@ -2743,7 +3733,7 @@ components:
                     description: Name of the metric (3-100 characters)
                     minLength: 3
                     maxLength: 100
-                    example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                    example: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                 event:
                     type: object
                     required:
@@ -2753,7 +3743,7 @@ components:
                         eventId:
                             type: string
                             description: Event ID registered in the computer
-                            example: EV_GITHUB_COMMITS
+                            example: EV_GITHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
                         fetcherConfigs:
                             type: array
                             minItems: 1
@@ -2765,7 +3755,7 @@ components:
                                     fetcherId:
                                         type: string
                                         description: Fetcher ID registered in the collector
-                                        example: FT_REST_GITHUB_COMMITS
+                                        example: FT_GQL_GITHUB_PROJECTV2_ITEMS
                                     fetcherConfig:
                                         type: object
                                         nullable: true
@@ -2811,7 +3801,7 @@ components:
                     pattern: '^[A-Za-z0-9_-]+$'
                     minLength: 3
                     maxLength: 100
-                    example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                    example: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                 info:
                     type: object
                     required:
@@ -2823,19 +3813,19 @@ components:
                             type: string
                             minLength: 3
                             maxLength: 200
-                            example: Number of Commits by Team
+                            example: Correlation In Progress Issues with New Branch
                         description:
                             type: string
                             maxLength: 500
-                            example: This guarantee measures the total number of commits made to a specific repository by the entire team over a defined period.
+                            example: 'TPa - When an issue is moved to In progress, a branch associated with this issue must be created. (by Team, Hourly)'
                         example:
                             type: string
                             maxLength: 500
-                            example: If a team has made 150 commits to the repository over the last month, this number reflects the team's overall contribution.
+                            example: 'If 4 out of 5 In Progress issues have an associated branch, the value would be (4/5)*100 = 80%'
                 numericExpression:
                     type: string
                     maxLength: 500
-                    example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                    example: (COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES/COUNT_INPROGRESS_ISSUES*100)
                 comparator:
                     type: string
                     nullable: true
@@ -2868,7 +3858,7 @@ components:
                 metricName:
                     type: string
                     description: Name of the metric (must match a metric in the guarantee template)
-                    example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                    example: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                 fetcherConfigs:
                     type: array
                     minItems: 1
@@ -2880,18 +3870,20 @@ components:
                         properties:
                             fetcherId:
                                 type: string
-                                example: FT_REST_GITHUB_COMMITS
+                                example: FT_GQL_GITHUB_PROJECTV2_ITEMS
                             fetcherConfig:
                                 type: object
                                 description: Full fetcher configuration (credentials, repository, etc.)
                                 example:
                                     owner: universidad-sevilla
                                     repository: L1-01-project
+                                    token: YOUR_GITHUB_TOKEN
                 processConfig:
                     type: object
                     description: Full process configuration (member, status, etc.)
                     example:
-                        member: member1
+                        columns:
+                            - In progress
 
         # ── AgreementCollection ──────────────────────
         AgreementCollection:
@@ -3002,7 +3994,7 @@ components:
                 displayName:
                     type: string
                     maxLength: 200
-                    example: Acuerdo PSG2 2025-2026 (actualizado)
+                    example: Acuerdo CS169L Spring 2026 (actualizado)
                 fields:
                     type: array
                     items:
@@ -3035,15 +4027,15 @@ components:
                                 timezone:
                                     type: string
                                     description: IANA timezone
-                                    example: Europe/Madrid
+                                    example: America/Los_Angeles
                                 initial:
                                     type: string
                                     format: date-time
-                                    example: '2026-03-31T00:00:00.000Z'
+                                    example: '2024-01-01T00:00:00.000Z'
                                 end:
                                     type: string
                                     format: date-time
-                                    example: '2026-12-31T23:59:59.000Z'
+                                    example: '2024-12-31T23:59:59.000Z'
                                 earlyTermination:
                                     type: string
                                     format: date-time
@@ -3081,21 +4073,21 @@ components:
                         agreementTemplateName:
                             type: string
                             description: Resolved name of the agreement template
-                            example: PSG2-2526
+                            example: CS169L-Sp26
                         validity:
                             type: object
                             properties:
                                 timezone:
                                     type: string
-                                    example: Europe/Madrid
+                                    example: America/Los_Angeles
                                 initial:
                                     type: string
                                     format: date-time
-                                    example: '2026-03-31T00:00:00.000Z'
+                                    example: '2024-01-01T00:00:00.000Z'
                                 end:
                                     type: string
                                     format: date-time
-                                    example: '2026-12-31T23:59:59.000Z'
+                                    example: '2024-12-31T23:59:59.000Z'
                                 earlyTermination:
                                     type: string
                                     format: date-time
@@ -3120,18 +4112,18 @@ components:
                         name:
                             type: string
                             description: Guarantee template name
-                            example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                            example: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                         numericExpression:
                             type: string
                             description: Numeric expression from the guarantee template
-                            example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                            example: (COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES/COUNT_INPROGRESS_ISSUES*100)
                         comparator:
                             type: string
                             enum: ['<', '>', '<=', '>=', '==', '!=']
                             example: '>='
                         threshold:
                             type: number
-                            example: 5
+                            example: 75
                         window:
                             type: object
                             properties:
@@ -3143,14 +4135,14 @@ components:
                                             unit:
                                                 type: string
                                                 enum: [millisecond, second, minute, hour, day, week]
-                                                example: day
+                                                example: hour
                                             value:
                                                 type: integer
                                                 example: 1
                                 anchorDate:
                                     type: string
                                     format: date-time
-                                    example: '2025-12-08T21:00:00.000Z'
+                                    example: '2024-01-01T00:00:00.000Z'
                         metrics:
                             type: array
                             description: Metrics from the guarantee template
@@ -3182,7 +4174,7 @@ components:
                             description: Name of an existing agreement template in the organization
                             minLength: 3
                             maxLength: 100
-                            example: PSG2-2526
+                            example: CS169L-Sp26
                         validity:
                             type: object
                             required:
@@ -3193,17 +4185,17 @@ components:
                                 timezone:
                                     type: string
                                     description: Valid IANA timezone
-                                    example: Europe/Madrid
+                                    example: America/Los_Angeles
                                 initial:
                                     type: string
                                     format: date-time
                                     description: Start date (ISO8601). Must be before `end`.
-                                    example: '2026-03-31T00:00:00.000Z'
+                                    example: '2024-01-01T00:00:00.000Z'
                                 end:
                                     type: string
                                     format: date-time
                                     description: End date (ISO8601). Must be after `initial`.
-                                    example: '2026-12-31T23:59:59.000Z'
+                                    example: '2024-12-31T23:59:59.000Z'
                 signatures:
                     type: array
                     description: At least one signature is required
@@ -3219,7 +4211,7 @@ components:
                                 description: Name of an existing guarantee template
                                 minLength: 3
                                 maxLength: 100
-                                example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                                example: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                             metrics:
                                 type: array
                                 description: Metrics with full fetcher and process configuration
@@ -3243,7 +4235,7 @@ components:
                     pattern: '^[A-Za-z0-9_-]+$'
                     minLength: 3
                     maxLength: 100
-                    example: GR_ELEMENT_xx_GITHUB_xx_TEAM_NUMBER_COMMITS
+                    example: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                 info:
                     type: object
                     required:
@@ -3267,7 +4259,7 @@ components:
                 numericExpression:
                     type: string
                     maxLength: 500
-                    example: MT_ELEMENT_xx_GITHUB_xx_COUNT_COMMITS
+                    example: (COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES/COUNT_INPROGRESS_ISSUES*100)
                 metrics:
                     type: array
                     minItems: 1

@@ -44,6 +44,23 @@ export const assembleBySignature = async (agreementVersion: IAgreementVersion) =
             const guaranteeTemplate = await findGuaranteeTemplateById(
                 guarantee!.guaranteeTemplateId,
             );
+            const mergedMetrics = guaranteeTemplate!.metrics.map((templateMetric) => {
+                const signatureMetric = sig.metrics.find(
+                    (sm) => sm.metricName === templateMetric.metricName,
+                );
+                return {
+                    metricName: templateMetric.metricName,
+                    event: {
+                        eventId: templateMetric.event.eventId,
+                        fetcherConfigs:
+                            signatureMetric?.fetcherConfigs ?? templateMetric.event.fetcherConfigs,
+                        processConfig:
+                            signatureMetric?.processConfig ?? templateMetric.event.processConfig,
+                    },
+                    aggregation: templateMetric.aggregation,
+                };
+            });
+
             return {
                 signatureId: sig._id,
                 guarantee: {
@@ -52,9 +69,8 @@ export const assembleBySignature = async (agreementVersion: IAgreementVersion) =
                     comparator: guarantee!.comparator,
                     threshold: guarantee!.threshold,
                     window: guarantee!.window,
-                    metrics: guaranteeTemplate!.metrics,
+                    metrics: mergedMetrics,
                 },
-                metrics: sig.metrics,
             };
         }),
     );

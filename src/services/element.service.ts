@@ -1,11 +1,12 @@
 import { bootEnv } from '../config/bootConfig.js';
+import { serviceHeaders } from '../utils/serviceAuth.js';
 
 export const getElementByName = async (orgName: string, elementName: string) => {
     const response = await fetch(
         `${bootEnv.SCOPE_MANAGER_URL}/api/v1/organizations/${orgName}/elements/${elementName}`,
         {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
+            headers: serviceHeaders,
         },
     );
 

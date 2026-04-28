@@ -21,6 +21,7 @@ const signatureSchema = new Schema<ISignature>({
                 {
                     fetcherId: { type: String, required: true },
                     fetcherConfig: { type: Schema.Types.Mixed, required: true },
+                    _id: false,
                 },
             ],
             processConfig: { type: Schema.Types.Mixed, required: true },
