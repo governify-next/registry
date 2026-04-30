@@ -1,10 +1,13 @@
 import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError } from '../utils/customErrors.js';
-import { bootEnv } from '../config/bootConfig.js';
+import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
 
 export const existingElement = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const element = await getElementByName(req.params.orgName, req.params.elementName);
+        const element = await scopeManagerIntegration.getElementByOrgAndNameAndElementName(
+            req.params.orgName,
+            req.params.elementName,
+        );
         if (!element)
             throw new ValidationError(
                 `Element with name ${req.params.elementName} does not exist in organization ${req.params.orgName}`,
@@ -14,16 +17,3 @@ export const existingElement = async (req: Request, res: Response, next: NextFun
         next(err);
     }
 };
-
-async function getElementByName(orgName: string, elementName: string) {
-    const response = await fetch(
-        `${bootEnv.SCOPE_MANAGER_URL}/api/v1/organizations/${orgName}/elements/${elementName}`,
-        {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-        },
-    );
-    const result = await response.json();
-
-    return result.data;
-}

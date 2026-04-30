@@ -1,9 +1,9 @@
 import { type Request, type Response, type NextFunction } from 'express';
 import { NotFoundError } from '../utils/customErrors.js';
-import * as organizationService from '../services/organization.service.js';
+import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
 
 export const getOrganizationOrFail = async (orgName: string) => {
-    const org = await organizationService.getOrganizationByName(orgName);
+    const org = await scopeManagerIntegration.getOrganizationByName(orgName);
     if (!org) throw new NotFoundError(`Organization with name ${orgName} does not exist`);
     return org;
 };

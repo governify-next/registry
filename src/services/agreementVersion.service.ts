@@ -1,12 +1,9 @@
 import { IAgreementVersion } from '../models/agreementCollection.model.js';
 import * as agreementVersionRepository from '../repositories/agreementVersion.repository.js';
 import { AgreementVersionPayload } from '../types/agreementVersion.types.js';
-import {
-    getAgreementCollectionByElement,
-    getCleanAgreementCollectionByElement,
-} from './agreementCollection.service.js';
+import { getCleanAgreementCollectionByElement } from './agreementCollection.service.js';
 import { getCleanAgreementTemplateByOrganization } from './agreementTemplate.service.js';
-import { getOrganizationByName } from './organization.service.js';
+import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
 import {
     assembleBySignature,
     createSignaturesByVersion,
@@ -34,7 +31,7 @@ export const createAgreementVersionByCollection = async (
     const newVersionNumber = agreementCollection!.agreementVersions.length + 1;
 
     // 3. Obtenemos el id del template
-    const organization = await getOrganizationByName(orgName);
+    const organization = await scopeManagerIntegration.getOrganizationByName(orgName);
     const agreementTemplate = await getCleanAgreementTemplateByOrganization(
         organization!._id,
         versionData.contract.agreementTemplateName,
