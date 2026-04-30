@@ -2,13 +2,12 @@ import { body, checkExact, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError, NotFoundError } from '../utils/customErrors.js';
 import * as agreementCollectionService from '../services/agreementCollection.service.js';
-import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
-import * as metricConfigService from '../services/metricConfig.service.js';
-import { bootEnv } from '../config/bootConfig.js';
 import {
     existingAgreementTemplate,
     existingGuaranteeTemplates,
 } from './agreementTemplate.validator.js';
+import { validateEventConfig } from '../integrations/computer.integration.js';
+import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
 
 // ─── Validaciones de campo ────────────────────────────
 
@@ -63,11 +62,42 @@ const guaranteeNameValidation = body('signatures.*.guaranteeName')
     .isLength({ min: 3, max: 100 })
     .withMessage('name must be between 3 and 100 characters');
 
-const auditConfigValidation = body('signatures.*.auditConfig')
-    .exists({ checkNull: true })
-    .withMessage('Each signature must have an auditConfig')
-    .isObject()
-    .withMessage('auditConfig must be an object');
+const signatureMetricsValidation = [
+    body('signatures.*.metrics')
+        .exists({ checkNull: true })
+        .withMessage('Each signature must have metrics')
+        .isArray({ min: 1 })
+        .withMessage('metrics must be an array with at least one entry'),
+    body('signatures.*.metrics.*.metricName')
+        .exists({ checkNull: true })
+        .withMessage('Each metric must have a metricName')
+        .isString()
+        .withMessage('metricName must be a string')
+        .notEmpty()
+        .withMessage('metricName must not be empty'),
+    body('signatures.*.metrics.*.fetcherConfigs')
+        .exists({ checkNull: true })
+        .withMessage('Each metric must have fetcherConfigs')
+        .isArray({ min: 1 })
+        .withMessage('fetcherConfigs must be an array with at least one entry'),
+    body('signatures.*.metrics.*.fetcherConfigs.*.fetcherId')
+        .exists({ checkNull: true })
+        .withMessage('Each fetcherConfig must have a fetcherId')
+        .isString()
+        .withMessage('fetcherId must be a string')
+        .notEmpty()
+        .withMessage('fetcherId must not be empty'),
+    body('signatures.*.metrics.*.fetcherConfigs.*.fetcherConfig')
+        .exists({ checkNull: true })
+        .withMessage('Each fetcherConfig must have a fetcherConfig')
+        .isObject()
+        .withMessage('fetcherConfig must be an object'),
+    body('signatures.*.metrics.*.processConfig')
+        .exists({ checkNull: true })
+        .withMessage('Each metric must have a processConfig')
+        .isObject()
+        .withMessage('processConfig must be an object'),
+];
 
 const fieldValidations = [
     agreementTemplateNameValidation,
@@ -76,7 +106,7 @@ const fieldValidations = [
     endValidation,
     signaturesValidation,
     guaranteeNameValidation,
-    auditConfigValidation,
+    ...signatureMetricsValidation,
 ];
 
 // ─── Express-validator ─────────────────────────────
@@ -171,41 +201,43 @@ const earlyTerminationInRange = async (req: Request, res: Response, next: NextFu
     }
 };
 
-const validateAuditConfigsInReporter = async (req: Request, res: Response, next: NextFunction) => {
+const validateSignatureConfigsInExternalServices = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
     try {
-        const signatures: { guaranteeName: string; auditConfig: Record<string, unknown> }[] =
-            req.body.signatures;
         const errors: string[] = [];
 
-        for (const sig of signatures) {
-            const guaranteeTemplate = await guaranteeTemplateService.findGuaranteeTemplateByName(
+        for (const sig of req.body.signatures) {
+            const guaranteeTemplate = await guaranteeTemplateService.getGuaranteeTemplateByName(
                 sig.guaranteeName,
             );
-            const metricConfigs = await metricConfigService.findByTemplateId(
-                guaranteeTemplate!._id,
-            );
 
-            for (const mc of metricConfigs) {
-                const response = await fetch(
-                    `${bootEnv.REPORTER_URL}/api/v1/metrics/${mc.metricName}/validate`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ auditConfig: sig.auditConfig }),
-                    },
+            for (const metric of sig.metrics) {
+                const templateMetric = guaranteeTemplate!.metrics.find(
+                    (m) => m.metricName === metric.metricName,
                 );
-                const result = await response.json();
 
-                if (!result.data?.valid) {
+                // Validar que las métricas especificadas estén en la template
+                if (!templateMetric) {
                     errors.push(
-                        `${sig.guaranteeName} -> ${mc.metricName}: ${result.data?.error || 'Unknown error'}`,
+                        `${sig.guaranteeName}: metricName '${metric.metricName}' not found in template`,
                     );
+                    continue;
                 }
+
+                const eventError = await validateEventConfig(
+                    templateMetric.event.eventId,
+                    metric.fetcherConfigs,
+                    metric.processConfig,
+                );
+                if (eventError) errors.push(`${sig.guaranteeName}: ${eventError}`);
             }
         }
 
         if (errors.length > 0)
-            return next(new ValidationError(`AuditConfig validation failed: ${errors.join('; ')}`));
+            return next(new ValidationError(`Signature validation failed: ${errors.join('; ')}`));
         next();
     } catch (err) {
         next(err);
@@ -229,5 +261,5 @@ export const validateCreateAgreementVersion = [
     existingGuaranteeTemplates((req) =>
         req.body.signatures.map((s: { guaranteeName: string }) => s.guaranteeName),
     ),
-    validateAuditConfigsInReporter,
+    validateSignatureConfigsInExternalServices,
 ];

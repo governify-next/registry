@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { sendSuccess } from '../utils/standardResponse.js';
 import * as agreementTemplateService from '../services/agreementTemplate.service.js';
-import * as organizationService from '../services/organization.service.js';
+import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
 
 export const getAgreementTemplateByOrganization = async (
     req: Request,
@@ -9,7 +9,9 @@ export const getAgreementTemplateByOrganization = async (
     next: NextFunction,
 ) => {
     try {
-        const organization = await organizationService.getOrganizationByName(req.params.orgName);
+        const organization = await scopeManagerIntegration.getOrganizationByName(
+            req.params.orgName,
+        );
         const agreementTemplate = await agreementTemplateService.getAgreementTemplateByOrganization(
             organization!._id,
             req.params.agreementTemplateName,
@@ -26,7 +28,9 @@ export const getAgreementTemplatesByOrganization = async (
     next: NextFunction,
 ) => {
     try {
-        const organization = await organizationService.getOrganizationByName(req.params.orgName);
+        const organization = await scopeManagerIntegration.getOrganizationByName(
+            req.params.orgName,
+        );
         const agreementTemplates =
             await agreementTemplateService.getAgreementTemplatesByOrganization(organization!._id);
         return sendSuccess(res, { data: agreementTemplates });
@@ -41,7 +45,9 @@ export const createAgreementTemplateByOrganization = async (
     next: NextFunction,
 ) => {
     try {
-        const organization = await organizationService.getOrganizationByName(req.params.orgName);
+        const organization = await scopeManagerIntegration.getOrganizationByName(
+            req.params.orgName,
+        );
         const agreementTemplate =
             await agreementTemplateService.createAgreementTemplateByOrganization(
                 organization!._id,
@@ -63,7 +69,9 @@ export const updateAgreementTemplateByOrganization = async (
     next: NextFunction,
 ) => {
     try {
-        const organization = await organizationService.getOrganizationByName(req.params.orgName);
+        const organization = await scopeManagerIntegration.getOrganizationByName(
+            req.params.orgName,
+        );
         const agreementTemplate =
             await agreementTemplateService.updateAgreementTemplateByOrganization(
                 organization!._id,
@@ -82,7 +90,9 @@ export const deleteAgreementTemplateByOrganization = async (
     next: NextFunction,
 ) => {
     try {
-        const organization = await organizationService.getOrganizationByName(req.params.orgName);
+        const organization = await scopeManagerIntegration.getOrganizationByName(
+            req.params.orgName,
+        );
         await agreementTemplateService.deleteAgreementTemplateByOrganization(
             organization!._id,
             req.params.agreementTemplateName,

@@ -3,7 +3,8 @@ import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError, DuplicateKeyError } from '../utils/customErrors.js';
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
 import * as guaranteeService from '../services/guarantee.service.js';
-import { bootEnv } from '../config/bootConfig.js';
+import { validateEventExists, validateAggregator } from '../integrations/computer.integration.js';
+import { validateFetcherExists } from '../integrations/collector.integration.js';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -131,26 +132,64 @@ const numericExpressionValidation = body('numericExpression')
     .isLength({ max: 500 })
     .withMessage('numericExpression must be at most 500 characters');
 
-const metricConfigsStructureValidation = [
-    body('metricConfigs')
+const metricsStructureValidation = [
+    body('metrics')
         .exists({ checkNull: true })
-        .withMessage('metricConfigs is required')
+        .withMessage('metrics is required')
         .isArray({ min: 1 })
-        .withMessage('metricConfigs must be an array with at least one entry'),
-    body('metricConfigs.*.name')
+        .withMessage('metrics must be an array with at least one entry'),
+    body('metrics.*.metricName')
         .exists({ checkNull: true })
-        .withMessage('Each metricConfigs entry must have a name')
+        .withMessage('Each metric must have a metricName')
         .isString()
-        .withMessage('metricConfigs name must be a string')
+        .withMessage('metricName must be a string')
         .notEmpty()
-        .withMessage('metricConfigs name must not be empty')
-        .isLength({ min: 3, max: 100 })
-        .withMessage('metricConfigs name must be between 3 and 100 characters'),
-    body('metricConfigs.*.metricConfig')
+        .withMessage('metricName must not be empty'),
+    body('metrics.*.event.eventId')
         .exists({ checkNull: true })
-        .withMessage('Each metricConfigs entry must have a metricConfig')
+        .withMessage('Each metric must have an event.eventId')
+        .isString()
+        .withMessage('eventId must be a string')
+        .notEmpty()
+        .withMessage('eventId must not be empty'),
+    body('metrics.*.event.fetcherConfigs')
+        .exists({ checkNull: true })
+        .withMessage('Each metric must have event.fetcherConfigs')
+        .isArray({ min: 1 })
+        .withMessage('fetcherConfigs must be an array with at least one entry'),
+    body('metrics.*.event.fetcherConfigs.*.fetcherId')
+        .exists({ checkNull: true })
+        .withMessage('Each fetcherConfig must have a fetcherId')
+        .isString()
+        .withMessage('fetcherId must be a string')
+        .notEmpty()
+        .withMessage('fetcherId must not be empty'),
+    body('metrics.*.event.fetcherConfigs.*.fetcherConfig')
+        .exists({ checkNull: false })
+        .withMessage('Each fetcherConfig entry must include fetcherConfig field')
+        .custom((value) => {
+            if (value !== null) throw new Error('fetcherConfig must be null in guarantee template');
+            return true;
+        }),
+    body('metrics.*.event.processConfig')
+        .exists({ checkNull: false })
+        .withMessage('Each metric must include event.processConfig field')
+        .custom((value) => {
+            if (value !== null) throw new Error('processConfig must be null in guarantee template');
+            return true;
+        }),
+    body('metrics.*.aggregation.aggregatorType')
+        .exists({ checkNull: true })
+        .withMessage('Each metric must have an aggregation.aggregatorType')
+        .isString()
+        .withMessage('aggregatorType must be a string')
+        .notEmpty()
+        .withMessage('aggregatorType must not be empty'),
+    body('metrics.*.aggregation.aggregatorConfig')
+        .exists({ checkNull: true })
+        .withMessage('Each metric must have an aggregation.aggregatorConfig')
         .isObject()
-        .withMessage('metricConfigs metricConfig must be an object'),
+        .withMessage('aggregatorConfig must be an object'),
 ];
 
 // ─── Express-validator ─────────────────────────────
@@ -168,7 +207,7 @@ const uniqueGuaranteeTemplateName = async (req: Request, res: Response, next: Ne
         // Si es update y el nombre no cambia, no hay conflicto
         if (req.params.guaranteeName && req.params.guaranteeName === req.body.name) return next();
 
-        const existing = await guaranteeTemplateService.findGuaranteeTemplateByName(req.body.name);
+        const existing = await guaranteeTemplateService.getGuaranteeTemplateByName(req.body.name);
         if (existing)
             return next(
                 new DuplicateKeyError(`Guarantee template '${req.body.name}' already exists`),
@@ -180,51 +219,21 @@ const uniqueGuaranteeTemplateName = async (req: Request, res: Response, next: Ne
 };
 
 const noDuplicateMetricNames = (req: Request, res: Response, next: NextFunction) => {
-    const names: string[] = req.body.metricConfigs.map((m: { name: string }) => m.name);
+    const names: string[] = req.body.metrics.map((m: { metricName: string }) => m.metricName);
     const duplicates = names.filter((name, i) => names.indexOf(name) !== i);
 
     if (duplicates.length > 0)
         return next(
             new ValidationError(
-                `Duplicate metric names in metricConfigs: ${[...new Set(duplicates)].join(', ')}`,
+                `Duplicate metric names in metrics: ${[...new Set(duplicates)].join(', ')}`,
             ),
         );
     next();
 };
 
-const validateMetricsInReporter = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const metricConfigs: { name: string; metricConfig: Record<string, unknown> }[] =
-            req.body.metricConfigs;
-        const errors: string[] = [];
-
-        for (const metric of metricConfigs) {
-            const response = await fetch(
-                `${bootEnv.REPORTER_URL}/api/v1/metrics/${metric.name}/validate`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ metricConfig: metric.metricConfig }),
-                },
-            );
-            const result = await response.json();
-
-            if (!result.data?.valid) {
-                errors.push(`${metric.name}: ${result.data?.error || 'Unknown error'}`);
-            }
-        }
-
-        if (errors.length > 0)
-            return next(new ValidationError(`Metric validation failed: ${errors.join('; ')}`));
-        next();
-    } catch (err) {
-        next(err);
-    }
-};
-
 const validNumericExpression = (req: Request, res: Response, next: NextFunction) => {
     const expression: string = req.body.numericExpression;
-    const metricNames: string[] = req.body.metricConfigs.map((m: { name: string }) => m.name);
+    const metricNames: string[] = req.body.metrics.map((m: { metricName: string }) => m.metricName);
 
     // 1. Comprobamos que la expresión sea válida matemáticamente
     if (!isValidMathExpression(expression))
@@ -256,13 +265,45 @@ const validNumericExpression = (req: Request, res: Response, next: NextFunction)
     next();
 };
 
+const validateMetricsInExternalServices = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const errors: string[] = [];
+
+        for (const metric of req.body.metrics) {
+            const eventError = await validateEventExists(metric.event.eventId);
+            if (eventError) errors.push(eventError);
+
+            for (const fetcherConfig of metric.event.fetcherConfigs) {
+                const fetcherError = await validateFetcherExists(fetcherConfig.fetcherId);
+                if (fetcherError) errors.push(fetcherError);
+            }
+
+            const aggregatorError = await validateAggregator(
+                metric.aggregation.aggregatorType,
+                metric.aggregation.aggregatorConfig,
+            );
+            if (aggregatorError) errors.push(aggregatorError);
+        }
+
+        if (errors.length > 0)
+            return next(new ValidationError(`External validation failed: ${errors.join('; ')}`));
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const existingGuaranteeTemplate = async (
     req: Request,
     res: Response,
     next: NextFunction,
 ) => {
     try {
-        const template = await guaranteeTemplateService.findGuaranteeTemplateByName(
+        const template = await guaranteeTemplateService.getGuaranteeTemplateByName(
             req.params.guaranteeName,
         );
         if (!template)
@@ -277,7 +318,7 @@ export const existingGuaranteeTemplate = async (
 
 const guaranteeTemplateNotInUse = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const template = await guaranteeTemplateService.findGuaranteeTemplateByName(
+        const template = await guaranteeTemplateService.getGuaranteeTemplateByName(
             req.params.guaranteeName,
         );
         const inUse = await guaranteeService.isGuaranteeTemplateInUse(template!._id);
@@ -303,13 +344,13 @@ export const validateCreateGuaranteeTemplate = [
     nullFieldValidation('window'),
     ...infoValidation,
     numericExpressionValidation,
-    ...metricConfigsStructureValidation,
+    ...metricsStructureValidation,
     collectValidationErrors,
     // 2. Validación de lógica
     uniqueGuaranteeTemplateName,
     noDuplicateMetricNames,
-    validateMetricsInReporter,
     validNumericExpression,
+    validateMetricsInExternalServices,
 ];
 
 export const validateUpdateGuaranteeTemplate = [
@@ -317,14 +358,14 @@ export const validateUpdateGuaranteeTemplate = [
     nameValidation,
     ...infoValidation,
     numericExpressionValidation,
-    ...metricConfigsStructureValidation,
+    ...metricsStructureValidation,
     collectValidationErrors,
     // 2. Validación de lógica
     existingGuaranteeTemplate,
     uniqueGuaranteeTemplateName,
     noDuplicateMetricNames,
-    validateMetricsInReporter,
     validNumericExpression,
+    validateMetricsInExternalServices,
 ];
 
 export const validateDeleteGuaranteeTemplate = [

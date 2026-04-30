@@ -2,14 +2,12 @@ import { Types } from 'mongoose';
 import { ISignatureEntry } from '../types/agreementVersion.types.js';
 import {
     findGuaranteeTemplateById,
-    findGuaranteeTemplateByName,
+    getGuaranteeTemplateByName,
 } from './guaranteeTemplate.service.js';
 import { getGuaranteeByTemplateIds, resolveGuaranteeById } from './guarantee.service.js';
 import * as signatureRepository from '../repositories/signature.repository.js';
 import { IAgreementVersion } from '../models/agreementCollection.model.js';
 import { resolveAgreementTemplateById } from './agreementTemplate.service.js';
-import { findByTemplateId } from './metricConfig.service.js';
-import { bootEnv } from '../config/bootConfig.js';
 
 export const createSignaturesByVersion = async (
     signatures: ISignatureEntry[],
@@ -18,13 +16,13 @@ export const createSignaturesByVersion = async (
     const createdSignatures = await Promise.all(
         signatures.map(async (sig) => {
             // Obtenemos el guarantee template id a partir del name
-            const guaranteeTemplate = await findGuaranteeTemplateByName(sig.guaranteeName);
+            const guaranteeTemplate = await getGuaranteeTemplateByName(sig.guaranteeName);
             const guaranteeTemplateId = guaranteeTemplate!._id;
 
             // Obtenemos la guarantee a partir de la guarantee template y el agreement template
             const guarantee = await getGuaranteeByTemplateIds(templateId, guaranteeTemplateId);
 
-            return await signatureRepository.createSignature(guarantee!._id, sig.auditConfig);
+            return await signatureRepository.createSignature(guarantee!._id, sig.metrics);
         }),
     );
 
@@ -46,11 +44,23 @@ export const assembleBySignature = async (agreementVersion: IAgreementVersion) =
             const guaranteeTemplate = await findGuaranteeTemplateById(
                 guarantee!.guaranteeTemplateId,
             );
-            const metricConfigs = await findByTemplateId(guaranteeTemplate!._id);
-            const mappedMetricConfigs = metricConfigs.map((mc) => ({
-                name: mc.metricName,
-                metricConfig: mc.metricConfig,
-            }));
+            const mergedMetrics = guaranteeTemplate!.metrics.map((templateMetric) => {
+                const signatureMetric = sig.metrics.find(
+                    (sm) => sm.metricName === templateMetric.metricName,
+                );
+                return {
+                    metricName: templateMetric.metricName,
+                    event: {
+                        eventId: templateMetric.event.eventId,
+                        fetcherConfigs:
+                            signatureMetric?.fetcherConfigs ?? templateMetric.event.fetcherConfigs,
+                        processConfig:
+                            signatureMetric?.processConfig ?? templateMetric.event.processConfig,
+                    },
+                    aggregation: templateMetric.aggregation,
+                };
+            });
+
             return {
                 signatureId: sig._id,
                 guarantee: {
@@ -59,9 +69,8 @@ export const assembleBySignature = async (agreementVersion: IAgreementVersion) =
                     comparator: guarantee!.comparator,
                     threshold: guarantee!.threshold,
                     window: guarantee!.window,
-                    metricConfigs: mappedMetricConfigs,
+                    metrics: mergedMetrics,
                 },
-                auditConfig: sig.auditConfig,
             };
         }),
     );
@@ -81,12 +90,5 @@ export const assembleBySignature = async (agreementVersion: IAgreementVersion) =
 };
 
 export const deleteSignaturesByIds = async (signatureIds: Types.ObjectId[]) => {
-    // Borrar los states asociados a una signature en el reporter
-    await Promise.all(
-        signatureIds.map((id) => fetch(`${bootEnv.REPORTER_URL}/api/v1/states/signatures/${id}`), {
-            method: 'DELETE',
-        }),
-    );
-
     return await signatureRepository.deleteSignaturesByIds(signatureIds);
 };

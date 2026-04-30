@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import * as agreementCollectionRepository from '../repositories/agreementCollection.repository.js';
-import { resolveElementId } from './element.service.js';
+import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
 import { IAgreementCollection } from '../models/agreementCollection.model.js';
 import { assembleAgreementVersions } from './agreementVersion.service.js';
 import { deleteSignaturesByIds } from './signature.service.js';
@@ -10,7 +10,10 @@ export const getAgreementCollectionsByElement = async (
     elementName: string,
     expand: boolean,
 ) => {
-    const element = await resolveElementId(orgName, elementName);
+    const element = await scopeManagerIntegration.getElementByOrgAndNameAndElementName(
+        orgName,
+        elementName,
+    );
 
     const collections = await agreementCollectionRepository.getAgreementCollectionsByElement(
         element._id,
@@ -32,7 +35,10 @@ export const getAgreementCollectionByElement = async (
     agColName: string,
     expand: boolean = false,
 ) => {
-    const element = await resolveElementId(orgName, elementName);
+    const element = await scopeManagerIntegration.getElementByOrgAndNameAndElementName(
+        orgName,
+        elementName,
+    );
 
     const collection = await agreementCollectionRepository.getAgreementCollectionByElement(
         element._id,
@@ -52,7 +58,10 @@ export const getCleanAgreementCollectionByElement = async (
     elementName: string,
     agColName: string,
 ) => {
-    const element = await resolveElementId(orgName, elementName);
+    const element = await scopeManagerIntegration.getElementByOrgAndNameAndElementName(
+        orgName,
+        elementName,
+    );
 
     return await agreementCollectionRepository.getAgreementCollectionByElement(
         element._id,
@@ -66,7 +75,10 @@ export const createAgreementCollectionByElement = async (
     data: Partial<IAgreementCollection>,
 ) => {
     // TODO: validar en middleware que no se puedan pasar x campos en post
-    const element = await resolveElementId(orgName, elementName);
+    const element = await scopeManagerIntegration.getElementByOrgAndNameAndElementName(
+        orgName,
+        elementName,
+    );
 
     // 3. Creamos el agreement collection
     return await agreementCollectionRepository.createAgreementCollectionByElement(
