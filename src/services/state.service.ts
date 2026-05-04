@@ -1,0 +1,205 @@
+import * as stateRepository from '../repositories/state.repository.js';
+import * as agreementVersionService from './agreementVersion.service.js';
+import * as evaluatorService from './evaluator.service.js';
+import * as windowUtil from '../utils/window.util.js';
+import * as computerIntegration from '../integrations/computer.integration.js';
+import { IState, StateStatus } from '../models/state.model.js';
+import { Types } from 'mongoose';
+import { IAssembledGuarantee } from '../types/assembledGuarantee.types.js';
+import { IComputedMetric } from '../types/metric.js';
+
+export const generateState = async (
+    isAsync: boolean,
+    date: Date,
+    signatureId: string,
+    guarantee: IAssembledGuarantee,
+): Promise<IState> => {
+    const initialState = await createInitialState(signatureId, guarantee, date);
+    const computeMetricsAndEvaluateState = async () => {
+        try {
+            const processedMetrics: IComputedMetric[] = [];
+            for (const metric of guarantee.metrics) {
+                const processedMetric = await computerIntegration.computeMetric(
+                    date,
+                    guarantee.window,
+                    metric.event,
+                    metric.aggregation,
+                );
+                processedMetrics.push({
+                    metricName: metric.metricName,
+                    value: processedMetric.value,
+                    evidences: processedMetric.evidences,
+                    metricConfig: processedMetric.metricConfig,
+                });
+            }
+            return await evaluateState(
+                initialState._id.toString(),
+                processedMetrics,
+                guarantee.numericExpression,
+                guarantee.comparator,
+                guarantee.threshold,
+            );
+        } catch (error) {
+            await stateRepository.updateStateById(initialState._id.toString(), {
+                endDate: new Date(),
+                status: StateStatus.FAILED,
+            });
+            throw error;
+        }
+    };
+    if (isAsync) {
+        // Async
+        void computeMetricsAndEvaluateState();
+        return initialState;
+    }
+    return await computeMetricsAndEvaluateState(); // Sync
+};
+
+export const createInitialState = async (
+    signatureId: string,
+    guarantee: IAssembledGuarantee,
+    date: Date,
+) => {
+    return stateRepository.createState({
+        signatureId: new Types.ObjectId(signatureId),
+        startDate: new Date(),
+        endDate: null,
+        date: date,
+        consolidated: windowUtil.isConsolidated(
+            date,
+            guarantee.window.anchorDate,
+            guarantee.window.period,
+        ),
+        status: StateStatus.IN_PROGRESS,
+        numericExpression: guarantee.numericExpression,
+        comparator: guarantee.comparator,
+        threshold: guarantee.threshold,
+        replacedNumericExpression: null,
+        numericExpressionValue: null,
+        compliant: null,
+        indeterminate: null,
+        window: guarantee.window,
+        metrics: guarantee.metrics,
+    });
+};
+
+export const evaluateState = async (
+    id: string,
+    processedMetrics: IComputedMetric[],
+    numericExpression: string,
+    comparator: string,
+    threshold: number,
+): Promise<IState> => {
+    const numericExpressionValue = evaluatorService.evaluateNumericExpression(
+        numericExpression,
+        processedMetrics,
+    );
+    const updatedState = await stateRepository.updateStateById(id, {
+        endDate: new Date(),
+        status: StateStatus.COMPLETED,
+        replacedNumericExpression: evaluatorService.replaceExpressionWithValues(
+            numericExpression,
+            processedMetrics,
+        ),
+        numericExpressionValue: numericExpressionValue,
+        compliant:
+            numericExpressionValue === null
+                ? null
+                : evaluatorService.evaluateCompliance(
+                      numericExpressionValue,
+                      comparator,
+                      threshold,
+                  ),
+        indeterminate: numericExpressionValue === null ? true : false,
+        metrics: Object.values(processedMetrics),
+    });
+    if (!updatedState) {
+        throw new Error(`State not found for id: ${id}`);
+    }
+    return updatedState;
+};
+
+export const updateStateById = async (id: string, data: Partial<IState>) => {
+    return await stateRepository.updateStateById(id, data);
+};
+
+export const generateStatesForAuditableVersion = async (
+    isAsync: boolean,
+    orgName: string,
+    elementName: string,
+    agColName: string,
+    date: Date,
+) => {
+    const auditableAgreementVersion = await agreementVersionService.getAuditableVersionByCollection(
+        orgName,
+        elementName,
+        agColName,
+        true,
+    );
+    const signatures =
+        'signatures' in auditableAgreementVersion!.contract
+            ? auditableAgreementVersion!.contract.signatures
+            : [];
+    const states: Array<IState> = [];
+    await Promise.all(
+        signatures.map(async (signature) => {
+            const existingState = await getExistingState(signature.signatureId.toString(), date);
+            if (existingState) {
+                states.push(existingState);
+                return;
+            }
+            const state = await generateState(
+                isAsync,
+                date,
+                signature.signatureId.toString(),
+                signature.guarantee,
+            );
+            states.push(state);
+        }),
+    );
+    return states;
+};
+
+export const getStatesForAuditableVersion = async (
+    orgName: string,
+    elementName: string,
+    agColName: string,
+) => {
+    const auditableAgreementVersion = await agreementVersionService.getAuditableVersionByCollection(
+        orgName,
+        elementName,
+        agColName,
+        true,
+    );
+    const signatures =
+        'signatures' in auditableAgreementVersion!.contract
+            ? auditableAgreementVersion!.contract.signatures
+            : [];
+    // For each signature, get states and return as array of arrays of states
+    const signatureStates = [];
+    for (const signature of signatures) {
+        const states = await stateRepository.getStatesBySignatureId(
+            signature.signatureId.toString(),
+        );
+        signatureStates.push({
+            ...signature,
+            states,
+        });
+    }
+    return {
+        organizationName: orgName,
+        elementName: elementName,
+        agreementCollectionName: agColName,
+        agreementVersion: {
+            ...auditableAgreementVersion,
+            contract: {
+                ...auditableAgreementVersion!.contract,
+                signatures: signatureStates,
+            },
+        },
+    };
+};
+
+const getExistingState = async (signatureId: string, date: Date) => {
+    return await stateRepository.getStateBySignatureIdAndDate(signatureId, date);
+};

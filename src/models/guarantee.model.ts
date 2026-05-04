@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import { Comparator } from '../types/agreementTemplate.types.js';
+import { IWindow } from '../types/window.js';
 
 const unitPeriodSchema = new Schema(
     {
@@ -29,13 +30,7 @@ export interface IGuarantee extends Document {
     agreementTemplateId: Types.ObjectId;
     comparator: Comparator;
     threshold: number;
-    window: {
-        period: {
-            unit: string;
-            value: number;
-        }[];
-        anchorDate: Date;
-    };
+    window: IWindow;
 }
 
 // Esquema principal
