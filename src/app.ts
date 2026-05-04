@@ -5,6 +5,7 @@ import { guaranteeTemplateRoutes } from './routes/guaranteeTemplate.routes.js';
 import { agreementTemplateRoutes } from './routes/agreementTemplate.routes.js';
 import { agreementCollectionRoutes } from './routes/agreementCollection.routes.js';
 import { agreementVersionRoutes } from './routes/agreementVersion.routes.js';
+import { stateRoutes } from './routes/state.routes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
@@ -25,6 +26,7 @@ app.use('/api/v1', guaranteeTemplateRoutes);
 app.use('/api/v1', agreementTemplateRoutes);
 app.use('/api/v1', agreementCollectionRoutes);
 app.use('/api/v1', agreementVersionRoutes);
+app.use('/api/v1', stateRoutes);
 app.use(errorHandler);
 
 export default app;

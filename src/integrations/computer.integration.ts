@@ -1,4 +1,5 @@
 import { bootEnv } from '../config/bootConfig.js';
+import { IWindow } from '../types/window.js';
 import { serviceHeaders } from '../utils/serviceAuth.js';
 
 const COMPUTER_SERVICE_URL = bootEnv.COMPUTER_SERVICE_URL;
@@ -54,5 +55,26 @@ export const validateAggregator = async (
         return result.data?.error || `aggregator '${aggregatorType}' validation failed in computer`;
     } catch {
         return `Could not connect to computer to validate aggregator '${aggregatorType}'`;
+    }
+};
+
+export const computeMetric = async (
+    date: Date,
+    window: IWindow,
+    event: Record<string, unknown>,
+    aggregation: Record<string, unknown>,
+) => {
+    try {
+        const response = await fetch(`${COMPUTER_SERVICE_URL}/api/v1/metric/compute`, {
+            method: 'POST',
+            headers: serviceHeaders,
+            body: JSON.stringify({ event: { ...event, date, window }, aggregation }),
+        });
+        const result = await response.json();
+        return result.data;
+    } catch (error) {
+        throw new Error(
+            `Could not connect to computer to compute metric for event '${event.eventId}' and aggregation '${aggregation.aggregatorType}'`,
+        );
     }
 };

@@ -54,8 +54,7 @@ export const assembleBySignature = async (agreementVersion: IAgreementVersion) =
                         eventId: templateMetric.event.eventId,
                         fetcherConfigs:
                             signatureMetric?.fetcherConfigs ?? templateMetric.event.fetcherConfigs,
-                        processConfig:
-                            signatureMetric?.processConfig ?? templateMetric.event.processConfig,
+                        processConfig: signatureMetric?.processConfig ?? {},
                     },
                     aggregation: templateMetric.aggregation,
                 };
