@@ -1,11 +1,12 @@
+export interface IFetcherConfig {
+    fetcherId: string;
+    fetcherConfig: Record<string, unknown> | null;
+}
 export interface IMetric {
     metricName: string;
     event: {
         eventId: string;
-        fetcherConfigs: {
-            fetcherId: string;
-            fetcherConfig: Record<string, unknown> | null;
-        }[];
+        fetcherConfigs: IFetcherConfig[];
         processConfig: Record<string, unknown> | null;
     };
     aggregation: {

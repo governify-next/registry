@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { IMetric } from '../types/metric.js';
 
 // Subdocumentos
 
@@ -33,22 +34,6 @@ const metricSchema = new Schema(
 );
 
 // Interfaz para TypeScript
-
-export interface IMetric {
-    metricName: string;
-    event: {
-        eventId: string;
-        fetcherConfigs: {
-            fetcherId: string;
-            fetcherConfig: Record<string, unknown> | null;
-        }[];
-        processConfig: Record<string, unknown> | null;
-    };
-    aggregation: {
-        aggregatorType: string;
-        aggregatorConfig: Record<string, unknown>;
-    };
-}
 
 export interface IGuaranteeTemplate extends Document {
     name: string;

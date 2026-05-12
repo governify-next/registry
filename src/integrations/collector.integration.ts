@@ -1,4 +1,5 @@
 import { bootEnv } from '../config/bootConfig.js';
+import { ExternalServiceError } from '../utils/customErrors.js';
 import { serviceHeaders } from '../utils/serviceAuth.js';
 
 const COLLECTOR_SERVICE_URL = bootEnv.COLLECTOR_SERVICE_URL;
@@ -15,4 +16,30 @@ export const validateFetcherExists = async (fetcherId: string): Promise<string |
     } catch {
         return `Could not connect to collector to validate fetcherId '${fetcherId}'`;
     }
+};
+
+export const generateFetchResult = async (
+    fetcherId: string,
+    date: Date,
+    fetcherConfig: Record<string, unknown>,
+) => {
+    const response = await fetch(
+        `${COLLECTOR_SERVICE_URL}/api/v1/fetchers/${fetcherId}/fetchResults/generate`,
+        {
+            method: 'POST',
+            headers: serviceHeaders,
+            body: JSON.stringify({
+                date,
+                fetcherConfig: fetcherConfig,
+            }),
+        },
+    );
+    const result = await response.json();
+
+    if (!result.success)
+        throw new ExternalServiceError(
+            `Failed to initiate fetch result generation for fetcher ${fetcherId}`,
+        );
+
+    return result.data;
 };
