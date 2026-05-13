@@ -18,6 +18,7 @@ export const validateFetcherExists = async (fetcherId: string): Promise<string |
     }
 };
 
+// TODO: A futuro para el cálculo directo de fetchs
 export const generateFetchResult = async (
     fetcherId: string,
     date: Date,

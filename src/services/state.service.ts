@@ -142,12 +142,12 @@ export const generateStatesForAuditableVersion = async (
             ? auditableAgreementVersion!.contract.signatures
             : [];
 
-    await prefetchFetchResults(
-        date,
-        signatures.flatMap((signature) =>
-            signature.guarantee.metrics.flatMap((metric) => metric.event.fetcherConfigs),
-        ),
-    );
+    // await prefetchFetchResults(
+    //     date,
+    //     signatures.flatMap((signature) =>
+    //         signature.guarantee.metrics.flatMap((metric) => metric.event.fetcherConfigs),
+    //     ),
+    // );
 
     const states: Array<IState> = [];
     await Promise.all(
