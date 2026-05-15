@@ -1,5 +1,5 @@
 {
-    "name": "base",
+    "name": "registry",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
@@ -25,15 +25,15 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/governify-next/base.git"
+        "url": "git+https://github.com/governify-next/registry.git"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/governify-next/base/issues"
+        "url": "https://github.com/governify-next/registry/issues"
     },
-    "homepage": "https://github.com/governify-next/base#readme",
+    "homepage": "https://github.com/governify-next/registry#readme",
     "dependencies": {
         "@types/bcrypt": "^6.0.0",
         "@types/jsonwebtoken": "^9.0.10",

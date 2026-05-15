@@ -18,8 +18,9 @@ export const bootEnv = {
     COLLECTOR_SERVICE_URL: process.env.COLLECTOR_SERVICE_URL || 'http://localhost:5904',
 
     // Database URIs
-    MONGO_URI: process.env.MONGO_URI || 'mongodb://localhost:27017/governify',
+    MONGO_URI: process.env.MONGO_URI || 'mongodb://localhost:27017/governify-next',
 
     // JWT configuration
-    JWT_SECRET: process.env.JWT_SECRET || 'governify_secret_key',
+    SERVICE_AUTHENTICATION_ENABLED: process.env.SERVICE_AUTHENTICATION_ENABLED === 'true',
+    JWT_SECRET: process.env.JWT_SECRET || 'governify_next_secret_key',
 };
