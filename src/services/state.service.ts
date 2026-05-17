@@ -32,6 +32,10 @@ export const generateState = async (
                     evidences: processedMetric.evidences,
                     metricConfig: processedMetric.metricConfig,
                 });
+                // If metric returns a null value, we stop the calculation for the guarantee
+                if (processedMetric.value === null) {
+                    break;
+                }
             }
             return await evaluateState(
                 initialState._id.toString(),
@@ -91,17 +95,17 @@ export const evaluateState = async (
     comparator: string,
     threshold: number,
 ): Promise<IState> => {
-    const numericExpressionValue = evaluatorService.evaluateNumericExpression(
-        numericExpression,
-        processedMetrics,
-    );
+    // If any of the metrics has a null value, it has not been computed correctly and is indeterminate.
+    const hasUnavailableMetricValue = processedMetrics.some((metric) => metric.value === null);
+    const numericExpressionValue = hasUnavailableMetricValue
+        ? null
+        : evaluatorService.evaluateNumericExpression(numericExpression, processedMetrics);
     const updatedState = await stateRepository.updateStateById(id, {
         endDate: new Date(),
         status: StateStatus.COMPLETED,
-        replacedNumericExpression: evaluatorService.replaceExpressionWithValues(
-            numericExpression,
-            processedMetrics,
-        ),
+        replacedNumericExpression: hasUnavailableMetricValue
+            ? null
+            : evaluatorService.replaceExpressionWithValues(numericExpression, processedMetrics),
         numericExpressionValue: numericExpressionValue,
         compliant:
             numericExpressionValue === null
@@ -111,7 +115,7 @@ export const evaluateState = async (
                       comparator,
                       threshold,
                   ),
-        indeterminate: numericExpressionValue === null ? true : false,
+        indeterminate: numericExpressionValue === null,
         metrics: Object.values(processedMetrics),
     });
     if (!updatedState) {

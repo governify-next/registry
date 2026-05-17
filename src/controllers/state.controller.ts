@@ -18,9 +18,11 @@ export const generateStatesForAuditableVersion = async (
             agColName,
             date,
         );
+        const hasIndeterminateStates = !isAsync && states.some((state) => state.indeterminate);
         return sendSuccess(res, {
             data: states,
             message: isAsync ? 'States created' : 'States created and generated',
+            httpStatus: hasIndeterminateStates ? 207 : 200,
         });
     } catch (err) {
         next(err);

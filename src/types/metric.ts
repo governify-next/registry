@@ -17,7 +17,7 @@ export interface IMetric {
 
 export interface IComputedMetric {
     metricName: string;
-    value: number;
+    value: number | null;
     evidences: Record<string, unknown>[];
     metricConfig: Record<string, unknown>;
 }

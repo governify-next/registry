@@ -1,8 +1,22 @@
 import { bootEnv } from '../config/bootConfig.js';
 import { IWindow } from '../types/window.js';
+import { ExternalServiceError } from '../utils/customErrors.js';
 import { serviceHeaders } from '../utils/serviceAuth.js';
 
 const COMPUTER_SERVICE_URL = bootEnv.COMPUTER_SERVICE_URL;
+
+// Function to check health of computer service
+export const checkHealth = async (): Promise<boolean> => {
+    try {
+        const response = await fetch(`${COMPUTER_SERVICE_URL}/health`, {
+            method: 'GET',
+        });
+        const result = await response.json();
+        return result;
+    } catch {
+        return false;
+    }
+};
 
 export const validateEventExists = async (eventId: string): Promise<string | null> => {
     try {
@@ -64,17 +78,19 @@ export const computeMetric = async (
     event: Record<string, unknown>,
     aggregation: Record<string, unknown>,
 ) => {
-    try {
-        const response = await fetch(`${COMPUTER_SERVICE_URL}/api/v1/metric/compute`, {
-            method: 'POST',
-            headers: serviceHeaders,
-            body: JSON.stringify({ event: { ...event, date, window }, aggregation }),
-        });
-        const result = await response.json();
-        return result.data;
-    } catch (error) {
-        throw new Error(
-            `Could not connect to computer to compute metric for event '${event.eventId}' and aggregation '${aggregation.aggregatorType}'`,
+    const response = await fetch(`${COMPUTER_SERVICE_URL}/api/v1/metric/compute`, {
+        method: 'POST',
+        headers: serviceHeaders,
+        body: JSON.stringify({ event: { ...event, date, window }, aggregation }),
+    });
+    const result = await response.json();
+
+    if (!result.success) {
+        throw new ExternalServiceError(
+            `Failed to compute metric for event '${event.eventId}' and aggregation '${aggregation.aggregatorType}'`,
+            result.error,
         );
     }
+
+    return result.data;
 };
