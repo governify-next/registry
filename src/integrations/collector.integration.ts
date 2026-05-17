@@ -4,18 +4,30 @@ import { serviceHeaders } from '../utils/serviceAuth.js';
 
 const COLLECTOR_SERVICE_URL = bootEnv.COLLECTOR_SERVICE_URL;
 
-export const validateFetcherExists = async (fetcherId: string): Promise<string | null> => {
+export const checkHealth = async (): Promise<boolean> => {
     try {
-        const response = await fetch(`${COLLECTOR_SERVICE_URL}/api/v1/fetchers/${fetcherId}`, {
+        const response = await fetch(`${COLLECTOR_SERVICE_URL}/health`, {
             method: 'GET',
-            headers: serviceHeaders,
         });
-        const result = await response.json();
-        if (result.success) return null;
-        return result.error?.message || `fetcherId '${fetcherId}' not found in collector`;
+        return response.ok;
     } catch {
-        return `Could not connect to collector to validate fetcherId '${fetcherId}'`;
+        return false;
     }
+};
+
+export const validateFetcherExists = async (fetcherId: string): Promise<string | null> => {
+    const response = await fetch(`${COLLECTOR_SERVICE_URL}/api/v1/fetchers/${fetcherId}`, {
+        method: 'GET',
+        headers: serviceHeaders,
+    });
+    const result = await response.json();
+    if (response.status >= 500) {
+        throw new Error(
+            result.error?.message || `Collector failed to validate fetcherId '${fetcherId}'`,
+        );
+    }
+    if (result.success) return null;
+    return result.error?.message;
 };
 
 // TODO: A futuro para el cálculo directo de fetchs

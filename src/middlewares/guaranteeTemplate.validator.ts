@@ -1,6 +1,6 @@
 import { body, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
-import { ValidationError, DuplicateKeyError } from '../utils/customErrors.js';
+import { ValidationError, DuplicateKeyError, ExternalServiceError } from '../utils/customErrors.js';
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
 import * as guaranteeService from '../services/guarantee.service.js';
 import { validateEventExists, validateAggregator } from '../integrations/computer.integration.js';
@@ -292,8 +292,13 @@ const validateMetricsInExternalServices = async (
         if (errors.length > 0)
             return next(new ValidationError(`External validation failed: ${errors.join('; ')}`));
         next();
-    } catch (err) {
-        next(err);
+    } catch (error) {
+        return next(
+            new ExternalServiceError(
+                'External validation service failed',
+                error instanceof Error ? { message: error.message } : error,
+            ),
+        );
     }
 };
 

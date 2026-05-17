@@ -8,6 +8,7 @@ import {
     existingAuditableVersion,
     existingVersionNumber,
 } from '../middlewares/agreementVersion.validator.js';
+import { validateComputerHealth } from '../middlewares/computer.validator.js';
 
 export const agreementVersionRoutes = Router();
 
@@ -38,6 +39,7 @@ agreementVersionRoutes.post(
     '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions',
     existingElement,
     existingAgreementCollection,
+    validateComputerHealth,
     validateCreateAgreementVersion,
     agreementVersionController.createAgreementVersionByCollection,
 );
