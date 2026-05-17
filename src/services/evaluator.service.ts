@@ -6,7 +6,7 @@ export const evaluateNumericExpression = (
 ): number | null => {
     const metricValues: Record<string, number> = {};
     for (const metric of metrics) {
-        metricValues[metric.metricName] = metric.value;
+        metricValues[metric.metricName] = metric.value!;
     }
     const func = new Function(...Object.keys(metricValues), `return ${expression};`);
     const result = func(...Object.values(metricValues));
@@ -48,7 +48,7 @@ export const replaceExpressionWithValues = (
     let replacedExpression = expression;
     for (const metric of metrics) {
         const regex = new RegExp(`\\b${metric.metricName}\\b`, 'g');
-        replacedExpression = replacedExpression.replace(regex, metric.value.toString());
+        replacedExpression = replacedExpression.replace(regex, metric.value!.toString());
     }
     return replacedExpression;
 };

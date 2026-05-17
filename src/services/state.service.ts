@@ -7,7 +7,10 @@ import * as collectorIntegrations from '../integrations/collector.integration.js
 import { IState, StateStatus } from '../models/state.model.js';
 import { Types } from 'mongoose';
 import { IAssembledGuarantee } from '../types/assembledGuarantee.types.js';
-import { IComputedMetric, IFetcherConfig, IMetric } from '../types/metric.js';
+import { IComputedMetric, IFetcherConfig } from '../types/metric.js';
+import { getLogger } from '../utils/logger.js';
+
+const logger = getLogger().setTag('state.service.ts');
 
 export const generateState = async (
     isAsync: boolean,
@@ -54,7 +57,13 @@ export const generateState = async (
     };
     if (isAsync) {
         // Async
-        void computeMetricsAndEvaluateState();
+        void computeMetricsAndEvaluateState().catch((error) => {
+            logger.error(
+                `Async state generation failed for state ${initialState._id.toString()}: ${
+                    error instanceof Error ? error.message : 'Unknown state generation error'
+                }`,
+            );
+        });
         return initialState;
     }
     return await computeMetricsAndEvaluateState(); // Sync

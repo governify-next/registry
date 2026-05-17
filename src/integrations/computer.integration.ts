@@ -11,8 +11,7 @@ export const checkHealth = async (): Promise<boolean> => {
         const response = await fetch(`${COMPUTER_SERVICE_URL}/health`, {
             method: 'GET',
         });
-        const result = await response.json();
-        return result;
+        return response.ok;
     } catch {
         return false;
     }
