@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { IMetric } from '../types/metric.js';
+import { IMetricDefinition } from '../types/metric.js';
 
 // Subdocumentos
 
@@ -15,19 +15,21 @@ const infoSchema = new Schema(
 const metricSchema = new Schema(
     {
         metricName: { type: String, required: true },
-        event: {
-            eventId: { type: String, required: true },
-            fetcherConfigs: [
-                {
-                    fetcherId: { type: String, required: true },
-                    fetcherConfig: { type: Schema.Types.Mixed, default: null },
-                },
-            ],
-            processConfig: { type: Schema.Types.Mixed, default: null },
-        },
-        aggregation: {
-            aggregatorType: { type: String, required: true },
-            aggregatorConfig: { type: Schema.Types.Mixed, default: {} },
+        metricConfig: {
+            event: {
+                eventId: { type: String, required: true },
+                fetcherConfigs: [
+                    {
+                        fetcherId: { type: String, required: true },
+                        fetcherConfig: { type: Schema.Types.Mixed, default: null },
+                    },
+                ],
+                processConfig: { type: Schema.Types.Mixed, default: null },
+            },
+            aggregation: {
+                aggregatorType: { type: String, required: true },
+                aggregatorConfig: { type: Schema.Types.Mixed, default: {} },
+            },
         },
     },
     { _id: false },
@@ -46,7 +48,7 @@ export interface IGuaranteeTemplate extends Document {
     comparator: null;
     threshold: null;
     window: null;
-    metrics: IMetric[];
+    metrics: IMetricDefinition[];
 }
 
 // Esquema principal

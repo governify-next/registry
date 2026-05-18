@@ -2,8 +2,8 @@ export interface IFetcherConfig {
     fetcherId: string;
     fetcherConfig: Record<string, unknown> | null;
 }
-export interface IMetric {
-    metricName: string;
+
+export interface IMetricConfig {
     event: {
         eventId: string;
         fetcherConfigs: IFetcherConfig[];
@@ -15,9 +15,12 @@ export interface IMetric {
     };
 }
 
-export interface IComputedMetric {
+export interface IMetricDefinition {
     metricName: string;
+    metricConfig: IMetricConfig;
+}
+
+export interface IMetric extends IMetricDefinition {
     value: number | null;
     evidences: Record<string, unknown>[];
-    metricConfig: Record<string, unknown>;
 }
