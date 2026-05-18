@@ -7,7 +7,7 @@ import * as collectorIntegrations from '../integrations/collector.integration.js
 import { IState, StateStatus } from '../models/state.model.js';
 import { Types } from 'mongoose';
 import { IAssembledGuarantee } from '../types/assembledGuarantee.types.js';
-import { IComputedMetric, IFetcherConfig } from '../types/metric.js';
+import { IMetric, IFetcherConfig } from '../types/metric.js';
 import { getLogger } from '../utils/logger.js';
 
 const logger = getLogger().setTag('state.service.ts');
@@ -21,13 +21,13 @@ export const generateState = async (
     const initialState = await createInitialState(signatureId, guarantee, date);
     const computeMetricsAndEvaluateState = async () => {
         try {
-            const processedMetrics: IComputedMetric[] = [];
+            const processedMetrics: IMetric[] = [];
             for (const metric of guarantee.metrics) {
                 const processedMetric = await computerIntegration.computeMetric(
                     date,
                     guarantee.window,
-                    metric.event,
-                    metric.aggregation,
+                    metric.metricConfig.event,
+                    metric.metricConfig.aggregation,
                 );
                 processedMetrics.push({
                     metricName: metric.metricName,
@@ -93,13 +93,18 @@ export const createInitialState = async (
         compliant: null,
         indeterminate: null,
         window: guarantee.window,
-        metrics: guarantee.metrics,
+        metrics: guarantee.metrics.map((metric) => ({
+            metricName: metric.metricName,
+            value: null,
+            evidences: [],
+            metricConfig: metric.metricConfig,
+        })),
     });
 };
 
 export const evaluateState = async (
     id: string,
-    processedMetrics: IComputedMetric[],
+    processedMetrics: IMetric[],
     numericExpression: string,
     comparator: string,
     threshold: number,
@@ -158,7 +163,7 @@ export const generateStatesForAuditableVersion = async (
     // await prefetchFetchResults(
     //     date,
     //     signatures.flatMap((signature) =>
-    //         signature.guarantee.metrics.flatMap((metric) => metric.event.fetcherConfigs),
+    //         signature.guarantee.metrics.flatMap((metric) => metric.metricConfig.event.fetcherConfigs),
     //     ),
     // );
 

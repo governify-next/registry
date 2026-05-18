@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import { IWindow } from '../types/window.js';
-import { IMetric, IComputedMetric } from '../types/metric.js';
+import { IMetric } from '../types/metric.js';
 
 export enum StateStatus {
     IN_PROGRESS = 'IN_PROGRESS',
@@ -23,7 +23,7 @@ export interface IState extends Document {
     compliant: boolean | null;
     indeterminate: boolean | null;
     window: IWindow;
-    metrics: IMetric[] | IComputedMetric[];
+    metrics: IMetric[];
 }
 
 const stateSchema = new Schema<IState>(
