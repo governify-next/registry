@@ -88,27 +88,29 @@ paths:
                                       __v: 0
                                       metrics:
                                           - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
-                                            event:
-                                                eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
-                                                fetcherConfigs:
-                                                    - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                      fetcherConfig: null
-                                                    - fetcherId: FT_GQL_GITHUB_ISSUES
-                                                      fetcherConfig: null
-                                                processConfig: null
-                                            aggregation:
-                                                aggregatorType: count
-                                                aggregatorConfig: {}
+                                            metricConfig:
+                                                event:
+                                                    eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                                    fetcherConfigs:
+                                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                          fetcherConfig: null
+                                                        - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                          fetcherConfig: null
+                                                    processConfig: null
+                                                aggregation:
+                                                    aggregatorType: count
+                                                    aggregatorConfig: {}
                                           - metricName: COUNT_INPROGRESS_ISSUES
-                                            event:
-                                                eventId: EV_ZENHUB_ISSUES_BY_COLUMN
-                                                fetcherConfigs:
-                                                    - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                      fetcherConfig: null
-                                                processConfig: null
-                                            aggregation:
-                                                aggregatorType: count
-                                                aggregatorConfig: {}
+                                            metricConfig:
+                                                event:
+                                                    eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                                    fetcherConfigs:
+                                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                          fetcherConfig: null
+                                                    processConfig: null
+                                                aggregation:
+                                                    aggregatorType: count
+                                                    aggregatorConfig: {}
                                 error: null
                 '500':
                     $ref: '#/components/responses/InternalError'
@@ -123,7 +125,7 @@ paths:
                 as these values are injected later by the AgreementTemplate.
                 The `numericExpression` must be a valid mathematical expression referencing
                 exactly the metrics declared in `metrics` (bidirectional consistency).
-                Each metric's eventId, fetcherId and aggregatorType are validated against the computer and collector.
+                Each metric's metricConfig eventId, fetcherId and aggregatorType are validated against the computer and collector.
             requestBody:
                 $ref: '#/components/requestBodies/GuaranteeTemplateBody'
             responses:
@@ -157,27 +159,29 @@ paths:
                                     __v: 0
                                     metrics:
                                         - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
-                                          event:
-                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
-                                              fetcherConfigs:
-                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                    fetcherConfig: null
-                                                  - fetcherId: FT_GQL_GITHUB_ISSUES
-                                                    fetcherConfig: null
-                                              processConfig: null
-                                          aggregation:
-                                              aggregatorType: count
-                                              aggregatorConfig: {}
+                                          metricConfig:
+                                              event:
+                                                  eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                                  fetcherConfigs:
+                                                      - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                        fetcherConfig: null
+                                                      - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                        fetcherConfig: null
+                                                  processConfig: null
+                                              aggregation:
+                                                  aggregatorType: count
+                                                  aggregatorConfig: {}
                                         - metricName: COUNT_INPROGRESS_ISSUES
-                                          event:
-                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN
-                                              fetcherConfigs:
-                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                    fetcherConfig: null
-                                              processConfig: null
-                                          aggregation:
-                                              aggregatorType: count
-                                              aggregatorConfig: {}
+                                          metricConfig:
+                                              event:
+                                                  eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                                  fetcherConfigs:
+                                                      - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                        fetcherConfig: null
+                                                  processConfig: null
+                                              aggregation:
+                                                  aggregatorType: count
+                                                  aggregatorConfig: {}
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
@@ -257,27 +261,29 @@ paths:
                                     __v: 0
                                     metrics:
                                         - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
-                                          event:
-                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
-                                              fetcherConfigs:
-                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                    fetcherConfig: null
-                                                  - fetcherId: FT_GQL_GITHUB_ISSUES
-                                                    fetcherConfig: null
-                                              processConfig: null
-                                          aggregation:
-                                              aggregatorType: count
-                                              aggregatorConfig: {}
+                                          metricConfig:
+                                              event:
+                                                  eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                                  fetcherConfigs:
+                                                      - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                        fetcherConfig: null
+                                                      - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                        fetcherConfig: null
+                                                  processConfig: null
+                                              aggregation:
+                                                  aggregatorType: count
+                                                  aggregatorConfig: {}
                                         - metricName: COUNT_INPROGRESS_ISSUES
-                                          event:
-                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN
-                                              fetcherConfigs:
-                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                    fetcherConfig: null
-                                              processConfig: null
-                                          aggregation:
-                                              aggregatorType: count
-                                              aggregatorConfig: {}
+                                          metricConfig:
+                                              event:
+                                                  eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                                  fetcherConfigs:
+                                                      - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                        fetcherConfig: null
+                                                  processConfig: null
+                                              aggregation:
+                                                  aggregatorType: count
+                                                  aggregatorConfig: {}
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
@@ -1133,27 +1139,29 @@ paths:
                                                         anchorDate: '2024-01-01T00:00:00.000Z'
                                                     metrics:
                                                         - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
-                                                          event:
-                                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
-                                                              fetcherConfigs:
-                                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                                    fetcherConfig: null
-                                                                  - fetcherId: FT_GQL_GITHUB_ISSUES
-                                                                    fetcherConfig: null
-                                                              processConfig: null
-                                                          aggregation:
-                                                              aggregatorType: count
-                                                              aggregatorConfig: {}
+                                                          metricConfig:
+                                                              event:
+                                                                  eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                                                  fetcherConfigs:
+                                                                      - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                                        fetcherConfig: null
+                                                                      - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                                        fetcherConfig: null
+                                                                  processConfig: null
+                                                              aggregation:
+                                                                  aggregatorType: count
+                                                                  aggregatorConfig: {}
                                                         - metricName: COUNT_INPROGRESS_ISSUES
-                                                          event:
-                                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN
-                                                              fetcherConfigs:
-                                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                                    fetcherConfig: null
-                                                              processConfig: null
-                                                          aggregation:
-                                                              aggregatorType: count
-                                                              aggregatorConfig: {}
+                                                          metricConfig:
+                                                              event:
+                                                                  eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                                                  fetcherConfigs:
+                                                                      - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                                        fetcherConfig: null
+                                                                  processConfig: null
+                                                              aggregation:
+                                                                  aggregatorType: count
+                                                                  aggregatorConfig: {}
                                                 metrics:
                                                     - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                                       fetcherConfigs:
@@ -1295,27 +1303,29 @@ paths:
                                                       anchorDate: '2024-01-01T00:00:00.000Z'
                                                   metrics:
                                                       - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
-                                                        event:
-                                                            eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
-                                                            fetcherConfigs:
-                                                                - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                                  fetcherConfig: null
-                                                                - fetcherId: FT_GQL_GITHUB_ISSUES
-                                                                  fetcherConfig: null
-                                                            processConfig: null
-                                                        aggregation:
-                                                            aggregatorType: count
-                                                            aggregatorConfig: {}
+                                                        metricConfig:
+                                                            event:
+                                                                eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                                                fetcherConfigs:
+                                                                    - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                                      fetcherConfig: null
+                                                                    - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                                      fetcherConfig: null
+                                                                processConfig: null
+                                                            aggregation:
+                                                                aggregatorType: count
+                                                                aggregatorConfig: {}
                                                       - metricName: COUNT_INPROGRESS_ISSUES
-                                                        event:
-                                                            eventId: EV_ZENHUB_ISSUES_BY_COLUMN
-                                                            fetcherConfigs:
-                                                                - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                                  fetcherConfig: null
-                                                            processConfig: null
-                                                        aggregation:
-                                                            aggregatorType: count
-                                                            aggregatorConfig: {}
+                                                        metricConfig:
+                                                            event:
+                                                                eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                                                fetcherConfigs:
+                                                                    - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                                      fetcherConfig: null
+                                                                processConfig: null
+                                                            aggregation:
+                                                                aggregatorType: count
+                                                                aggregatorConfig: {}
                                               metrics:
                                                   - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                                     fetcherConfigs:
@@ -2172,27 +2182,29 @@ components:
                                 window: null
                                 metrics:
                                     - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
-                                      event:
-                                          eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                fetcherConfig: null
-                                              - fetcherId: FT_GQL_GITHUB_ISSUES
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                    fetcherConfig: null
+                                                  - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                                     - metricName: COUNT_INPROGRESS_ISSUES
-                                      event:
-                                          eventId: EV_ZENHUB_ISSUES_BY_COLUMN
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                         TPb_CORRELATION_BRANCHESASSOCIATED_INPROGRESSISSUES:
                             summary: 'TPb - Correlation Branches Associated to In Progress Issues'
                             value:
@@ -2207,27 +2219,29 @@ components:
                                 window: null
                                 metrics:
                                     - metricName: COUNT_BRANCHES_ASSOCIATED_TO_INPROGRESS_ISSUES
-                                      event:
-                                          eventId: EV_ZENHUB_ISSUES_WITH_DIFFERENT_BRANCHES_BY_COLUMN
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                fetcherConfig: null
-                                              - fetcherId: FT_GQL_GITHUB_ISSUES
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_ZENHUB_ISSUES_WITH_DIFFERENT_BRANCHES_BY_COLUMN
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                    fetcherConfig: null
+                                                  - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                                     - metricName: COUNT_INPROGRESS_ISSUES
-                                      event:
-                                          eventId: EV_ZENHUB_ISSUES_BY_COLUMN
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                         TPc_CORRELATION_INREVIEWISSUES_OPENPR:
                             summary: 'TPc - Correlation In Review Issues with Open PR'
                             value:
@@ -2242,27 +2256,29 @@ components:
                                 window: null
                                 metrics:
                                     - metricName: COUNT_INREVIEW_ISSUES_WITH_ASSOCIATED_OPEN_PR
-                                      event:
-                                          eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_PULL_REQUESTS_BY_STATUS
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                fetcherConfig: null
-                                              - fetcherId: FT_GQL_GITHUB_ISSUES
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_PULL_REQUESTS_BY_STATUS
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                    fetcherConfig: null
+                                                  - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                                     - metricName: COUNT_INREVIEW_ISSUES
-                                      event:
-                                          eventId: EV_ZENHUB_ISSUES_BY_COLUMN
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                         TPd_CORRELATION_DONEISSUES_MERGEDPR:
                             summary: 'TPd - Correlation Done Issues with Merged PR'
                             value:
@@ -2277,27 +2293,29 @@ components:
                                 window: null
                                 metrics:
                                     - metricName: COUNT_DONE_ISSUES_WITH_ASSOCIATED_CLOSED_PR
-                                      event:
-                                          eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_PULL_REQUESTS_BY_STATUS
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                fetcherConfig: null
-                                              - fetcherId: FT_GQL_GITHUB_ISSUES
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_PULL_REQUESTS_BY_STATUS
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                    fetcherConfig: null
+                                                  - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                                     - metricName: COUNT_DONE_ISSUES
-                                      event:
-                                          eventId: EV_ZENHUB_ISSUES_BY_COLUMN
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                         TPe_NUMBER_INPROGRESSISSUES_HOURLY_UNDER_1:
                             summary: 'TPe - Number of In Progress Issues per Member'
                             value:
@@ -2312,15 +2330,16 @@ components:
                                 window: null
                                 metrics:
                                     - metricName: COUNT_INPROGRESSISSUES_MEMBER
-                                      event:
-                                          eventId: EV_ZENHUB_ISSUES_BY_COLUMN
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                         TPf_NUMBER_DONEISSUES_WEEKLY_OVER_1:
                             summary: 'TPf - Number of Done Issues per Member Weekly'
                             value:
@@ -2335,15 +2354,16 @@ components:
                                 window: null
                                 metrics:
                                     - metricName: COUNT_DONEISSUES_MEMBER
-                                      event:
-                                          eventId: EV_ZENHUB_ISSUES_BY_COLUMN_FILTERED_BY_UPDATED_AT_DATE_ASSOCIATED_TO_MEMBER
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN_FILTERED_BY_UPDATED_AT_DATE_ASSOCIATED_TO_MEMBER
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                         TPg_CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_TEAM:
                             summary: 'TPg - Correlation Approved Merged PRs vs Total Merged PRs (Team)'
                             value:
@@ -2358,25 +2378,27 @@ components:
                                 window: null
                                 metrics:
                                     - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_TEAM
-                                      event:
-                                          eventId: EV_GITHUB_MERGED_PR_BY_REVIEW_STATE
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_GITHUB_MERGED_PR_BY_REVIEW_STATE
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                                     - metricName: COUNT_PR_MERGED_TEAM
-                                      event:
-                                          eventId: EV_GITHUB_PR_MERGED
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_GITHUB_PR_MERGED
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                         TPh1_CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_MEMBER:
                             summary: 'TPh.1 - Correlation Approved Merged PRs vs Total Merged PRs (Member)'
                             value:
@@ -2391,25 +2413,27 @@ components:
                                 window: null
                                 metrics:
                                     - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
-                                      event:
-                                          eventId: EV_GITHUB_MERGED_PR_BY_REVIEW_STATE
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_GITHUB_MERGED_PR_BY_REVIEW_STATE
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                                     - metricName: COUNT_PR_MERGED_MEMBER
-                                      event:
-                                          eventId: EV_GITHUB_PR_MERGED
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_GITHUB_PR_MERGED
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                         TPh2_NUMBER_APPROVEDMERGEDPULLREQUEST_MEMBER:
                             summary: 'TPh.2 - Number of Approved Merged PRs per Member'
                             value:
@@ -2424,15 +2448,16 @@ components:
                                 window: null
                                 metrics:
                                     - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
-                                      event:
-                                          eventId: EV_GITHUB_MERGED_PR_BY_REVIEW_STATE
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_GITHUB_MERGED_PR_BY_REVIEW_STATE
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                         TPi1_CORRELATION_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER_AND_COUNTPR:
                             summary: 'TPi.1 - Correlation PRs Commented/Approved by Member vs Total PRs from Others'
                             value:
@@ -2447,25 +2472,27 @@ components:
                                 window: null
                                 metrics:
                                     - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
-                                      event:
-                                          eventId: EV_GITHUB_PRS_WITH_COMMENT_OR_REVIEW_BY_MEMBER
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_GITHUB_PRS_WITH_COMMENT_OR_REVIEW_BY_MEMBER
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                                     - metricName: COUNT_PR
-                                      event:
-                                          eventId: EV_GITHUB_PRS_FROM_OTHERS
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_GITHUB_PRS_FROM_OTHERS
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
                         TPi2_NUMBER_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER:
                             summary: 'TPi.2 - Number of PRs Commented/Approved by Member'
                             value:
@@ -2480,15 +2507,16 @@ components:
                                 window: null
                                 metrics:
                                     - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
-                                      event:
-                                          eventId: EV_GITHUB_PRS_WITH_COMMENT_OR_REVIEW_BY_MEMBER
-                                          fetcherConfigs:
-                                              - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
-                                                fetcherConfig: null
-                                          processConfig: null
-                                      aggregation:
-                                          aggregatorType: count
-                                          aggregatorConfig: {}
+                                      metricConfig:
+                                          event:
+                                              eventId: EV_GITHUB_PRS_WITH_COMMENT_OR_REVIEW_BY_MEMBER
+                                              fetcherConfigs:
+                                                  - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                    fetcherConfig: null
+                                              processConfig: null
+                                          aggregation:
+                                              aggregatorType: count
+                                              aggregatorConfig: {}
 
         GuaranteeTemplateUpdateBody:
             description: Data to update a guarantee template
@@ -2506,27 +2534,29 @@ components:
                         numericExpression: '(COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES/COUNT_INPROGRESS_ISSUES*100)'
                         metrics:
                             - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
-                              event:
-                                  eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
-                                  fetcherConfigs:
-                                      - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                        fetcherConfig: null
-                                      - fetcherId: FT_GQL_GITHUB_ISSUES
-                                        fetcherConfig: null
-                                  processConfig: null
-                              aggregation:
-                                  aggregatorType: count
-                                  aggregatorConfig: {}
+                              metricConfig:
+                                  event:
+                                      eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                      fetcherConfigs:
+                                          - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                            fetcherConfig: null
+                                          - fetcherId: FT_GQL_GITHUB_ISSUES
+                                            fetcherConfig: null
+                                      processConfig: null
+                                  aggregation:
+                                      aggregatorType: count
+                                      aggregatorConfig: {}
                             - metricName: COUNT_INPROGRESS_ISSUES
-                              event:
-                                  eventId: EV_ZENHUB_ISSUES_BY_COLUMN
-                                  fetcherConfigs:
-                                      - fetcherId: FT_GQL_ZENHUB_ISSUES
-                                        fetcherConfig: null
-                                  processConfig: null
-                              aggregation:
-                                  aggregatorType: count
-                                  aggregatorConfig: {}
+                              metricConfig:
+                                  event:
+                                      eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                      fetcherConfigs:
+                                          - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                            fetcherConfig: null
+                                      processConfig: null
+                                  aggregation:
+                                      aggregatorType: count
+                                      aggregatorConfig: {}
 
     # ── Reusable responses ────────────────────────
     responses:
@@ -3756,11 +3786,10 @@ components:
 
         MetricEntry:
             type: object
-            description: A metric entry within a guarantee template
+            description: A metric definition within a guarantee template
             required:
                 - metricName
-                - event
-                - aggregation
+                - metricConfig
             properties:
                 metricName:
                     type: string
@@ -3768,52 +3797,58 @@ components:
                     minLength: 3
                     maxLength: 100
                     example: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
-                event:
+                metricConfig:
                     type: object
                     required:
-                        - eventId
-                        - fetcherConfigs
+                        - event
+                        - aggregation
                     properties:
-                        eventId:
-                            type: string
-                            description: Event ID registered in the computer
-                            example: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
-                        fetcherConfigs:
-                            type: array
-                            minItems: 1
-                            items:
-                                type: object
-                                required:
-                                    - fetcherId
-                                properties:
-                                    fetcherId:
-                                        type: string
-                                        description: Fetcher ID registered in the collector
-                                        example: FT_GQL_ZENHUB_ISSUES
-                                    fetcherConfig:
+                        event:
+                            type: object
+                            required:
+                                - eventId
+                                - fetcherConfigs
+                            properties:
+                                eventId:
+                                    type: string
+                                    description: Event ID registered in the computer
+                                    example: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                fetcherConfigs:
+                                    type: array
+                                    minItems: 1
+                                    items:
                                         type: object
-                                        nullable: true
-                                        description: Fetcher configuration. Null in templates (placeholder).
-                                        example: null
-                        processConfig:
+                                        required:
+                                            - fetcherId
+                                        properties:
+                                            fetcherId:
+                                                type: string
+                                                description: Fetcher ID registered in the collector
+                                                example: FT_GQL_ZENHUB_ISSUES
+                                            fetcherConfig:
+                                                type: object
+                                                nullable: true
+                                                description: Fetcher configuration. Null in templates (placeholder).
+                                                example: null
+                                processConfig:
+                                    type: object
+                                    nullable: true
+                                    description: Process configuration. Null in templates (placeholder).
+                                    example: null
+                        aggregation:
                             type: object
-                            nullable: true
-                            description: Process configuration. Null in templates (placeholder).
-                            example: null
-                aggregation:
-                    type: object
-                    required:
-                        - aggregatorType
-                        - aggregatorConfig
-                    properties:
-                        aggregatorType:
-                            type: string
-                            description: Aggregator type registered in the computer
-                            example: count
-                        aggregatorConfig:
-                            type: object
-                            description: Aggregator configuration
-                            example: {}
+                            required:
+                                - aggregatorType
+                                - aggregatorConfig
+                            properties:
+                                aggregatorType:
+                                    type: string
+                                    description: Aggregator type registered in the computer
+                                    example: count
+                                aggregatorConfig:
+                                    type: object
+                                    description: Aggregator configuration
+                                    example: {}
 
         GuaranteeTemplateCreateInput:
             type: object
