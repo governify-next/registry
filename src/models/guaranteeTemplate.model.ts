@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { IMetricDefinition } from '../types/metric.js';
+import { metricDefinitionSchema } from './shared/metric.schema.js';
 
 // Subdocumentos
 
@@ -8,29 +9,6 @@ const infoSchema = new Schema(
         title: { type: String, required: true },
         description: { type: String },
         example: { type: String },
-    },
-    { _id: false },
-);
-
-const metricSchema = new Schema(
-    {
-        metricName: { type: String, required: true },
-        metricConfig: {
-            event: {
-                eventId: { type: String, required: true },
-                fetcherConfigs: [
-                    {
-                        fetcherId: { type: String, required: true },
-                        fetcherConfig: { type: Schema.Types.Mixed, default: null },
-                    },
-                ],
-                processConfig: { type: Schema.Types.Mixed, default: null },
-            },
-            aggregation: {
-                aggregatorType: { type: String, required: true },
-                aggregatorConfig: { type: Schema.Types.Mixed, default: {} },
-            },
-        },
     },
     { _id: false },
 );
@@ -60,7 +38,7 @@ const guaranteeTemplateSchema = new Schema<IGuaranteeTemplate>({
     comparator: { type: Schema.Types.Mixed },
     threshold: { type: Schema.Types.Mixed },
     window: { type: Schema.Types.Mixed },
-    metrics: { type: [metricSchema], required: true },
+    metrics: { type: [metricDefinitionSchema], required: true },
 });
 
 const GuaranteeTemplate = mongoose.model<IGuaranteeTemplate>(

@@ -2,6 +2,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 import { IWindow } from '../types/window.js';
 import { IMetric } from '../types/metric.js';
 import { windowSchema } from './shared/window.schema.js';
+import { metricSchema } from './shared/metric.schema.js';
 
 export enum StateStatus {
     IN_PROGRESS = 'IN_PROGRESS',
@@ -43,7 +44,7 @@ const stateSchema = new Schema<IState>(
         compliant: { type: Boolean, default: null },
         indeterminate: { type: Boolean, default: null },
         window: { type: windowSchema, required: true },
-        metrics: { type: Schema.Types.Mixed, required: true },
+        metrics: { type: [metricSchema], required: true },
     },
     { timestamps: true, minimize: false },
 );
