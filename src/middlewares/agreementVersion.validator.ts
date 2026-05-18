@@ -228,7 +228,7 @@ const validateSignatureConfigsInExternalServices = async (
                 }
 
                 const eventError = await validateEventConfig(
-                    templateMetric.event.eventId,
+                    templateMetric.metricConfig.event.eventId,
                     metric.fetcherConfigs,
                     metric.processConfig,
                 );

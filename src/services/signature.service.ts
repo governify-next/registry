@@ -50,13 +50,16 @@ export const assembleBySignature = async (agreementVersion: IAgreementVersion) =
                 );
                 return {
                     metricName: templateMetric.metricName,
-                    event: {
-                        eventId: templateMetric.event.eventId,
-                        fetcherConfigs:
-                            signatureMetric?.fetcherConfigs ?? templateMetric.event.fetcherConfigs,
-                        processConfig: signatureMetric?.processConfig ?? {},
+                    metricConfig: {
+                        event: {
+                            eventId: templateMetric.metricConfig.event.eventId,
+                            fetcherConfigs:
+                                signatureMetric?.fetcherConfigs ??
+                                templateMetric.metricConfig.event.fetcherConfigs,
+                            processConfig: signatureMetric?.processConfig ?? {},
+                        },
+                        aggregation: templateMetric.metricConfig.aggregation,
                     },
-                    aggregation: templateMetric.aggregation,
                 };
             });
 
