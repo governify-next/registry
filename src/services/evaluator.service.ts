@@ -1,8 +1,8 @@
-import { IComputedMetric } from '../types/metric.js';
+import { IMetric } from '../types/metric.js';
 
 export const evaluateNumericExpression = (
     expression: string,
-    metrics: IComputedMetric[],
+    metrics: IMetric[],
 ): number | null => {
     const metricValues: Record<string, number> = {};
     for (const metric of metrics) {
@@ -41,10 +41,7 @@ export const evaluateCompliance = (
     }
 };
 
-export const replaceExpressionWithValues = (
-    expression: string,
-    metrics: IComputedMetric[],
-): string => {
+export const replaceExpressionWithValues = (expression: string, metrics: IMetric[]): string => {
     let replacedExpression = expression;
     for (const metric of metrics) {
         const regex = new RegExp(`\\b${metric.metricName}\\b`, 'g');

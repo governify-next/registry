@@ -1,5 +1,6 @@
 import { bootEnv } from '../config/bootConfig.js';
 import { IWindow } from '../types/window.js';
+import { IMetricConfig } from '../types/metric.js';
 import { ExternalServiceError } from '../utils/customErrors.js';
 import { serviceHeaders } from '../utils/serviceAuth.js';
 
@@ -83,8 +84,8 @@ export const validateAggregator = async (
 export const computeMetric = async (
     date: Date,
     window: IWindow,
-    event: Record<string, unknown>,
-    aggregation: Record<string, unknown>,
+    event: IMetricConfig['event'],
+    aggregation: IMetricConfig['aggregation'],
 ) => {
     const response = await fetch(`${COMPUTER_SERVICE_URL}/api/v1/metric/compute`, {
         method: 'POST',
