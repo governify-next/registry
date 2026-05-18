@@ -1,29 +1,7 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import { Comparator } from '../types/agreementTemplate.types.js';
 import { IWindow } from '../types/window.js';
-
-const unitPeriodSchema = new Schema(
-    {
-        unit: {
-            type: String,
-            required: true,
-            enum: ['millisecond', 'second', 'minute', 'hour', 'day', 'week'],
-        },
-        value: {
-            type: Number,
-            required: true,
-        },
-    },
-    { _id: false },
-);
-
-const windowSchema = new Schema(
-    {
-        period: { type: [unitPeriodSchema], required: true },
-        anchorDate: { type: Date, required: true },
-    },
-    { _id: false },
-);
+import { windowSchema } from './shared/window.schema.js';
 
 export interface IGuarantee extends Document {
     guaranteeTemplateId: Types.ObjectId;

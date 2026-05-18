@@ -4,6 +4,7 @@ import * as agreementTemplateService from '../services/agreementTemplate.service
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
 import { getOrganizationOrFail } from './organization.validator.js';
 import { DuplicateKeyError, ValidationError, NotFoundError } from '../utils/customErrors.js';
+import { windowUnits } from '../types/window.js';
 
 // ─── Validaciones de campo ────────────────────────────
 
@@ -92,7 +93,7 @@ const guaranteesStructureValidation = [
     body('guarantees.*.window.period.*.unit')
         .exists({ checkNull: true })
         .withMessage('Each period entry must have a unit')
-        .isIn(['millisecond', 'second', 'minute', 'hour', 'day', 'week'])
+        .isIn(windowUnits)
         .withMessage('Period unit must be one of: millisecond, second, minute, hour, day, week'),
 
     body('guarantees.*.window.period.*.value')

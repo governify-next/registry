@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import { IWindow } from '../types/window.js';
 import { IMetric } from '../types/metric.js';
+import { windowSchema } from './shared/window.schema.js';
 
 export enum StateStatus {
     IN_PROGRESS = 'IN_PROGRESS',
@@ -41,7 +42,7 @@ const stateSchema = new Schema<IState>(
         numericExpressionValue: { type: Number, default: null },
         compliant: { type: Boolean, default: null },
         indeterminate: { type: Boolean, default: null },
-        window: { type: Schema.Types.Mixed, required: true },
+        window: { type: windowSchema, required: true },
         metrics: { type: Schema.Types.Mixed, required: true },
     },
     { timestamps: true, minimize: false },
