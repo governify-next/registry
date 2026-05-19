@@ -2,19 +2,6 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { IMetricDefinition } from '../types/metric.js';
 import { metricDefinitionSchema } from './shared/metric.schema.js';
 
-// Subdocumentos
-
-const infoSchema = new Schema(
-    {
-        title: { type: String, required: true },
-        description: { type: String },
-        example: { type: String },
-    },
-    { _id: false },
-);
-
-// Interfaz para TypeScript
-
 export interface IGuaranteeTemplate extends Document {
     name: string;
     info: {
@@ -29,11 +16,17 @@ export interface IGuaranteeTemplate extends Document {
     metrics: IMetricDefinition[];
 }
 
-// Esquema principal
-
 const guaranteeTemplateSchema = new Schema<IGuaranteeTemplate>({
     name: { type: String, required: true, unique: true },
-    info: { type: infoSchema, required: true },
+    info: {
+        type: {
+            title: { type: String, required: true },
+            description: { type: String },
+            example: { type: String },
+        },
+        required: true,
+        _id: false,
+    },
     numericExpression: { type: String, required: true },
     comparator: { type: Schema.Types.Mixed },
     threshold: { type: Schema.Types.Mixed },
