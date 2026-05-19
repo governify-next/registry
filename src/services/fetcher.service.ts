@@ -7,6 +7,7 @@ export const fetchAuditableVersionFetchResults = async (
     elementName: string,
     agColName: string,
     date: Date,
+    expand: boolean,
 ) => {
     const auditableAgreementVersion = await agreementVersionService.getAuditableVersionByCollection(
         orgName,
@@ -26,7 +27,7 @@ export const fetchAuditableVersionFetchResults = async (
     const fetchResults = await fetchFetchResults(date, fetcherConfigs);
 
     return {
-        fetchResults,
+        fetchResults: expand ? fetchResults : fetchResults.map((fetchResult) => fetchResult._id),
         hasFailedFetchResults: fetchResults.some(
             (fetchResult) => fetchResult.status !== 'COMPLETED',
         ),

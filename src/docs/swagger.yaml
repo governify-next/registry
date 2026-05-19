@@ -22,6 +22,8 @@ tags:
       description: Agreement collection management within an element
     - name: AgreementVersions
       description: Agreement version management within a collection
+    - name: Fetchers
+      description: Fetch result orchestration from Registry
 
 paths:
     # ──────────────────────────────────────────────
@@ -1465,6 +1467,91 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
+    # ──────────────────────────────────────────────
+    # Fetchers
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}/agreementVersions/auditableVersion/fetchers/fetch:
+        post:
+            tags:
+                - Fetchers
+            summary: Generate fetch results for auditable agreement version
+            operationId: fetchAuditableVersionFetchResults
+            parameters:
+                - $ref: '#/components/parameters/orgName'
+                - $ref: '#/components/parameters/elementName'
+                - $ref: '#/components/parameters/agColName'
+                - in: query
+                  name: expand
+                  required: false
+                  schema:
+                      type: boolean
+                  description: If true, returns full fetch results. By default, only fetch result ids are returned.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - date
+                            properties:
+                                date:
+                                    type: string
+                                    format: date-time
+                        example:
+                            date: '2026-05-19T00:00:00.000Z'
+            responses:
+                '200':
+                    description: Fetch results generated successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  type: string
+                            example:
+                                success: true
+                                message: Fetch results generated
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - 665e5f6a7b8c9d0e1f2a3b4c
+                                error: null
+                '207':
+                    description: Generation completed with one or more non-completed fetch results
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  type: string
+                            example:
+                                success: true
+                                message: Fetch results generated with failures
+                                httpStatus: 207
+                                appCode: SUCCESS
+                                data:
+                                    - 665e5f6a7b8c9d0e1f2a3b4d
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/ExternalServiceError'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
 # ──────────────────────────────────────────────
 # Reusable components
 # ──────────────────────────────────────────────
@@ -2889,6 +2976,21 @@ components:
                         data: null
                         error:
                             message: Internal server error
+                            details: null
+        ExternalServiceError:
+            description: External service error
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorResponse'
+                    example:
+                        success: false
+                        message: External service error
+                        httpStatus: 422
+                        appCode: EXTERNAL_SERVICE_ERROR
+                        data: null
+                        error:
+                            message: External service error
                             details: null
 
     # ── Schemas ───────────────────────────────────

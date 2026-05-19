@@ -8,6 +8,7 @@ export const fetchAuditableVersionFetchResults = async (
     next: NextFunction,
 ) => {
     try {
+        const expand = req.query.expand === 'true';
         const { orgName, elementName, agColName } = req.params;
         const { date } = req.body;
 
@@ -17,6 +18,7 @@ export const fetchAuditableVersionFetchResults = async (
                 elementName,
                 agColName,
                 new Date(date),
+                expand,
             );
 
         return sendSuccess(res, {
