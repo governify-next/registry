@@ -3,11 +3,10 @@ import * as agreementVersionService from './agreementVersion.service.js';
 import * as evaluatorService from './evaluator.service.js';
 import * as windowUtil from '../utils/window.util.js';
 import * as computerIntegration from '../integrations/computer.integration.js';
-import * as collectorIntegrations from '../integrations/collector.integration.js';
 import { IState, StateStatus } from '../models/state.model.js';
 import { Types } from 'mongoose';
 import { IAssembledGuarantee } from '../types/assembledGuarantee.types.js';
-import { IMetric, IFetcherConfig } from '../types/metric.js';
+import { IMetric } from '../types/metric.js';
 import { Comparator } from '../types/comparator.js';
 import { getLogger } from '../utils/logger.js';
 
@@ -161,13 +160,6 @@ export const generateStatesForAuditableVersion = async (
             ? auditableAgreementVersion!.contract.signatures
             : [];
 
-    // await prefetchFetchResults(
-    //     date,
-    //     signatures.flatMap((signature) =>
-    //         signature.guarantee.metrics.flatMap((metric) => metric.metricConfig.event.fetcherConfigs),
-    //     ),
-    // );
-
     const states: Array<IState> = [];
     await Promise.all(
         signatures.map(async (signature) => {
@@ -230,31 +222,4 @@ export const getStatesForAuditableVersion = async (
 
 const getExistingState = async (signatureId: string, date: Date) => {
     return await stateRepository.getStateBySignatureIdAndDate(signatureId, date);
-};
-
-const buildFetchResultKey = (fetcherConfig: IFetcherConfig) => {
-    return JSON.stringify({
-        fetcherId: fetcherConfig.fetcherId,
-        fetcherConfig: fetcherConfig.fetcherConfig,
-    });
-};
-
-const prefetchFetchResults = async (date: Date, fetcherConfigs: IFetcherConfig[]) => {
-    const uniqueFetches = new Map<string, IFetcherConfig>();
-
-    for (const fetcherConfig of fetcherConfigs) {
-        const key = buildFetchResultKey(fetcherConfig);
-
-        uniqueFetches.set(key, fetcherConfig);
-    }
-
-    await Promise.all(
-        [...uniqueFetches.values()].map((fetcherConfig) =>
-            collectorIntegrations.generateFetchResult(
-                fetcherConfig.fetcherId,
-                date,
-                fetcherConfig.fetcherConfig!,
-            ),
-        ),
-    );
 };

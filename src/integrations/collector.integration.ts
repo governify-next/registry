@@ -30,7 +30,6 @@ export const validateFetcherExists = async (fetcherId: string): Promise<string |
     return result.error?.message;
 };
 
-// TODO: A futuro para el cálculo directo de fetchs
 export const generateFetchResult = async (
     fetcherId: string,
     date: Date,
@@ -41,18 +40,18 @@ export const generateFetchResult = async (
         {
             method: 'POST',
             headers: serviceHeaders,
-            body: JSON.stringify({
-                date,
-                fetcherConfig: fetcherConfig,
-            }),
+            body: JSON.stringify({ date, fetcherConfig }),
         },
     );
+
     const result = await response.json();
 
-    if (!result.success)
+    if (!result.success) {
         throw new ExternalServiceError(
-            `Failed to initiate fetch result generation for fetcher ${fetcherId}`,
+            `Failed to generate fetch result for fetcher ${fetcherId}`,
+            result.error,
         );
+    }
 
     return result.data;
 };

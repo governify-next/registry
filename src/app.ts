@@ -6,6 +6,7 @@ import { agreementTemplateRoutes } from './routes/agreementTemplate.routes.js';
 import { agreementCollectionRoutes } from './routes/agreementCollection.routes.js';
 import { agreementVersionRoutes } from './routes/agreementVersion.routes.js';
 import { stateRoutes } from './routes/state.routes.js';
+import { fetcherRoutes } from './routes/fetcher.routes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { checkServiceAuthentication } from './middlewares/service.authenticator.js';
 import swaggerUi from 'swagger-ui-express';
@@ -28,6 +29,7 @@ app.use('/api/v1', checkServiceAuthentication, agreementTemplateRoutes);
 app.use('/api/v1', checkServiceAuthentication, agreementCollectionRoutes);
 app.use('/api/v1', checkServiceAuthentication, agreementVersionRoutes);
 app.use('/api/v1', checkServiceAuthentication, stateRoutes);
+app.use('/api/v1', checkServiceAuthentication, fetcherRoutes);
 app.use(errorHandler);
 
 export default app;
