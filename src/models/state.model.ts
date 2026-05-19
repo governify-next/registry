@@ -3,6 +3,7 @@ import { IWindow } from '../types/window.js';
 import { IMetric } from '../types/metric.js';
 import { windowSchema } from './shared/window.schema.js';
 import { metricSchema } from './shared/metric.schema.js';
+import { Comparator } from '../types/agreementTemplate.types.js';
 
 export enum StateStatus {
     IN_PROGRESS = 'IN_PROGRESS',
@@ -18,7 +19,7 @@ export interface IState extends Document {
     consolidated: boolean;
     status: StateStatus;
     numericExpression: string;
-    comparator: string;
+    comparator: Comparator;
     threshold: number;
     replacedNumericExpression: string | null;
     numericExpressionValue: number | null;

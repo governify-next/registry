@@ -8,7 +8,9 @@ export interface IAgreementTemplateData {
     isPublic: boolean;
 }
 
-export type Comparator = '<' | '>' | '<=' | '>=' | '==' | '!=';
+export const comparators = ['<', '>', '<=', '>=', '==', '!='] as const;
+
+export type Comparator = (typeof comparators)[number];
 
 export interface IGuaranteeEntry {
     guaranteeTemplateName: string;

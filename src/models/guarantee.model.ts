@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import { Comparator } from '../types/agreementTemplate.types.js';
+import { Comparator, comparators } from '../types/agreementTemplate.types.js';
 import { IWindow } from '../types/window.js';
 import { windowSchema } from './shared/window.schema.js';
 
@@ -16,7 +16,7 @@ export interface IGuarantee extends Document {
 const guaranteeSchema = new Schema<IGuarantee>({
     guaranteeTemplateId: { type: Schema.ObjectId, required: true },
     agreementTemplateId: { type: Schema.ObjectId, required: true },
-    comparator: { type: String, required: true, enum: ['<', '>', '<=', '>=', '==', '!='] },
+    comparator: { type: String, required: true, enum: comparators },
     threshold: { type: Number, required: true },
     window: { type: windowSchema, required: true },
 });

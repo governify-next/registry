@@ -5,6 +5,7 @@ import * as guaranteeTemplateService from '../services/guaranteeTemplate.service
 import { getOrganizationOrFail } from './organization.validator.js';
 import { DuplicateKeyError, ValidationError, NotFoundError } from '../utils/customErrors.js';
 import { windowUnits } from '../types/window.js';
+import { comparators } from '../types/agreementTemplate.types.js';
 
 // ─── Validaciones de campo ────────────────────────────
 
@@ -62,7 +63,7 @@ const guaranteesStructureValidation = [
         .withMessage('Each guarantee entry must have a comparator')
         .isString()
         .withMessage('comparator must be a string')
-        .isIn(['<', '>', '<=', '>=', '==', '!='])
+        .isIn(comparators)
         .withMessage('comparator must be one of: <, >, <=, >=, ==, !='),
     body('guarantees.*.threshold')
         .exists({ checkNull: true })

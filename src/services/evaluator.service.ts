@@ -1,4 +1,5 @@
 import { IMetric } from '../types/metric.js';
+import { Comparator } from '../types/agreementTemplate.types.js';
 
 export const evaluateNumericExpression = (
     expression: string,
@@ -20,7 +21,7 @@ export const evaluateNumericExpression = (
 
 export const evaluateCompliance = (
     expressionValue: number,
-    comparator: string,
+    comparator: Comparator,
     threshold: number,
 ): boolean | null => {
     switch (comparator) {
