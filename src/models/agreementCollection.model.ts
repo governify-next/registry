@@ -1,7 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-// Interfaz para TypeScript
-
 export interface IAgreementVersion {
     versionNumber: number;
     contract: {

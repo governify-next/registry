@@ -1,4 +1,4 @@
-import { Comparator } from './agreementTemplate.types.js';
+import { Comparator } from './comparator.js';
 import { IMetricDefinition } from './metric.js';
 import { IWindow } from './window.js';
 

@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import { Comparator, comparators } from '../types/agreementTemplate.types.js';
+import { Comparator, comparators } from '../types/comparator.js';
 import { IWindow } from '../types/window.js';
 import { windowSchema } from './shared/window.schema.js';
 
@@ -10,8 +10,6 @@ export interface IGuarantee extends Document {
     threshold: number;
     window: IWindow;
 }
-
-// Esquema principal
 
 const guaranteeSchema = new Schema<IGuarantee>({
     guaranteeTemplateId: { type: Schema.ObjectId, required: true },

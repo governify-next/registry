@@ -1,6 +1,6 @@
 import { IWindowPeriod } from './window.js';
+import { Comparator } from './comparator.js';
 
-// Tipo base de dominio independiente de mongoose
 export interface IAgreementTemplateData {
     name: string;
     displayName: string;
@@ -8,11 +8,7 @@ export interface IAgreementTemplateData {
     isPublic: boolean;
 }
 
-export const comparators = ['<', '>', '<=', '>=', '==', '!='] as const;
-
-export type Comparator = (typeof comparators)[number];
-
-export interface IGuaranteeEntry {
+export interface IAgreementTemplateGuaranteeInput {
     guaranteeTemplateName: string;
     comparator: Comparator;
     threshold: number;
@@ -22,7 +18,6 @@ export interface IGuaranteeEntry {
     };
 }
 
-// Payload del POST/PUT: datos de la plantilla
-export interface AgreementTemplatePayload extends IAgreementTemplateData {
-    guarantees: IGuaranteeEntry[];
+export interface IAgreementTemplatePayload extends IAgreementTemplateData {
+    guarantees: IAgreementTemplateGuaranteeInput[];
 }

@@ -3,7 +3,7 @@ import { IWindow } from '../types/window.js';
 import { IMetric } from '../types/metric.js';
 import { windowSchema } from './shared/window.schema.js';
 import { metricSchema } from './shared/metric.schema.js';
-import { Comparator } from '../types/agreementTemplate.types.js';
+import { Comparator, comparators } from '../types/comparator.js';
 
 export enum StateStatus {
     IN_PROGRESS = 'IN_PROGRESS',
@@ -38,7 +38,7 @@ const stateSchema = new Schema<IState>(
         consolidated: { type: Boolean, required: true },
         status: { type: String, enum: Object.values(StateStatus), required: true },
         numericExpression: { type: String, required: true },
-        comparator: { type: String, required: true },
+        comparator: { type: String, required: true, enum: comparators },
         threshold: { type: Number, required: true },
         replacedNumericExpression: { type: String, default: null },
         numericExpressionValue: { type: Number, default: null },

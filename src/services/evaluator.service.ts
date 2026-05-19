@@ -1,5 +1,5 @@
 import { IMetric } from '../types/metric.js';
-import { Comparator } from '../types/agreementTemplate.types.js';
+import { Comparator } from '../types/comparator.js';
 
 export const evaluateNumericExpression = (
     expression: string,
