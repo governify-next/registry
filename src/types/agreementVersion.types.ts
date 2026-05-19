@@ -10,7 +10,7 @@ export interface IAgreementVersionData {
     };
 }
 
-export interface ISignatureEntry {
+export interface IAgreementVersionSignatureInput {
     guaranteeName: string;
     metrics: {
         metricName: string;
@@ -22,6 +22,6 @@ export interface ISignatureEntry {
     }[];
 }
 
-export interface AgreementVersionPayload extends IAgreementVersionData {
-    signatures: ISignatureEntry[];
+export interface IAgreementVersionPayload extends IAgreementVersionData {
+    signatures: IAgreementVersionSignatureInput[];
 }

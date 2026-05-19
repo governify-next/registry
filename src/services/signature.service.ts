@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { ISignatureEntry } from '../types/agreementVersion.types.js';
+import { IAgreementVersionSignatureInput } from '../types/agreementVersion.types.js';
 import {
     findGuaranteeTemplateById,
     getGuaranteeTemplateByName,
@@ -10,7 +10,7 @@ import { IAgreementVersion } from '../models/agreementCollection.model.js';
 import { resolveAgreementTemplateById } from './agreementTemplate.service.js';
 
 export const createSignaturesByVersion = async (
-    signatures: ISignatureEntry[],
+    signatures: IAgreementVersionSignatureInput[],
     templateId: Types.ObjectId,
 ) => {
     const createdSignatures = await Promise.all(
