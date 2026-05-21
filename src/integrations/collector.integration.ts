@@ -34,9 +34,10 @@ export const generateFetchResult = async (
     fetcherId: string,
     date: Date,
     fetcherConfig: Record<string, unknown>,
+    isAsync: boolean,
 ) => {
     const response = await fetch(
-        `${COLLECTOR_SERVICE_URL}/api/v1/fetchers/${fetcherId}/fetchResults/generate`,
+        `${COLLECTOR_SERVICE_URL}/api/v1/fetchers/${fetcherId}/fetchResults/generate?isAsync=${isAsync}`,
         {
             method: 'POST',
             headers: serviceHeaders,

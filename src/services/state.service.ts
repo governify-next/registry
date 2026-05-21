@@ -116,7 +116,7 @@ export const evaluateState = async (
         : evaluatorService.evaluateNumericExpression(numericExpression, processedMetrics);
     const updatedState = await stateRepository.updateStateById(id, {
         endDate: new Date(),
-        status: StateStatus.COMPLETED,
+        status: hasUnavailableMetricValue ? StateStatus.FAILED : StateStatus.COMPLETED,
         replacedNumericExpression: hasUnavailableMetricValue
             ? null
             : evaluatorService.replaceExpressionWithValues(numericExpression, processedMetrics),

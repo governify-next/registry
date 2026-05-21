@@ -8,6 +8,7 @@ export const fetchAuditableVersionFetchResults = async (
     agColName: string,
     date: Date,
     expand: boolean,
+    isAsync: boolean,
 ) => {
     const auditableAgreementVersion = await agreementVersionService.getAuditableVersionByCollection(
         orgName,
@@ -24,17 +25,19 @@ export const fetchAuditableVersionFetchResults = async (
         signature.guarantee.metrics.flatMap((metric) => metric.metricConfig.event.fetcherConfigs),
     );
 
-    const fetchResults = await fetchFetchResults(date, fetcherConfigs);
+    const fetchResults = await fetchFetchResults(date, fetcherConfigs, isAsync);
 
     return {
         fetchResults: expand ? fetchResults : fetchResults.map((fetchResult) => fetchResult._id),
-        hasFailedFetchResults: fetchResults.some(
-            (fetchResult) => fetchResult.status !== 'COMPLETED',
-        ),
+        hasFailedFetchResults: fetchResults.some((fetchResult) => fetchResult.status === 'FAILED'),
     };
 };
 
-const fetchFetchResults = async (date: Date, fetcherConfigs: IFetcherConfig[]) => {
+const fetchFetchResults = async (
+    date: Date,
+    fetcherConfigs: IFetcherConfig[],
+    isAsync: boolean,
+) => {
     const uniqueFetches = new Map<string, IFetcherConfig>();
 
     for (const fetcherConfig of fetcherConfigs) {
@@ -47,6 +50,7 @@ const fetchFetchResults = async (date: Date, fetcherConfigs: IFetcherConfig[]) =
                 fetcherConfig.fetcherId,
                 date,
                 fetcherConfig.fetcherConfig!,
+                isAsync,
             ),
         ),
     );

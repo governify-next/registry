@@ -9,6 +9,7 @@ export const fetchAuditableVersionFetchResults = async (
 ) => {
     try {
         const expand = req.query.expand === 'true';
+        const isAsync = req.query.isAsync === 'true';
         const { orgName, elementName, agColName } = req.params;
         const { date } = req.body;
 
@@ -19,6 +20,7 @@ export const fetchAuditableVersionFetchResults = async (
                 agColName,
                 new Date(date),
                 expand,
+                isAsync,
             );
 
         return sendSuccess(res, {
@@ -26,7 +28,7 @@ export const fetchAuditableVersionFetchResults = async (
             message: hasFailedFetchResults
                 ? 'Fetch results generated with failures'
                 : 'Fetch results generated',
-            httpStatus: hasFailedFetchResults ? 207 : 200,
+            httpStatus: hasFailedFetchResults ? 207 : 201,
         });
     } catch (err) {
         next(err);
