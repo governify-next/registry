@@ -22,6 +22,8 @@ tags:
       description: Agreement collection management within an element
     - name: AgreementVersions
       description: Agreement version management within a collection
+    - name: States
+      description: State generation and retrieval for auditable agreement versions
     - name: Fetchers
       description: Fetch result orchestration from Registry
 
@@ -1464,6 +1466,176 @@ paths:
                     $ref: '#/components/responses/ValidationError'
                 '404':
                     $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    # ──────────────────────────────────────────────
+    # States
+    # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}/agreementVersions/auditableVersion/states/consolidated/generate:
+        post:
+            tags:
+                - States
+            summary: Generate consolidated states for auditable agreement version
+            operationId: generateConsolidatedStatesForAuditableVersion
+            description: |
+                Generates states for every exact consolidation date within the inclusive
+                `startDate` and `endDate` range, using each signature guarantee window.
+                Existing states for the same signature and date are reused.
+            parameters:
+                - $ref: '#/components/parameters/orgName'
+                - $ref: '#/components/parameters/elementName'
+                - $ref: '#/components/parameters/agColName'
+                - in: query
+                  name: isAsync
+                  required: false
+                  schema:
+                      type: boolean
+                      default: false
+                  description: If true, states are created and metric computation continues asynchronously.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - startDate
+                                - endDate
+                            properties:
+                                startDate:
+                                    type: string
+                                    format: date-time
+                                    description: Inclusive lower bound for consolidation dates.
+                                endDate:
+                                    type: string
+                                    format: date-time
+                                    description: Inclusive upper bound for consolidation dates. Must be after or equal to `startDate`.
+                        example:
+                            startDate: '2026-05-01T00:00:00.000Z'
+                            endDate: '2026-05-03T23:59:59.999Z'
+            responses:
+                '200':
+                    description: Consolidated states generated successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/State'
+                            example:
+                                success: true
+                                message: Consolidated states created and generated
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - _id: 665e5f6a7b8c9d0e1f2a3b4c
+                                      signatureId: 69cbea571d5009a043619276
+                                      startDate: '2026-05-21T00:00:01.000Z'
+                                      endDate: '2026-05-21T00:00:03.000Z'
+                                      date: '2026-05-21T00:00:00.000Z'
+                                      consolidated: true
+                                      status: COMPLETED
+                                      numericExpression: COUNT_DONEISSUES_MEMBER
+                                      comparator: '>='
+                                      threshold: 1
+                                      replacedNumericExpression: '2'
+                                      numericExpressionValue: 2
+                                      compliant: true
+                                      indeterminate: false
+                                      window:
+                                          anchorDate: '2026-05-14T00:00:00.000Z'
+                                          period:
+                                              - unit: week
+                                                value: 1
+                                      metrics:
+                                          - metricName: COUNT_DONEISSUES_MEMBER
+                                            value: 2
+                                            evidences: []
+                                            metricConfig:
+                                                event:
+                                                    eventId: EV_ZENHUB_ISSUES_BY_COLUMN_FILTERED_BY_UPDATED_AT_DATE_ASSOCIATED_TO_MEMBER
+                                                    fetcherConfigs:
+                                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                          fetcherConfig:
+                                                              workspaceId: YOUR_ZENHUB_WORKSPACE_ID
+                                                          fetchResultId: 665e5f6a7b8c9d0e1f2a3b4d
+                                                    processConfig:
+                                                        columns:
+                                                            - Done
+                                                        username: johndoe
+                                                aggregation:
+                                                    aggregatorType: count
+                                                    aggregatorConfig: {}
+                                error: null
+                '207':
+                    description: Generation completed with one or more indeterminate states
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/State'
+                            example:
+                                success: true
+                                message: Consolidated states created and generated
+                                httpStatus: 207
+                                appCode: SUCCESS
+                                data:
+                                    - _id: 665e5f6a7b8c9d0e1f2a3b4e
+                                      signatureId: 69cbea571d5009a043619276
+                                      startDate: '2026-05-21T00:00:01.000Z'
+                                      endDate: '2026-05-21T00:00:03.000Z'
+                                      date: '2026-05-21T00:00:00.000Z'
+                                      consolidated: true
+                                      status: FAILED
+                                      numericExpression: COUNT_DONEISSUES_MEMBER
+                                      comparator: '>='
+                                      threshold: 1
+                                      replacedNumericExpression: null
+                                      numericExpressionValue: null
+                                      compliant: null
+                                      indeterminate: true
+                                      window:
+                                          anchorDate: '2026-05-14T00:00:00.000Z'
+                                          period:
+                                              - unit: week
+                                                value: 1
+                                      metrics:
+                                          - metricName: COUNT_DONEISSUES_MEMBER
+                                            value: null
+                                            evidences: []
+                                            metricConfig:
+                                                event:
+                                                    eventId: EV_ZENHUB_ISSUES_BY_COLUMN_FILTERED_BY_UPDATED_AT_DATE_ASSOCIATED_TO_MEMBER
+                                                    fetcherConfigs:
+                                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                          fetcherConfig:
+                                                              workspaceId: YOUR_ZENHUB_WORKSPACE_ID
+                                                    processConfig:
+                                                        columns:
+                                                            - Done
+                                                        username: johndoe
+                                                aggregation:
+                                                    aggregatorType: count
+                                                    aggregatorConfig: {}
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/ExternalServiceError'
                 '500':
                     $ref: '#/components/responses/InternalError'
 
@@ -4179,6 +4351,165 @@ components:
                     nullable: true
                     description: Version number to set as auditable, or null to unset
                     example: null
+
+        # ── State ─────────────────────────────────
+        State:
+            type: object
+            description: Computed state for a signature guarantee at a concrete evaluation date
+            properties:
+                _id:
+                    type: string
+                    description: MongoDB internal identifier (ObjectId)
+                    example: 665e5f6a7b8c9d0e1f2a3b4c
+                signatureId:
+                    type: string
+                    description: ObjectId of the evaluated signature
+                    example: 69cbea571d5009a043619276
+                startDate:
+                    type: string
+                    format: date-time
+                    description: State generation start timestamp
+                    example: '2026-05-21T00:00:01.000Z'
+                endDate:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    description: State generation end timestamp. Null while status is IN_PROGRESS.
+                    example: '2026-05-21T00:00:03.000Z'
+                date:
+                    type: string
+                    format: date-time
+                    description: Evaluation date for this state
+                    example: '2026-05-21T00:00:00.000Z'
+                consolidated:
+                    type: boolean
+                    description: Whether the evaluation date is an exact consolidation date for the guarantee window
+                    example: true
+                status:
+                    type: string
+                    enum: [IN_PROGRESS, COMPLETED, FAILED]
+                    example: COMPLETED
+                numericExpression:
+                    type: string
+                    example: COUNT_DONEISSUES_MEMBER
+                comparator:
+                    type: string
+                    enum: ['<', '>', '<=', '>=', '==', '!=']
+                    example: '>='
+                threshold:
+                    type: number
+                    example: 1
+                replacedNumericExpression:
+                    type: string
+                    nullable: true
+                    example: '2'
+                numericExpressionValue:
+                    type: number
+                    nullable: true
+                    example: 2
+                compliant:
+                    type: boolean
+                    nullable: true
+                    example: true
+                indeterminate:
+                    type: boolean
+                    nullable: true
+                    example: false
+                window:
+                    type: object
+                    properties:
+                        period:
+                            type: array
+                            items:
+                                type: object
+                                properties:
+                                    unit:
+                                        type: string
+                                        enum:
+                                            [
+                                                millisecond,
+                                                milisecond,
+                                                second,
+                                                minute,
+                                                hour,
+                                                day,
+                                                week,
+                                            ]
+                                        example: week
+                                    value:
+                                        type: integer
+                                        example: 1
+                        anchorDate:
+                            type: string
+                            format: date-time
+                            example: '2026-05-14T00:00:00.000Z'
+                metrics:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/StateMetric'
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+
+        StateMetric:
+            type: object
+            description: Metric value and evidence generated for a state
+            properties:
+                metricName:
+                    type: string
+                    example: COUNT_DONEISSUES_MEMBER
+                value:
+                    type: number
+                    nullable: true
+                    example: 2
+                evidences:
+                    type: array
+                    items:
+                        type: object
+                        additionalProperties: true
+                    example: []
+                metricConfig:
+                    type: object
+                    properties:
+                        event:
+                            type: object
+                            properties:
+                                eventId:
+                                    type: string
+                                    example: EV_ZENHUB_ISSUES_BY_COLUMN_FILTERED_BY_UPDATED_AT_DATE_ASSOCIATED_TO_MEMBER
+                                fetcherConfigs:
+                                    type: array
+                                    items:
+                                        type: object
+                                        properties:
+                                            fetcherId:
+                                                type: string
+                                                example: FT_GQL_ZENHUB_ISSUES
+                                            fetcherConfig:
+                                                type: object
+                                                nullable: true
+                                                additionalProperties: true
+                                            fetchResultId:
+                                                type: string
+                                                description: ObjectId of the fetch result used as evidence, when available
+                                                example: 665e5f6a7b8c9d0e1f2a3b4d
+                                processConfig:
+                                    type: object
+                                    nullable: true
+                                    additionalProperties: true
+                        aggregation:
+                            type: object
+                            properties:
+                                aggregatorType:
+                                    type: string
+                                    example: count
+                                aggregatorConfig:
+                                    type: object
+                                    additionalProperties: true
+                                    example: {}
 
         # ── AgreementVersion ──────────────────────
         AgreementVersionRaw:

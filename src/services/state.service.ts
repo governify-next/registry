@@ -180,6 +180,61 @@ export const generateStatesForAuditableVersion = async (
     return states;
 };
 
+export const generateConsolidatedStatesForAuditableVersion = async (
+    isAsync: boolean,
+    orgName: string,
+    elementName: string,
+    agColName: string,
+    startDate: Date,
+    endDate: Date,
+) => {
+    const auditableAgreementVersion = await agreementVersionService.getAuditableVersionByCollection(
+        orgName,
+        elementName,
+        agColName,
+        true,
+    );
+
+    const signatures =
+        'signatures' in auditableAgreementVersion!.contract
+            ? auditableAgreementVersion!.contract.signatures
+            : [];
+
+    const states: IState[] = [];
+
+    await Promise.all(
+        signatures.map(async (signature) => {
+            const consolidationDates = windowUtil.getConsolidationDatesInRange(
+                startDate,
+                endDate,
+                signature.guarantee.window.anchorDate,
+                signature.guarantee.window.period,
+            );
+
+            for (const date of consolidationDates) {
+                const existingState = await getExistingState(
+                    signature.signatureId.toString(),
+                    date,
+                );
+                if (existingState) {
+                    states.push(existingState);
+                    continue;
+                }
+
+                const state = await generateState(
+                    isAsync,
+                    date,
+                    signature.signatureId.toString(),
+                    signature.guarantee,
+                );
+                states.push(state);
+            }
+        }),
+    );
+
+    return states;
+};
+
 export const getStatesForAuditableVersion = async (
     orgName: string,
     elementName: string,
