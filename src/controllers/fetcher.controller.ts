@@ -34,3 +34,26 @@ export const fetchAuditableVersionFetchResults = async (
         next(err);
     }
 };
+
+export const getConsolidationFetchesForAuditableVersion = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const { orgName, elementName, agColName } = req.params;
+
+        const fetches = await fetcherService.getConsolidationFetchesForAuditableVersion(
+            orgName,
+            elementName,
+            agColName,
+        );
+
+        return sendSuccess(res, {
+            data: fetches,
+            message: 'Consolidation fetches retrieved',
+        });
+    } catch (err) {
+        next(err);
+    }
+};

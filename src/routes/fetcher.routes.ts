@@ -17,3 +17,11 @@ fetcherRoutes.post(
     validateFetchAuditableVersionBody,
     fetcherController.fetchAuditableVersionFetchResults,
 );
+
+fetcherRoutes.get(
+    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/auditableVersion/fetchers/consolidated',
+    existingElement,
+    existingAgreementCollection,
+    existingAuditableVersion,
+    fetcherController.getConsolidationFetchesForAuditableVersion,
+);
