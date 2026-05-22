@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import { windowUnits } from '../../types/window.js';
+import { windowUnits } from '../../types/window.types.js';
 
 export const windowSchema = new Schema(
     {

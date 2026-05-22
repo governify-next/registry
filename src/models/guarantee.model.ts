@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import { Comparator, comparators } from '../types/comparator.js';
-import { IWindow } from '../types/window.js';
+import { Comparator, comparators } from '../types/comparator.types.js';
+import { IWindow } from '../types/window.types.js';
 import { windowSchema } from './shared/window.schema.js';
 
 export interface IGuarantee extends Document {

@@ -1,5 +1,5 @@
-import { IWindowPeriod } from './window.js';
-import { Comparator } from './comparator.js';
+import { IWindowPeriod } from './window.types.js';
+import { Comparator } from './comparator.types.js';
 
 export interface IAgreementTemplateData {
     name: string;

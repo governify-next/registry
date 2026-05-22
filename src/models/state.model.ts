@@ -1,9 +1,9 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import { IWindow } from '../types/window.js';
-import { IMetric } from '../types/metric.js';
+import { IWindow } from '../types/window.types.js';
+import { IMetric } from '../types/metric.types.js';
 import { windowSchema } from './shared/window.schema.js';
 import { metricSchema } from './shared/metric.schema.js';
-import { Comparator, comparators } from '../types/comparator.js';
+import { Comparator, comparators } from '../types/comparator.types.js';
 
 export enum StateStatus {
     IN_PROGRESS = 'IN_PROGRESS',

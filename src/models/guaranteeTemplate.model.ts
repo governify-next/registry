@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { IMetricDefinition } from '../types/metric.js';
+import { IMetricDefinition } from '../types/metric.types.js';
 import { metricDefinitionSchema } from './shared/metric.schema.js';
 
 export interface IGuaranteeTemplate extends Document {

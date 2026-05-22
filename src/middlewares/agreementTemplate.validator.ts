@@ -4,8 +4,8 @@ import * as agreementTemplateService from '../services/agreementTemplate.service
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
 import { getOrganizationOrFail } from './organization.validator.js';
 import { DuplicateKeyError, ValidationError, NotFoundError } from '../utils/customErrors.js';
-import { windowUnits } from '../types/window.js';
-import { comparators } from '../types/comparator.js';
+import { windowUnits } from '../types/window.types.js';
+import { comparators } from '../types/comparator.types.js';
 
 // ─── Validaciones de campo ────────────────────────────
 

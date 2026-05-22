@@ -6,8 +6,8 @@ import * as computerIntegration from '../integrations/computer.integration.js';
 import { IState, StateStatus } from '../models/state.model.js';
 import { Types } from 'mongoose';
 import { IAssembledGuarantee } from '../types/assembledGuarantee.types.js';
-import { IMetric } from '../types/metric.js';
-import { Comparator } from '../types/comparator.js';
+import { IMetric } from '../types/metric.types.js';
+import { Comparator } from '../types/comparator.types.js';
 import { getLogger } from '../utils/logger.js';
 
 const logger = getLogger().setTag('state.service.ts');

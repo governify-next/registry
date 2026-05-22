@@ -1,6 +1,6 @@
 import { bootEnv } from '../config/bootConfig.js';
-import { IWindow } from '../types/window.js';
-import { IMetricConfig } from '../types/metric.js';
+import { IWindow } from '../types/window.types.js';
+import { IMetricConfig } from '../types/metric.types.js';
 import { ExternalServiceError } from '../utils/customErrors.js';
 import { serviceHeaders } from '../utils/serviceAuth.js';
 

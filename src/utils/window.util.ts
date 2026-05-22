@@ -1,4 +1,4 @@
-import { IWindowPeriod, WindowUnit } from '../types/window.js';
+import { IWindowPeriod, WindowUnit } from '../types/window.types.js';
 
 export const getPeriodStartDateFromAnchorDateAndPeriod = (
     date: Date,
@@ -39,7 +39,10 @@ export const getConsolidationDatesInRange = (
     const endTime = new Date(endDate).getTime();
     const anchorTime = new Date(anchorDate).getTime();
 
-    const firstConsolidationIndex = Math.ceil((startTime - anchorTime) / periodMilliseconds);
+    const firstConsolidationIndex = Math.max(
+        1,
+        Math.ceil((startTime - anchorTime) / periodMilliseconds),
+    );
     const firstConsolidationTime = anchorTime + periodMilliseconds * firstConsolidationIndex;
 
     const dates: Date[] = [];

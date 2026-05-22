@@ -1,6 +1,6 @@
-import { Comparator } from './comparator.js';
-import { IMetricDefinition } from './metric.js';
-import { IWindow } from './window.js';
+import { Comparator } from './comparator.types.js';
+import { IMetricDefinition } from './metric.types.js';
+import { IWindow } from './window.types.js';
 
 export interface IAssembledGuarantee {
     name: string;
