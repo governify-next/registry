@@ -1,18 +1,58 @@
 import { bootEnv } from '../config/bootConfig.js';
+import { ExternalServiceError } from '../utils/customErrors.js';
 import { serviceHeaders } from '../utils/serviceAuth.js';
 
 const COLLECTOR_SERVICE_URL = bootEnv.COLLECTOR_SERVICE_URL;
 
-export const validateFetcherExists = async (fetcherId: string): Promise<string | null> => {
+export const checkHealth = async (): Promise<boolean> => {
     try {
-        const response = await fetch(`${COLLECTOR_SERVICE_URL}/api/v1/fetchers/${fetcherId}`, {
+        const response = await fetch(`${COLLECTOR_SERVICE_URL}/health`, {
             method: 'GET',
-            headers: serviceHeaders,
         });
-        const result = await response.json();
-        if (result.success) return null;
-        return result.error?.message || `fetcherId '${fetcherId}' not found in collector`;
+        return response.ok;
     } catch {
-        return `Could not connect to collector to validate fetcherId '${fetcherId}'`;
+        return false;
     }
+};
+
+export const validateFetcherExists = async (fetcherId: string): Promise<string | null> => {
+    const response = await fetch(`${COLLECTOR_SERVICE_URL}/api/v1/fetchers/${fetcherId}`, {
+        method: 'GET',
+        headers: serviceHeaders,
+    });
+    const result = await response.json();
+    if (response.status >= 500) {
+        throw new Error(
+            result.error?.message || `Collector failed to validate fetcherId '${fetcherId}'`,
+        );
+    }
+    if (result.success) return null;
+    return result.error?.message;
+};
+
+export const generateFetchResult = async (
+    fetcherId: string,
+    date: Date,
+    fetcherConfig: Record<string, unknown>,
+    isAsync: boolean,
+) => {
+    const response = await fetch(
+        `${COLLECTOR_SERVICE_URL}/api/v1/fetchers/${fetcherId}/fetchResults/generate?isAsync=${isAsync}`,
+        {
+            method: 'POST',
+            headers: serviceHeaders,
+            body: JSON.stringify({ date, fetcherConfig }),
+        },
+    );
+
+    const result = await response.json();
+
+    if (!result.success) {
+        throw new ExternalServiceError(
+            `Failed to generate fetch result for fetcher ${fetcherId}`,
+            result.error,
+        );
+    }
+
+    return result.data;
 };

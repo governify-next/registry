@@ -3,7 +3,10 @@ import * as agreementTemplateRepository from '../repositories/agreementTemplate.
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
 import * as guaranteeService from '../services/guarantee.service.js';
 import { IAgreementTemplate } from '../models/agreementTemplate.model.js';
-import { AgreementTemplatePayload, IGuaranteeEntry } from '../types/agreementTemplate.types.js';
+import {
+    IAgreementTemplateGuaranteeInput,
+    IAgreementTemplatePayload,
+} from '../types/agreementTemplate.types.js';
 
 const assembleAgreementTemplate = async (agreementTemplate: IAgreementTemplate) => {
     const guarantees = await guaranteeService.getGuaranteesByAgreementTemplateId(
@@ -22,7 +25,7 @@ const assembleAgreementTemplate = async (agreementTemplate: IAgreementTemplate) 
 
 export const createAgreementTemplateByOrganization = async (
     orgId: Types.ObjectId,
-    data: AgreementTemplatePayload,
+    data: IAgreementTemplatePayload,
 ) => {
     // 1. Extraemos cada parte del payload
     const { guarantees, ...agreementData } = data;
@@ -41,7 +44,7 @@ export const createAgreementTemplateByOrganization = async (
 
 export const buildAndSaveGuarantees = async (
     templateId: Types.ObjectId,
-    guarantees: IGuaranteeEntry[],
+    guarantees: IAgreementTemplateGuaranteeInput[],
 ) => {
     const guaranteeTemplatesNames = guarantees.map((g) => g.guaranteeTemplateName);
     const guaranteeTemplatesFromDb =
@@ -107,7 +110,7 @@ export const getCleanAgreementTemplatesByOrganization = async (orgId: Types.Obje
 export const updateAgreementTemplateByOrganization = async (
     orgId: Types.ObjectId,
     agreementTemplateName: string,
-    data: AgreementTemplatePayload,
+    data: IAgreementTemplatePayload,
 ) => {
     const { guarantees, name, description, displayName, isPublic } = data;
 

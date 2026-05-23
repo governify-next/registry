@@ -91,3 +91,14 @@ export class ForbiddenError extends StdError {
         });
     }
 }
+
+export class ExternalServiceError extends StdError {
+    constructor(message: string = 'External service error', details?: unknown) {
+        super({
+            message,
+            httpStatus: 422,
+            appCode: 'EXTERNAL_SERVICE_ERROR',
+            details,
+        });
+    }
+}

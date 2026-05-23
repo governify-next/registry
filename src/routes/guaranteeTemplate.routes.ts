@@ -6,6 +6,8 @@ import {
     validateDeleteGuaranteeTemplate,
     existingGuaranteeTemplate,
 } from '../middlewares/guaranteeTemplate.validator.js';
+import { validateComputerHealth } from '../middlewares/computer.validator.js';
+import { validateCollectorHealth } from '../middlewares/collector.validator.js';
 
 export const guaranteeTemplateRoutes = Router();
 
@@ -22,12 +24,16 @@ guaranteeTemplateRoutes.get(
 
 guaranteeTemplateRoutes.post(
     '/guaranteeTemplates',
+    validateComputerHealth,
+    validateCollectorHealth,
     validateCreateGuaranteeTemplate,
     guaranteeTemplateController.createGuaranteeTemplate,
 );
 
 guaranteeTemplateRoutes.put(
     '/guaranteeTemplates/:guaranteeName',
+    validateComputerHealth,
+    validateCollectorHealth,
     validateUpdateGuaranteeTemplate,
     guaranteeTemplateController.updateGuaranteeTemplate,
 );

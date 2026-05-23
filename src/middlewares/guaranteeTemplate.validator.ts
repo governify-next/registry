@@ -1,6 +1,6 @@
 import { body, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
-import { ValidationError, DuplicateKeyError } from '../utils/customErrors.js';
+import { ValidationError, DuplicateKeyError, ExternalServiceError } from '../utils/customErrors.js';
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
 import * as guaranteeService from '../services/guarantee.service.js';
 import { validateEventExists, validateAggregator } from '../integrations/computer.integration.js';
@@ -145,47 +145,52 @@ const metricsStructureValidation = [
         .withMessage('metricName must be a string')
         .notEmpty()
         .withMessage('metricName must not be empty'),
-    body('metrics.*.event.eventId')
+    body('metrics.*.metricConfig')
+        .exists({ checkNull: true })
+        .withMessage('Each metric must have a metricConfig')
+        .isObject()
+        .withMessage('metricConfig must be an object'),
+    body('metrics.*.metricConfig.event.eventId')
         .exists({ checkNull: true })
         .withMessage('Each metric must have an event.eventId')
         .isString()
         .withMessage('eventId must be a string')
         .notEmpty()
         .withMessage('eventId must not be empty'),
-    body('metrics.*.event.fetcherConfigs')
+    body('metrics.*.metricConfig.event.fetcherConfigs')
         .exists({ checkNull: true })
         .withMessage('Each metric must have event.fetcherConfigs')
         .isArray({ min: 1 })
         .withMessage('fetcherConfigs must be an array with at least one entry'),
-    body('metrics.*.event.fetcherConfigs.*.fetcherId')
+    body('metrics.*.metricConfig.event.fetcherConfigs.*.fetcherId')
         .exists({ checkNull: true })
         .withMessage('Each fetcherConfig must have a fetcherId')
         .isString()
         .withMessage('fetcherId must be a string')
         .notEmpty()
         .withMessage('fetcherId must not be empty'),
-    body('metrics.*.event.fetcherConfigs.*.fetcherConfig')
+    body('metrics.*.metricConfig.event.fetcherConfigs.*.fetcherConfig')
         .exists({ checkNull: false })
         .withMessage('Each fetcherConfig entry must include fetcherConfig field')
         .custom((value) => {
             if (value !== null) throw new Error('fetcherConfig must be null in guarantee template');
             return true;
         }),
-    body('metrics.*.event.processConfig')
+    body('metrics.*.metricConfig.event.processConfig')
         .exists({ checkNull: false })
         .withMessage('Each metric must include event.processConfig field')
         .custom((value) => {
             if (value !== null) throw new Error('processConfig must be null in guarantee template');
             return true;
         }),
-    body('metrics.*.aggregation.aggregatorType')
+    body('metrics.*.metricConfig.aggregation.aggregatorType')
         .exists({ checkNull: true })
         .withMessage('Each metric must have an aggregation.aggregatorType')
         .isString()
         .withMessage('aggregatorType must be a string')
         .notEmpty()
         .withMessage('aggregatorType must not be empty'),
-    body('metrics.*.aggregation.aggregatorConfig')
+    body('metrics.*.metricConfig.aggregation.aggregatorConfig')
         .exists({ checkNull: true })
         .withMessage('Each metric must have an aggregation.aggregatorConfig')
         .isObject()
@@ -274,17 +279,17 @@ const validateMetricsInExternalServices = async (
         const errors: string[] = [];
 
         for (const metric of req.body.metrics) {
-            const eventError = await validateEventExists(metric.event.eventId);
+            const eventError = await validateEventExists(metric.metricConfig.event.eventId);
             if (eventError) errors.push(eventError);
 
-            for (const fetcherConfig of metric.event.fetcherConfigs) {
+            for (const fetcherConfig of metric.metricConfig.event.fetcherConfigs) {
                 const fetcherError = await validateFetcherExists(fetcherConfig.fetcherId);
                 if (fetcherError) errors.push(fetcherError);
             }
 
             const aggregatorError = await validateAggregator(
-                metric.aggregation.aggregatorType,
-                metric.aggregation.aggregatorConfig,
+                metric.metricConfig.aggregation.aggregatorType,
+                metric.metricConfig.aggregation.aggregatorConfig,
             );
             if (aggregatorError) errors.push(aggregatorError);
         }
@@ -292,8 +297,13 @@ const validateMetricsInExternalServices = async (
         if (errors.length > 0)
             return next(new ValidationError(`External validation failed: ${errors.join('; ')}`));
         next();
-    } catch (err) {
-        next(err);
+    } catch (error) {
+        return next(
+            new ExternalServiceError(
+                'External validation service failed',
+                error instanceof Error ? { message: error.message } : error,
+            ),
+        );
     }
 };
 

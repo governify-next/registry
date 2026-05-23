@@ -6,7 +6,11 @@ import * as computerIntegration from '../integrations/computer.integration.js';
 import { IState, StateStatus } from '../models/state.model.js';
 import { Types } from 'mongoose';
 import { IAssembledGuarantee } from '../types/assembledGuarantee.types.js';
-import { IComputedMetric } from '../types/metric.js';
+import { IMetric } from '../types/metric.types.js';
+import { Comparator } from '../types/comparator.types.js';
+import { getLogger } from '../utils/logger.js';
+
+const logger = getLogger().setTag('state.service.ts');
 
 export const generateState = async (
     isAsync: boolean,
@@ -17,13 +21,13 @@ export const generateState = async (
     const initialState = await createInitialState(signatureId, guarantee, date);
     const computeMetricsAndEvaluateState = async () => {
         try {
-            const processedMetrics: IComputedMetric[] = [];
+            const processedMetrics: IMetric[] = [];
             for (const metric of guarantee.metrics) {
                 const processedMetric = await computerIntegration.computeMetric(
                     date,
                     guarantee.window,
-                    metric.event,
-                    metric.aggregation,
+                    metric.metricConfig.event,
+                    metric.metricConfig.aggregation,
                 );
                 processedMetrics.push({
                     metricName: metric.metricName,
@@ -31,6 +35,10 @@ export const generateState = async (
                     evidences: processedMetric.evidences,
                     metricConfig: processedMetric.metricConfig,
                 });
+                // If metric returns a null value, we stop the calculation for the guarantee
+                if (processedMetric.value === null) {
+                    break;
+                }
             }
             return await evaluateState(
                 initialState._id.toString(),
@@ -49,7 +57,13 @@ export const generateState = async (
     };
     if (isAsync) {
         // Async
-        void computeMetricsAndEvaluateState();
+        void computeMetricsAndEvaluateState().catch((error) => {
+            logger.error(
+                `Async state generation failed for state ${initialState._id.toString()}: ${
+                    error instanceof Error ? error.message : 'Unknown state generation error'
+                }`,
+            );
+        });
         return initialState;
     }
     return await computeMetricsAndEvaluateState(); // Sync
@@ -79,28 +93,33 @@ export const createInitialState = async (
         compliant: null,
         indeterminate: null,
         window: guarantee.window,
-        metrics: guarantee.metrics,
+        metrics: guarantee.metrics.map((metric) => ({
+            metricName: metric.metricName,
+            value: null,
+            evidences: [],
+            metricConfig: metric.metricConfig,
+        })),
     });
 };
 
 export const evaluateState = async (
     id: string,
-    processedMetrics: IComputedMetric[],
+    processedMetrics: IMetric[],
     numericExpression: string,
-    comparator: string,
+    comparator: Comparator,
     threshold: number,
 ): Promise<IState> => {
-    const numericExpressionValue = evaluatorService.evaluateNumericExpression(
-        numericExpression,
-        processedMetrics,
-    );
+    // If any of the metrics has a null value, it has not been computed correctly and is indeterminate.
+    const hasUnavailableMetricValue = processedMetrics.some((metric) => metric.value === null);
+    const numericExpressionValue = hasUnavailableMetricValue
+        ? null
+        : evaluatorService.evaluateNumericExpression(numericExpression, processedMetrics);
     const updatedState = await stateRepository.updateStateById(id, {
         endDate: new Date(),
-        status: StateStatus.COMPLETED,
-        replacedNumericExpression: evaluatorService.replaceExpressionWithValues(
-            numericExpression,
-            processedMetrics,
-        ),
+        status: hasUnavailableMetricValue ? StateStatus.FAILED : StateStatus.COMPLETED,
+        replacedNumericExpression: hasUnavailableMetricValue
+            ? null
+            : evaluatorService.replaceExpressionWithValues(numericExpression, processedMetrics),
         numericExpressionValue: numericExpressionValue,
         compliant:
             numericExpressionValue === null
@@ -110,7 +129,7 @@ export const evaluateState = async (
                       comparator,
                       threshold,
                   ),
-        indeterminate: numericExpressionValue === null ? true : false,
+        indeterminate: numericExpressionValue === null,
         metrics: Object.values(processedMetrics),
     });
     if (!updatedState) {
@@ -140,6 +159,7 @@ export const generateStatesForAuditableVersion = async (
         'signatures' in auditableAgreementVersion!.contract
             ? auditableAgreementVersion!.contract.signatures
             : [];
+
     const states: Array<IState> = [];
     await Promise.all(
         signatures.map(async (signature) => {
@@ -157,6 +177,61 @@ export const generateStatesForAuditableVersion = async (
             states.push(state);
         }),
     );
+    return states;
+};
+
+export const generateConsolidatedStatesForAuditableVersion = async (
+    isAsync: boolean,
+    orgName: string,
+    elementName: string,
+    agColName: string,
+    startDate: Date,
+    endDate: Date,
+) => {
+    const auditableAgreementVersion = await agreementVersionService.getAuditableVersionByCollection(
+        orgName,
+        elementName,
+        agColName,
+        true,
+    );
+
+    const signatures =
+        'signatures' in auditableAgreementVersion!.contract
+            ? auditableAgreementVersion!.contract.signatures
+            : [];
+
+    const states: IState[] = [];
+
+    await Promise.all(
+        signatures.map(async (signature) => {
+            const consolidationDates = windowUtil.getConsolidationDatesInRange(
+                startDate,
+                endDate,
+                signature.guarantee.window.anchorDate,
+                signature.guarantee.window.period,
+            );
+
+            for (const date of consolidationDates) {
+                const existingState = await getExistingState(
+                    signature.signatureId.toString(),
+                    date,
+                );
+                if (existingState) {
+                    states.push(existingState);
+                    continue;
+                }
+
+                const state = await generateState(
+                    isAsync,
+                    date,
+                    signature.signatureId.toString(),
+                    signature.guarantee,
+                );
+                states.push(state);
+            }
+        }),
+    );
+
     return states;
 };
 

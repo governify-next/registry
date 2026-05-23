@@ -1,6 +1,6 @@
 import { IAgreementVersion } from '../models/agreementCollection.model.js';
 import * as agreementVersionRepository from '../repositories/agreementVersion.repository.js';
-import { AgreementVersionPayload } from '../types/agreementVersion.types.js';
+import { IAgreementVersionPayload } from '../types/agreementVersion.types.js';
 import { getCleanAgreementCollectionByElement } from './agreementCollection.service.js';
 import { getCleanAgreementTemplateByOrganization } from './agreementTemplate.service.js';
 import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
@@ -14,7 +14,7 @@ export const createAgreementVersionByCollection = async (
     orgName: string,
     elementName: string,
     agreementName: string,
-    data: AgreementVersionPayload,
+    data: IAgreementVersionPayload,
 ) => {
     // TODO: validar en middleware que no se pase un signaturesId ni versionNumber. EarlyTermination también se podría quitar para el post
 

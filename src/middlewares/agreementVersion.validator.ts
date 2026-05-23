@@ -1,6 +1,6 @@
 import { body, checkExact, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
-import { ValidationError, NotFoundError } from '../utils/customErrors.js';
+import { ExternalServiceError, ValidationError, NotFoundError } from '../utils/customErrors.js';
 import * as agreementCollectionService from '../services/agreementCollection.service.js';
 import {
     existingAgreementTemplate,
@@ -228,7 +228,7 @@ const validateSignatureConfigsInExternalServices = async (
                 }
 
                 const eventError = await validateEventConfig(
-                    templateMetric.event.eventId,
+                    templateMetric.metricConfig.event.eventId,
                     metric.fetcherConfigs,
                     metric.processConfig,
                 );
@@ -239,8 +239,13 @@ const validateSignatureConfigsInExternalServices = async (
         if (errors.length > 0)
             return next(new ValidationError(`Signature validation failed: ${errors.join('; ')}`));
         next();
-    } catch (err) {
-        next(err);
+    } catch (error) {
+        return next(
+            new ExternalServiceError(
+                'External validation service failed',
+                error instanceof Error ? { message: error.message } : error,
+            ),
+        );
     }
 };
 
