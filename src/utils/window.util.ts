@@ -11,7 +11,7 @@ export const getPeriodStartDateFromAnchorDateAndPeriod = (
     return new Date(new Date(anchorDate).getTime() + periodInMilliseconds * currentPeriodIndex);
 };
 
-const fromPeriodToMilliseconds = (period: IWindowPeriod[]): number => {
+export const fromPeriodToMilliseconds = (period: IWindowPeriod[]): number => {
     const unitToMilliseconds: Record<WindowUnit, number> = {
         millisecond: 1,
         milisecond: 1,

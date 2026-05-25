@@ -2,11 +2,11 @@ import { bootEnv } from '../config/bootConfig.js';
 import { ExternalServiceError } from '../utils/customErrors.js';
 import { serviceHeaders } from '../utils/serviceAuth.js';
 
-const COLLECTOR_SERVICE_URL = bootEnv.COLLECTOR_SERVICE_URL;
+const FETCHER_SERVICE_URL = bootEnv.FETCHER_SERVICE_URL;
 
 export const checkHealth = async (): Promise<boolean> => {
     try {
-        const response = await fetch(`${COLLECTOR_SERVICE_URL}/health`, {
+        const response = await fetch(`${FETCHER_SERVICE_URL}/health`, {
             method: 'GET',
         });
         return response.ok;
@@ -16,14 +16,14 @@ export const checkHealth = async (): Promise<boolean> => {
 };
 
 export const validateFetcherExists = async (fetcherId: string): Promise<string | null> => {
-    const response = await fetch(`${COLLECTOR_SERVICE_URL}/api/v1/fetchers/${fetcherId}`, {
+    const response = await fetch(`${FETCHER_SERVICE_URL}/api/v1/fetchers/${fetcherId}`, {
         method: 'GET',
         headers: serviceHeaders,
     });
     const result = await response.json();
     if (response.status >= 500) {
         throw new Error(
-            result.error?.message || `Collector failed to validate fetcherId '${fetcherId}'`,
+            result.error?.message || `Fetcher failed to validate fetcherId '${fetcherId}'`,
         );
     }
     if (result.success) return null;
@@ -37,7 +37,7 @@ export const generateFetchResult = async (
     isAsync: boolean,
 ) => {
     const response = await fetch(
-        `${COLLECTOR_SERVICE_URL}/api/v1/fetchers/${fetcherId}/fetchResults/generate?isAsync=${isAsync}`,
+        `${FETCHER_SERVICE_URL}/api/v1/fetchers/${fetcherId}/fetchResults/generate?isAsync=${isAsync}`,
         {
             method: 'POST',
             headers: serviceHeaders,

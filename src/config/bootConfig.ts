@@ -15,7 +15,8 @@ export const bootEnv = {
     // Internal service URLs
     SCOPE_MANAGER_SERVICE_URL: process.env.SCOPE_MANAGER_SERVICE_URL || 'http://localhost:5901',
     COMPUTER_SERVICE_URL: process.env.COMPUTER_SERVICE_URL || 'http://localhost:5903',
-    COLLECTOR_SERVICE_URL: process.env.COLLECTOR_SERVICE_URL || 'http://localhost:5904',
+    FETCHER_SERVICE_URL: process.env.FETCHER_SERVICE_URL || 'http://localhost:5904',
+    DIRECTOR_SERVICE_URL: process.env.DIRECTOR_SERVICE_URL || 'http://localhost:5906',
 
     // Database URIs
     MONGO_URI: process.env.MONGO_URI || 'mongodb://localhost:27017/governify-next',
