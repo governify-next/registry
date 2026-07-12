@@ -63,7 +63,7 @@ const collectValidationErrors = (req: Request, res: Response, next: NextFunction
 
 // ─── Validaciones de lógica de negocio ─────────────────────────────────
 
-const uniqueAgreementCollectionInElement = async (
+const uniqueAgreementCollectionInScope = async (
     req: Request,
     res: Response,
     next: NextFunction,
@@ -72,16 +72,16 @@ const uniqueAgreementCollectionInElement = async (
         // Si es update y el nombre no cambió, no hay conflicto
         if (req.params.agColName && req.params.agColName === req.body.name) return next();
 
-        const existing = await agreementCollectionService.getCleanAgreementCollectionByElement(
+        const existing = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
-            req.params.elementName,
+            req.params.scopeName,
             req.body.name,
         );
 
         if (existing)
             return next(
                 new DuplicateKeyError(
-                    `An AgreementCollection with name '${req.body.name}' already exists in this element`,
+                    `An AgreementCollection with name '${req.body.name}' already exists in this scope`,
                 ),
             );
         next();
@@ -96,9 +96,9 @@ export const existingAgreementCollection = async (
     next: NextFunction,
 ) => {
     try {
-        const collection = await agreementCollectionService.getCleanAgreementCollectionByElement(
+        const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
-            req.params.elementName,
+            req.params.scopeName,
             req.params.agColName,
         );
 
@@ -119,9 +119,9 @@ const validAuditableVersion = async (req: Request, res: Response, next: NextFunc
         // Si es null, no hay nada que validar
         if (auditableVersionNumber === null) return next();
 
-        const collection = await agreementCollectionService.getCleanAgreementCollectionByElement(
+        const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
-            req.params.elementName,
+            req.params.scopeName,
             req.params.agColName,
         );
 
@@ -154,13 +154,13 @@ const validAuditableVersion = async (req: Request, res: Response, next: NextFunc
 export const validateCreateAgreementCollection = [
     checkExact(fieldValidations, { locations: ['body'] }), // TODO: seguir esta técnica en el resto de middlewares
     collectValidationErrors,
-    uniqueAgreementCollectionInElement,
+    uniqueAgreementCollectionInScope,
 ];
 
 export const validateUpdateAgreementCollection = [
     checkExact(updateFieldValidations, { locations: ['body'] }), // cualquier campo no presente en las validaciones será rechazado
     collectValidationErrors,
     existingAgreementCollection,
-    uniqueAgreementCollectionInElement,
+    uniqueAgreementCollectionInScope,
     validAuditableVersion,
 ];

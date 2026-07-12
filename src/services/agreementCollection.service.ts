@@ -5,18 +5,18 @@ import { IAgreementCollection } from '../models/agreementCollection.model.js';
 import { assembleAgreementVersions } from './agreementVersion.service.js';
 import { deleteSignaturesByIds } from './signature.service.js';
 
-export const getAgreementCollectionsByElement = async (
+export const getAgreementCollectionsByScope = async (
     orgName: string,
-    elementName: string,
+    scopeName: string,
     expand: boolean,
 ) => {
-    const element = await scopeManagerIntegration.getElementByOrgAndNameAndElementName(
+    const scope = await scopeManagerIntegration.getScopeByOrgAndNameAndScopeName(
         orgName,
-        elementName,
+        scopeName,
     );
 
-    const collections = await agreementCollectionRepository.getAgreementCollectionsByElement(
-        element._id,
+    const collections = await agreementCollectionRepository.getAgreementCollectionsByScope(
+        scope._id,
     );
 
     if (!expand) return collections;
@@ -29,19 +29,19 @@ export const getAgreementCollectionsByElement = async (
     );
 };
 
-export const getAgreementCollectionByElement = async (
+export const getAgreementCollectionByScope = async (
     orgName: string,
-    elementName: string,
+    scopeName: string,
     agColName: string,
     expand: boolean = false,
 ) => {
-    const element = await scopeManagerIntegration.getElementByOrgAndNameAndElementName(
+    const scope = await scopeManagerIntegration.getScopeByOrgAndNameAndScopeName(
         orgName,
-        elementName,
+        scopeName,
     );
 
-    const collection = await agreementCollectionRepository.getAgreementCollectionByElement(
-        element._id,
+    const collection = await agreementCollectionRepository.getAgreementCollectionByScope(
+        scope._id,
         agColName,
     );
 
@@ -53,63 +53,57 @@ export const getAgreementCollectionByElement = async (
     };
 };
 
-export const getCleanAgreementCollectionByElement = async (
+export const getCleanAgreementCollectionByScope = async (
     orgName: string,
-    elementName: string,
+    scopeName: string,
     agColName: string,
 ) => {
-    const element = await scopeManagerIntegration.getElementByOrgAndNameAndElementName(
+    const scope = await scopeManagerIntegration.getScopeByOrgAndNameAndScopeName(
         orgName,
-        elementName,
+        scopeName,
     );
 
-    return await agreementCollectionRepository.getAgreementCollectionByElement(
-        element._id,
-        agColName,
-    );
+    return await agreementCollectionRepository.getAgreementCollectionByScope(scope._id, agColName);
 };
 
-export const createAgreementCollectionByElement = async (
+export const createAgreementCollectionByScope = async (
     orgName: string,
-    elementName: string,
+    scopeName: string,
     data: Partial<IAgreementCollection>,
 ) => {
     // TODO: validar en middleware que no se puedan pasar x campos en post
-    const element = await scopeManagerIntegration.getElementByOrgAndNameAndElementName(
+    const scope = await scopeManagerIntegration.getScopeByOrgAndNameAndScopeName(
         orgName,
-        elementName,
+        scopeName,
     );
 
     // 3. Creamos el agreement collection
-    return await agreementCollectionRepository.createAgreementCollectionByElement(
-        data,
-        element._id,
-    );
+    return await agreementCollectionRepository.createAgreementCollectionByScope(data, scope._id);
 };
 
-export const updateAgreementCollectionByElement = async (
+export const updateAgreementCollectionByScope = async (
     orgName: string,
-    elementName: string,
+    scopeName: string,
     agColName: string,
     data: Partial<IAgreementCollection>,
 ) => {
     const { name, displayName, auditableVersionNumber, fields, permissions } = data;
 
     // Obtenemos el agreementCollection
-    const agreementCollection = await getCleanAgreementCollectionByElement(
+    const agreementCollection = await getCleanAgreementCollectionByScope(
         orgName,
-        elementName,
+        scopeName,
         agColName,
     );
 
-    return await agreementCollectionRepository.updateAgreementCollectionByElement(
+    return await agreementCollectionRepository.updateAgreementCollectionByScope(
         agreementCollection!._id,
         { name, displayName, auditableVersionNumber, fields, permissions },
     );
 };
 
-export const getAgreementCollectionsByElementId = async (elementId: Types.ObjectId) => {
-    return await agreementCollectionRepository.getAgreementCollectionsByElement(elementId);
+export const getAgreementCollectionsByScopeId = async (scopeId: Types.ObjectId) => {
+    return await agreementCollectionRepository.getAgreementCollectionsByScope(scopeId);
 };
 
 export const deleteAgreementCollectionById = async (agColId: Types.ObjectId) => {
@@ -119,17 +113,17 @@ export const deleteAgreementCollectionById = async (agColId: Types.ObjectId) => 
     if (signatureIds.length > 0) {
         await deleteSignaturesByIds(signatureIds);
     }
-    return await agreementCollectionRepository.deleteAgreementCollectionByElement(agColId);
+    return await agreementCollectionRepository.deleteAgreementCollectionByScope(agColId);
 };
 
-export const deleteAgreementCollectionByElement = async (
+export const deleteAgreementCollectionByScope = async (
     orgName: string,
-    elementName: string,
+    scopeName: string,
     agColName: string,
 ) => {
-    const agreementCollection = await getCleanAgreementCollectionByElement(
+    const agreementCollection = await getCleanAgreementCollectionByScope(
         orgName,
-        elementName,
+        scopeName,
         agColName,
     );
 

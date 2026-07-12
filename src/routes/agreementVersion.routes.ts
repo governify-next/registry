@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as agreementVersionController from '../controllers/agreementVersion.controller.js';
-import { existingElement } from '../middlewares/element.validator.js';
+import { existingScope } from '../middlewares/scope.validator.js';
 import { existingAgreementCollection } from '../middlewares/agreementCollection.validator.js';
 import {
     validateCreateAgreementVersion,
@@ -14,14 +14,14 @@ export const agreementVersionRoutes = Router();
 
 agreementVersionRoutes.get(
     '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions',
-    existingElement,
+    existingScope,
     existingAgreementCollection,
     agreementVersionController.getAgreementVersionsByCollection,
 );
 
 agreementVersionRoutes.get(
     '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/auditableVersion',
-    existingElement,
+    existingScope,
     existingAgreementCollection,
     existingAuditableVersion,
     agreementVersionController.getAuditableVersionByCollection,
@@ -29,7 +29,7 @@ agreementVersionRoutes.get(
 
 agreementVersionRoutes.delete(
     '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/:versionNumber',
-    existingElement,
+    existingScope,
     existingAgreementCollection,
     existingVersionNumber,
     agreementVersionController.deleteAgreementVersionByCollection,
@@ -37,7 +37,7 @@ agreementVersionRoutes.delete(
 
 agreementVersionRoutes.post(
     '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions',
-    existingElement,
+    existingScope,
     existingAgreementCollection,
     validateComputerHealth,
     validateCreateAgreementVersion,
@@ -46,7 +46,7 @@ agreementVersionRoutes.post(
 
 agreementVersionRoutes.post(
     '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/activeVersion/terminate',
-    existingElement,
+    existingScope,
     existingAgreementCollection,
     validateTerminateVersion,
     agreementVersionController.terminateActiveVersion,

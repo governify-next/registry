@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as fetcherController from '../controllers/fetcher.controller.js';
-import { existingElement } from '../middlewares/element.validator.js';
+import { existingScope } from '../middlewares/scope.validator.js';
 import { existingAgreementCollection } from '../middlewares/agreementCollection.validator.js';
 import { existingAuditableVersion } from '../middlewares/agreementVersion.validator.js';
 import { validateCollectorHealth } from '../middlewares/collector.validator.js';
@@ -11,7 +11,7 @@ export const fetcherRoutes = Router();
 fetcherRoutes.post(
     '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/auditableVersion/fetchers/fetch',
     validateCollectorHealth,
-    existingElement,
+    existingScope,
     existingAgreementCollection,
     existingAuditableVersion,
     validateFetchAuditableVersionBody,
@@ -20,7 +20,7 @@ fetcherRoutes.post(
 
 fetcherRoutes.get(
     '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/auditableVersion/fetchers/consolidated',
-    existingElement,
+    existingScope,
     existingAgreementCollection,
     existingAuditableVersion,
     fetcherController.getConsolidationFetchesForAuditableVersion,

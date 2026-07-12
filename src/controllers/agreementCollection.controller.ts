@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { sendSuccess } from '../utils/standardResponse.js';
 import * as agreementCollectionService from '../services/agreementCollection.service.js';
 
-export const getAgreementCollectionsByElement = async (
+export const getAgreementCollectionsByScope = async (
     req: Request,
     res: Response,
     next: NextFunction,
@@ -11,9 +11,9 @@ export const getAgreementCollectionsByElement = async (
         const expand = req.query.expand === 'true';
 
         const agreementCollections =
-            await agreementCollectionService.getAgreementCollectionsByElement(
+            await agreementCollectionService.getAgreementCollectionsByScope(
                 req.params.orgName,
-                req.params.elementName,
+                req.params.scopeName,
                 expand,
             );
         return sendSuccess(res, { data: agreementCollections });
@@ -22,7 +22,7 @@ export const getAgreementCollectionsByElement = async (
     }
 };
 
-export const getAgreementCollectionByElement = async (
+export const getAgreementCollectionByScope = async (
     req: Request,
     res: Response,
     next: NextFunction,
@@ -30,29 +30,28 @@ export const getAgreementCollectionByElement = async (
     try {
         const expand = req.query.expand === 'true';
 
-        const agreementCollection =
-            await agreementCollectionService.getAgreementCollectionByElement(
-                req.params.orgName,
-                req.params.elementName,
-                req.params.agColName,
-                expand,
-            );
+        const agreementCollection = await agreementCollectionService.getAgreementCollectionByScope(
+            req.params.orgName,
+            req.params.scopeName,
+            req.params.agColName,
+            expand,
+        );
         return sendSuccess(res, { data: agreementCollection });
     } catch (err) {
         next(err);
     }
 };
 
-export const createAgreementCollectionByElement = async (
+export const createAgreementCollectionByScope = async (
     req: Request,
     res: Response,
     next: NextFunction,
 ) => {
     try {
         const agreementCollection =
-            await agreementCollectionService.createAgreementCollectionByElement(
+            await agreementCollectionService.createAgreementCollectionByScope(
                 req.params.orgName,
-                req.params.elementName,
+                req.params.scopeName,
                 req.body,
             );
         return sendSuccess(res, {
@@ -65,16 +64,16 @@ export const createAgreementCollectionByElement = async (
     }
 };
 
-export const updateAgreementCollectionByElement = async (
+export const updateAgreementCollectionByScope = async (
     req: Request,
     res: Response,
     next: NextFunction,
 ) => {
     try {
         const agreementCollection =
-            await agreementCollectionService.updateAgreementCollectionByElement(
+            await agreementCollectionService.updateAgreementCollectionByScope(
                 req.params.orgName,
-                req.params.elementName,
+                req.params.scopeName,
                 req.params.agColName,
                 req.body,
             );
@@ -87,15 +86,15 @@ export const updateAgreementCollectionByElement = async (
     }
 };
 
-export const deleteAgreementCollectionByElement = async (
+export const deleteAgreementCollectionByScope = async (
     req: Request,
     res: Response,
     next: NextFunction,
 ) => {
     try {
-        await agreementCollectionService.deleteAgreementCollectionByElement(
+        await agreementCollectionService.deleteAgreementCollectionByScope(
             req.params.orgName,
-            req.params.elementName,
+            req.params.scopeName,
             req.params.agColName,
         );
         return sendSuccess(res, {

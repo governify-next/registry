@@ -5,31 +5,28 @@ export const getAgreementCollectionById = async (agColId: Types.ObjectId) => {
     return await AgreementCollection.findById(agColId);
 };
 
-export const getAgreementCollectionsByElement = async (elementId: Types.ObjectId) => {
-    return await AgreementCollection.find({ elementId: elementId });
+export const getAgreementCollectionsByScope = async (scopeId: Types.ObjectId) => {
+    return await AgreementCollection.find({ scopeId: scopeId });
 };
 
-export const createAgreementCollectionByElement = async (
+export const createAgreementCollectionByScope = async (
     data: Partial<IAgreementCollection>,
-    elementId: Types.ObjectId,
+    scopeId: Types.ObjectId,
 ) => {
-    return await AgreementCollection.create({ ...data, elementId: elementId });
+    return await AgreementCollection.create({ ...data, scopeId: scopeId });
 };
 
-export const getAgreementCollectionByElement = async (
-    elementId: Types.ObjectId,
-    agColName: string,
-) => {
-    return await AgreementCollection.findOne({ name: agColName, elementId: elementId });
+export const getAgreementCollectionByScope = async (scopeId: Types.ObjectId, agColName: string) => {
+    return await AgreementCollection.findOne({ name: agColName, scopeId: scopeId });
 };
 
-export const updateAgreementCollectionByElement = async (
+export const updateAgreementCollectionByScope = async (
     agColId: Types.ObjectId,
     data: Partial<IAgreementCollection>,
 ) => {
     return await AgreementCollection.findOneAndUpdate({ _id: agColId }, data, { new: true });
 };
 
-export const deleteAgreementCollectionByElement = async (agColId: Types.ObjectId) => {
+export const deleteAgreementCollectionByScope = async (agColId: Types.ObjectId) => {
     return await AgreementCollection.findOneAndDelete({ _id: agColId });
 };

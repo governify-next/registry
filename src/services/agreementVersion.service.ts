@@ -1,7 +1,7 @@
 import { IAgreementVersion } from '../models/agreementCollection.model.js';
 import * as agreementVersionRepository from '../repositories/agreementVersion.repository.js';
 import { IAgreementVersionPayload } from '../types/agreementVersion.types.js';
-import { getCleanAgreementCollectionByElement } from './agreementCollection.service.js';
+import { getCleanAgreementCollectionByScope } from './agreementCollection.service.js';
 import { getCleanAgreementTemplateByOrganization } from './agreementTemplate.service.js';
 import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
 import {
@@ -21,7 +21,7 @@ export const createAgreementVersionByCollection = async (
     const { signatures, ...versionData } = data;
 
     // 1. Obtenemos el AgreementCollection
-    const agreementCollection = await getCleanAgreementCollectionByElement(
+    const agreementCollection = await getCleanAgreementCollectionByScope(
         orgName,
         elementName,
         agreementName,
@@ -70,7 +70,7 @@ export const getAgreementVersionsByCollection = async (
     agreementName: string,
     expand: boolean,
 ) => {
-    const agreementCollection = await getCleanAgreementCollectionByElement(
+    const agreementCollection = await getCleanAgreementCollectionByScope(
         orgName,
         elementName,
         agreementName,
@@ -88,7 +88,7 @@ export const getAuditableVersionByCollection = async (
     expand: boolean,
 ) => {
     // TODO: Validar en el middleware que el collection que se llama para el auditable version no la tenga en null y posiblemente que sea válida
-    const agreementCollection = await getCleanAgreementCollectionByElement(
+    const agreementCollection = await getCleanAgreementCollectionByScope(
         orgName,
         elementName,
         agreementName,
@@ -109,7 +109,7 @@ export const deleteVersionByCollection = async (
     agreementName: string,
     versionNumber: number,
 ) => {
-    const agreementCollection = await getCleanAgreementCollectionByElement(
+    const agreementCollection = await getCleanAgreementCollectionByScope(
         orgName,
         elementName,
         agreementName,
@@ -138,7 +138,7 @@ export const terminateActiveVersion = async (
     agreementName: string,
     earlyTermination: string,
 ) => {
-    const agreementCollection = await getCleanAgreementCollectionByElement(
+    const agreementCollection = await getCleanAgreementCollectionByScope(
         orgName,
         elementName,
         agreementName,
