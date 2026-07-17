@@ -129,7 +129,7 @@ paths:
                 as these values are injected later by the AgreementTemplate.
                 The `numericExpression` must be a valid mathematical expression referencing
                 exactly the metrics declared in `metrics` (bidirectional consistency).
-                Each metric's metricConfig eventId, fetcherId and aggregatorType are validated against the computer and collector.
+                Each metric's metricConfig eventId, fetcherId and aggregatorType are validated against the computer and fetcher.
             requestBody:
                 $ref: '#/components/requestBodies/GuaranteeTemplateBody'
             responses:
@@ -4097,7 +4097,7 @@ components:
                                         properties:
                                             fetcherId:
                                                 type: string
-                                                description: Fetcher ID registered in the collector
+                                                description: Fetcher ID registered in the fetcher
                                                 example: FT_GQL_ZENHUB_ISSUES
                                             fetcherConfig:
                                                 type: object

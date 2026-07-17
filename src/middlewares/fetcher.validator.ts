@@ -1,17 +1,15 @@
-import { body, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
-import { ValidationError } from '../utils/customErrors.js';
+import { ExternalServiceError } from '../utils/customErrors.js';
+import * as fetcherIntegration from '../integrations/fetcher.integration.js';
 
-const collectValidationErrors = (req: Request, res: Response, next: NextFunction) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return next(new ValidationError('Validation failed', errors.array()));
-    next();
+export const validateFetcherHealth = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const fetcherHealth = await fetcherIntegration.checkHealth();
+        if (!fetcherHealth) {
+            return next(new ExternalServiceError('Fetcher service is not available'));
+        }
+        next();
+    } catch (err) {
+        next(err);
+    }
 };
-
-const dateRequiredValidation = body('date')
-    .exists({ checkNull: true })
-    .withMessage('date is required')
-    .isISO8601()
-    .withMessage('date must be a valid ISO 8601 date');
-
-export const validateFetchAuditableVersionBody = [dateRequiredValidation, collectValidationErrors];
