@@ -9,13 +9,13 @@ import { validateGenerateConsolidatedStatesBody } from '../middlewares/state.val
 export const stateRoutes = Router();
 
 stateRoutes.post(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/auditableVersion/states/generate',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/auditableVersion/states/generate',
     validateComputerHealth,
     stateController.generateStatesForAuditableVersion,
 );
 
 stateRoutes.post(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/auditableVersion/states/consolidated/generate',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/auditableVersion/states/consolidated/generate',
     validateComputerHealth,
     existingScope,
     existingAgreementCollection,
@@ -25,6 +25,6 @@ stateRoutes.post(
 );
 
 stateRoutes.get(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/auditableVersion/states',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/auditableVersion/states',
     stateController.getStatesForAuditableVersion,
 );

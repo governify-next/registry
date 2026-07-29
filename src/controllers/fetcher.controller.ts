@@ -10,13 +10,13 @@ export const fetchAuditableVersionFetchResults = async (
     try {
         const expand = req.query.expand === 'true';
         const isAsync = req.query.isAsync === 'true';
-        const { orgName, elementName, agColName } = req.params;
+        const { orgName, scopeId, agColName } = req.params;
         const { date } = req.body;
 
         const { fetchResults, hasFailedFetchResults } =
             await fetcherService.fetchAuditableVersionFetchResults(
                 orgName,
-                elementName,
+                scopeId,
                 agColName,
                 new Date(date),
                 expand,
@@ -41,11 +41,11 @@ export const getConsolidationFetchesForAuditableVersion = async (
     next: NextFunction,
 ) => {
     try {
-        const { orgName, elementName, agColName } = req.params;
+        const { orgName, scopeId, agColName } = req.params;
 
         const fetches = await fetcherService.getConsolidationFetchesForAuditableVersion(
             orgName,
-            elementName,
+            scopeId,
             agColName,
         );
 

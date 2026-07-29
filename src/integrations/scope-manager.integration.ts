@@ -3,9 +3,9 @@ import { serviceHeaders } from '../utils/serviceAuth.js';
 
 const SCOPE_MANAGER_SERVICE_URL = bootEnv.SCOPE_MANAGER_SERVICE_URL;
 
-export const getScopeByOrgAndNameAndScopeName = async (orgName: string, scopeName: string) => {
+export const getScopeByOrgAndScopeId = async (orgName: string, scopeId: string) => {
     const response = await fetch(
-        `${SCOPE_MANAGER_SERVICE_URL}/api/v1/organizations/${orgName}/scopes/${scopeName}`,
+        `${SCOPE_MANAGER_SERVICE_URL}/api/v1/organizations/${orgName}/scopes/${scopeId}`,
         {
             method: 'GET',
             headers: serviceHeaders,
@@ -18,7 +18,7 @@ export const getScopeByOrgAndNameAndScopeName = async (orgName: string, scopeNam
 
     if (!result.success)
         throw new Error(
-            `Failed to fetch scope '${scopeName}' from scope-manager (status: ${response.status})`,
+            `Failed to fetch scope '${scopeId}' from scope-manager (status: ${response.status})`,
         );
 
     return result.data;

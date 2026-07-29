@@ -74,7 +74,7 @@ const uniqueAgreementCollectionInScope = async (
 
         const existing = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
-            req.params.scopeName,
+            req.params.scopeId,
             req.body.name,
         );
 
@@ -98,7 +98,7 @@ export const existingAgreementCollection = async (
     try {
         const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
-            req.params.scopeName,
+            req.params.scopeId,
             req.params.agColName,
         );
 
@@ -121,7 +121,7 @@ const validAuditableVersion = async (req: Request, res: Response, next: NextFunc
 
         const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
-            req.params.scopeName,
+            req.params.scopeId,
             req.params.agColName,
         );
 

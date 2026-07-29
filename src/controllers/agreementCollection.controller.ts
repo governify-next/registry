@@ -13,7 +13,7 @@ export const getAgreementCollectionsByScope = async (
         const agreementCollections =
             await agreementCollectionService.getAgreementCollectionsByScope(
                 req.params.orgName,
-                req.params.scopeName,
+                req.params.scopeId,
                 expand,
             );
         return sendSuccess(res, { data: agreementCollections });
@@ -32,7 +32,7 @@ export const getAgreementCollectionByScope = async (
 
         const agreementCollection = await agreementCollectionService.getAgreementCollectionByScope(
             req.params.orgName,
-            req.params.scopeName,
+            req.params.scopeId,
             req.params.agColName,
             expand,
         );
@@ -51,7 +51,7 @@ export const createAgreementCollectionByScope = async (
         const agreementCollection =
             await agreementCollectionService.createAgreementCollectionByScope(
                 req.params.orgName,
-                req.params.scopeName,
+                req.params.scopeId,
                 req.body,
             );
         return sendSuccess(res, {
@@ -73,7 +73,7 @@ export const updateAgreementCollectionByScope = async (
         const agreementCollection =
             await agreementCollectionService.updateAgreementCollectionByScope(
                 req.params.orgName,
-                req.params.scopeName,
+                req.params.scopeId,
                 req.params.agColName,
                 req.body,
             );
@@ -94,7 +94,7 @@ export const deleteAgreementCollectionByScope = async (
     try {
         await agreementCollectionService.deleteAgreementCollectionByScope(
             req.params.orgName,
-            req.params.scopeName,
+            req.params.scopeId,
             req.params.agColName,
         );
         return sendSuccess(res, {

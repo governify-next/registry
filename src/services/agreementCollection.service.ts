@@ -7,13 +7,10 @@ import { deleteSignaturesByIds } from './signature.service.js';
 
 export const getAgreementCollectionsByScope = async (
     orgName: string,
-    scopeName: string,
+    scopeId: string,
     expand: boolean,
 ) => {
-    const scope = await scopeManagerIntegration.getScopeByOrgAndNameAndScopeName(
-        orgName,
-        scopeName,
-    );
+    const scope = await scopeManagerIntegration.getScopeByOrgAndScopeId(orgName, scopeId);
 
     const collections = await agreementCollectionRepository.getAgreementCollectionsByScope(
         scope._id,
@@ -31,14 +28,11 @@ export const getAgreementCollectionsByScope = async (
 
 export const getAgreementCollectionByScope = async (
     orgName: string,
-    scopeName: string,
+    scopeId: string,
     agColName: string,
     expand: boolean = false,
 ) => {
-    const scope = await scopeManagerIntegration.getScopeByOrgAndNameAndScopeName(
-        orgName,
-        scopeName,
-    );
+    const scope = await scopeManagerIntegration.getScopeByOrgAndScopeId(orgName, scopeId);
 
     const collection = await agreementCollectionRepository.getAgreementCollectionByScope(
         scope._id,
@@ -55,27 +49,21 @@ export const getAgreementCollectionByScope = async (
 
 export const getCleanAgreementCollectionByScope = async (
     orgName: string,
-    scopeName: string,
+    scopeId: string,
     agColName: string,
 ) => {
-    const scope = await scopeManagerIntegration.getScopeByOrgAndNameAndScopeName(
-        orgName,
-        scopeName,
-    );
+    const scope = await scopeManagerIntegration.getScopeByOrgAndScopeId(orgName, scopeId);
 
     return await agreementCollectionRepository.getAgreementCollectionByScope(scope._id, agColName);
 };
 
 export const createAgreementCollectionByScope = async (
     orgName: string,
-    scopeName: string,
+    scopeId: string,
     data: Partial<IAgreementCollection>,
 ) => {
     // TODO: validar en middleware que no se puedan pasar x campos en post
-    const scope = await scopeManagerIntegration.getScopeByOrgAndNameAndScopeName(
-        orgName,
-        scopeName,
-    );
+    const scope = await scopeManagerIntegration.getScopeByOrgAndScopeId(orgName, scopeId);
 
     // 3. Creamos el agreement collection
     return await agreementCollectionRepository.createAgreementCollectionByScope(data, scope._id);
@@ -83,7 +71,7 @@ export const createAgreementCollectionByScope = async (
 
 export const updateAgreementCollectionByScope = async (
     orgName: string,
-    scopeName: string,
+    scopeId: string,
     agColName: string,
     data: Partial<IAgreementCollection>,
 ) => {
@@ -92,7 +80,7 @@ export const updateAgreementCollectionByScope = async (
     // Obtenemos el agreementCollection
     const agreementCollection = await getCleanAgreementCollectionByScope(
         orgName,
-        scopeName,
+        scopeId,
         agColName,
     );
 
@@ -118,12 +106,12 @@ export const deleteAgreementCollectionById = async (agColId: Types.ObjectId) => 
 
 export const deleteAgreementCollectionByScope = async (
     orgName: string,
-    scopeName: string,
+    scopeId: string,
     agColName: string,
 ) => {
     const agreementCollection = await getCleanAgreementCollectionByScope(
         orgName,
-        scopeName,
+        scopeId,
         agColName,
     );
 

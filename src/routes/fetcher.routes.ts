@@ -9,7 +9,7 @@ import { validateFetchAuditableVersionBody } from '../middlewares/fetcher.valida
 export const fetcherRoutes = Router();
 
 fetcherRoutes.post(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/auditableVersion/fetchers/fetch',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/auditableVersion/fetchers/fetch',
     validateCollectorHealth,
     existingScope,
     existingAgreementCollection,
@@ -19,7 +19,7 @@ fetcherRoutes.post(
 );
 
 fetcherRoutes.get(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/auditableVersion/fetchers/consolidated',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/auditableVersion/fetchers/consolidated',
     existingScope,
     existingAgreementCollection,
     existingAuditableVersion,

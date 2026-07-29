@@ -9,12 +9,12 @@ export const generateStatesForAuditableVersion = async (
 ) => {
     try {
         const isAsync = req.query.isAsync === 'true';
-        const { orgName, elementName, agColName } = req.params;
+        const { orgName, scopeId, agColName } = req.params;
         const { date } = req.body;
         const states = await stateService.generateStatesForAuditableVersion(
             isAsync,
             orgName,
-            elementName,
+            scopeId,
             agColName,
             date,
         );
@@ -36,13 +36,13 @@ export const generateConsolidatedStatesForAuditableVersion = async (
 ) => {
     try {
         const isAsync = req.query.isAsync === 'true';
-        const { orgName, elementName, agColName } = req.params;
+        const { orgName, scopeId, agColName } = req.params;
         const { startDate, endDate } = req.body;
 
         const states = await stateService.generateConsolidatedStatesForAuditableVersion(
             isAsync,
             orgName,
-            elementName,
+            scopeId,
             agColName,
             new Date(startDate),
             new Date(endDate),
@@ -68,12 +68,8 @@ export const getStatesForAuditableVersion = async (
     next: NextFunction,
 ) => {
     try {
-        const { orgName, elementName, agColName } = req.params;
-        const states = await stateService.getStatesForAuditableVersion(
-            orgName,
-            elementName,
-            agColName,
-        );
+        const { orgName, scopeId, agColName } = req.params;
+        const states = await stateService.getStatesForAuditableVersion(orgName, scopeId, agColName);
         return sendSuccess(res, {
             data: states,
             message: 'States retrieved',

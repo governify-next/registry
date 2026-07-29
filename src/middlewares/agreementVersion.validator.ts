@@ -130,9 +130,9 @@ const endAfterInitial = (req: Request, res: Response, next: NextFunction) => {
 
 export const existingVersionNumber = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const collection = await agreementCollectionService.getCleanAgreementCollectionByElement(
+        const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
-            req.params.elementName,
+            req.params.scopeId,
             req.params.agColName,
         );
 
@@ -153,9 +153,9 @@ export const existingVersionNumber = async (req: Request, res: Response, next: N
 
 export const existingAuditableVersion = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const collection = await agreementCollectionService.getCleanAgreementCollectionByElement(
+        const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
-            req.params.elementName,
+            req.params.scopeId,
             req.params.agColName,
         );
 
@@ -175,9 +175,9 @@ const earlyTerminationValidation = body('earlyTermination')
 
 const earlyTerminationInRange = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const collection = await agreementCollectionService.getCleanAgreementCollectionByElement(
+        const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
-            req.params.elementName,
+            req.params.scopeId,
             req.params.agColName,
         );
 

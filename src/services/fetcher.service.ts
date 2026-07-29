@@ -6,7 +6,7 @@ import { ConsolidationFetch } from '../types/fetcher.types.js';
 
 export const fetchAuditableVersionFetchResults = async (
     orgName: string,
-    elementName: string,
+    scopeId: string,
     agColName: string,
     date: Date,
     expand: boolean,
@@ -14,7 +14,7 @@ export const fetchAuditableVersionFetchResults = async (
 ) => {
     const auditableAgreementVersion = await agreementVersionService.getAuditableVersionByCollection(
         orgName,
-        elementName,
+        scopeId,
         agColName,
         true,
     );
@@ -37,12 +37,12 @@ export const fetchAuditableVersionFetchResults = async (
 
 export const getConsolidationFetchesForAuditableVersion = async (
     orgName: string,
-    elementName: string,
+    scopeId: string,
     agColName: string,
 ): Promise<ConsolidationFetch[]> => {
     const auditableAgreementVersion = await agreementVersionService.getAuditableVersionByCollection(
         orgName,
-        elementName,
+        scopeId,
         agColName,
         true,
     );

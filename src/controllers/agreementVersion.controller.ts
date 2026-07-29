@@ -12,7 +12,7 @@ export const getAgreementVersionsByCollection = async (
 
         const agreementVersions = await agreementVersionService.getAgreementVersionsByCollection(
             req.params.orgName,
-            req.params.elementName,
+            req.params.scopeId,
             req.params.agColName,
             expand,
         );
@@ -30,7 +30,7 @@ export const createAgreementVersionByCollection = async (
     try {
         const agreementVersion = await agreementVersionService.createAgreementVersionByCollection(
             req.params.orgName,
-            req.params.elementName,
+            req.params.scopeId,
             req.params.agColName,
             req.body,
         );
@@ -54,7 +54,7 @@ export const getAuditableVersionByCollection = async (
 
         const auditableVersion = await agreementVersionService.getAuditableVersionByCollection(
             req.params.orgName,
-            req.params.elementName,
+            req.params.scopeId,
             req.params.agColName,
             expand,
         );
@@ -72,7 +72,7 @@ export const deleteAgreementVersionByCollection = async (
     try {
         await agreementVersionService.deleteVersionByCollection(
             req.params.orgName,
-            req.params.elementName,
+            req.params.scopeId,
             req.params.agColName,
             Number(req.params.versionNumber),
         );
@@ -89,7 +89,7 @@ export const terminateActiveVersion = async (req: Request, res: Response, next: 
     try {
         const result = await agreementVersionService.terminateActiveVersion(
             req.params.orgName,
-            req.params.elementName,
+            req.params.scopeId,
             req.params.agColName,
             req.body.earlyTermination,
         );

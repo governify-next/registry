@@ -4,13 +4,13 @@ import * as scopeManagerIntegration from '../integrations/scope-manager.integrat
 
 export const existingScope = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const scope = await scopeManagerIntegration.getScopeByOrgAndNameAndScopeName(
+        const scope = await scopeManagerIntegration.getScopeByOrgAndScopeId(
             req.params.orgName,
-            req.params.scopeName,
+            req.params.scopeId,
         );
         if (!scope)
             throw new ValidationError(
-                `Scope with name ${req.params.scopeName} does not exist in organization ${req.params.orgName}`,
+                `Scope with id ${req.params.scopeId} does not exist in organization ${req.params.orgName}`,
             );
         next();
     } catch (err) {

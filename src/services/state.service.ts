@@ -145,13 +145,13 @@ export const updateStateById = async (id: string, data: Partial<IState>) => {
 export const generateStatesForAuditableVersion = async (
     isAsync: boolean,
     orgName: string,
-    elementName: string,
+    scopeId: string,
     agColName: string,
     date: Date,
 ) => {
     const auditableAgreementVersion = await agreementVersionService.getAuditableVersionByCollection(
         orgName,
-        elementName,
+        scopeId,
         agColName,
         true,
     );
@@ -183,14 +183,14 @@ export const generateStatesForAuditableVersion = async (
 export const generateConsolidatedStatesForAuditableVersion = async (
     isAsync: boolean,
     orgName: string,
-    elementName: string,
+    scopeId: string,
     agColName: string,
     startDate: Date,
     endDate: Date,
 ) => {
     const auditableAgreementVersion = await agreementVersionService.getAuditableVersionByCollection(
         orgName,
-        elementName,
+        scopeId,
         agColName,
         true,
     );
@@ -237,12 +237,12 @@ export const generateConsolidatedStatesForAuditableVersion = async (
 
 export const getStatesForAuditableVersion = async (
     orgName: string,
-    elementName: string,
+    scopeId: string,
     agColName: string,
 ) => {
     const auditableAgreementVersion = await agreementVersionService.getAuditableVersionByCollection(
         orgName,
-        elementName,
+        scopeId,
         agColName,
         true,
     );
@@ -263,7 +263,7 @@ export const getStatesForAuditableVersion = async (
     }
     return {
         organizationName: orgName,
-        elementName: elementName,
+        scopeId: scopeId,
         agreementCollectionName: agColName,
         agreementVersion: {
             ...auditableAgreementVersion,

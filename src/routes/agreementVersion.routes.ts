@@ -13,14 +13,14 @@ import { validateComputerHealth } from '../middlewares/computer.validator.js';
 export const agreementVersionRoutes = Router();
 
 agreementVersionRoutes.get(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions',
     existingScope,
     existingAgreementCollection,
     agreementVersionController.getAgreementVersionsByCollection,
 );
 
 agreementVersionRoutes.get(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/auditableVersion',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/auditableVersion',
     existingScope,
     existingAgreementCollection,
     existingAuditableVersion,
@@ -28,7 +28,7 @@ agreementVersionRoutes.get(
 );
 
 agreementVersionRoutes.delete(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/:versionNumber',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/:versionNumber',
     existingScope,
     existingAgreementCollection,
     existingVersionNumber,
@@ -36,7 +36,7 @@ agreementVersionRoutes.delete(
 );
 
 agreementVersionRoutes.post(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions',
     existingScope,
     existingAgreementCollection,
     validateComputerHealth,
@@ -45,7 +45,7 @@ agreementVersionRoutes.post(
 );
 
 agreementVersionRoutes.post(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/activeVersion/terminate',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/activeVersion/terminate',
     existingScope,
     existingAgreementCollection,
     validateTerminateVersion,

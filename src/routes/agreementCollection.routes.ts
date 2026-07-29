@@ -10,34 +10,34 @@ import { existingScope } from '../middlewares/scope.validator.js';
 export const agreementCollectionRoutes = Router();
 
 agreementCollectionRoutes.get(
-    '/organizations/:orgName/scopes/:scopeName/agreementCollections',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections',
     existingScope,
     agreementCollectionController.getAgreementCollectionsByScope,
 );
 
 agreementCollectionRoutes.get(
-    '/organizations/:orgName/scopes/:scopeName/agreementCollections/:agColName',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName',
     existingScope,
     existingAgreementCollection,
     agreementCollectionController.getAgreementCollectionByScope,
 );
 
 agreementCollectionRoutes.post(
-    '/organizations/:orgName/scopes/:scopeName/agreementCollections',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections',
     existingScope,
     validateCreateAgreementCollection,
     agreementCollectionController.createAgreementCollectionByScope,
 );
 
 agreementCollectionRoutes.put(
-    '/organizations/:orgName/scopes/:scopeName/agreementCollections/:agColName',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName',
     existingScope,
     validateUpdateAgreementCollection,
     agreementCollectionController.updateAgreementCollectionByScope,
 );
 
 agreementCollectionRoutes.delete(
-    '/organizations/:orgName/scopes/:scopeName/agreementCollections/:agColName',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName',
     existingScope,
     existingAgreementCollection,
     agreementCollectionController.deleteAgreementCollectionByScope,
