@@ -3,11 +3,11 @@ info:
     title: Registry API
     version: 1.0.0
     description: |
-        REST API for managing organizations, their roles, element fields
-        and agreement fields within Registry API.
+        REST API for managing guarantee templates, agreement templates, agreement
+        collections and their versions within Registry API.
 
-        Each organization is the main container in the system: it groups elements,
-        defines the vocabulary they must follow and establishes the available roles.
+        Agreement collections belong to a scope, which is owned by an organization and
+        resolved through the scope-manager service. Scopes are referenced by their id.
 servers:
     - url: /
 
@@ -19,7 +19,7 @@ tags:
     - name: AgreementTemplates
       description: Agreement template management within an organization
     - name: AgreementCollections
-      description: Agreement collection management within an element
+      description: Agreement collection management within a scope
     - name: AgreementVersions
       description: Agreement version management within a collection
     - name: States
@@ -825,17 +825,17 @@ paths:
     # ──────────────────────────────────────────────
     # AgreementCollections
     # ──────────────────────────────────────────────
-    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections:
         parameters:
             - $ref: '#/components/parameters/orgName'
-            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/scopeId'
         get:
             tags:
                 - AgreementCollections
-            summary: List all agreement collections in an element
-            operationId: getAgreementCollectionsByElement
+            summary: List all agreement collections in a scope
+            operationId: getAgreementCollectionsByScope
             description: |
-                Returns all agreement collections belonging to the specified element.
+                Returns all agreement collections belonging to the specified scope.
             responses:
                 '200':
                     description: List of agreement collections retrieved successfully
@@ -859,7 +859,7 @@ paths:
                                     - _id: 69cbe9901d5009a04361925d
                                       name: tpa-US-PSG2-2526
                                       displayName: TPA US PSG2 2526
-                                      elementId: 69cbdee759092b362376ca17
+                                      scopeId: 69cbdee759092b362376ca17
                                       auditableVersionNumber: 1
                                       agreementVersions:
                                           - contract:
@@ -884,9 +884,9 @@ paths:
             tags:
                 - AgreementCollections
             summary: Create an agreement collection
-            operationId: createAgreementCollectionByElement
+            operationId: createAgreementCollectionByScope
             description: |
-                Creates a new agreement collection within the specified element.
+                Creates a new agreement collection within the specified scope.
                 The collection is created empty (no versions). Versions are added later
                 through the agreement version endpoints.
             requestBody:
@@ -912,7 +912,7 @@ paths:
                                     _id: 69cbe9901d5009a04361925d
                                     name: tpa-US-PSG2-2526
                                     displayName: TPA US PSG2 2526
-                                    elementId: 69cbdee759092b362376ca17
+                                    scopeId: 69cbdee759092b362376ca17
                                     auditableVersionNumber: null
                                     agreementVersions: []
                                     fields: []
@@ -928,18 +928,18 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
-    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}:
         parameters:
             - $ref: '#/components/parameters/orgName'
-            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/scopeId'
             - $ref: '#/components/parameters/agColName'
         get:
             tags:
                 - AgreementCollections
             summary: Get an agreement collection by name
-            operationId: getAgreementCollectionByElement
+            operationId: getAgreementCollectionByScope
             description: |
-                Returns a specific agreement collection by name within the element.
+                Returns a specific agreement collection by name within the scope.
                 Supports an optional `expand` query parameter to assemble version data
                 with resolved signatures, guarantees and metric configurations.
             parameters:
@@ -971,7 +971,7 @@ paths:
                                     _id: 69cbe9901d5009a04361925d
                                     name: tpa-US-PSG2-2526
                                     displayName: TPA US PSG2 2526
-                                    elementId: 69cbdee759092b362376ca17
+                                    scopeId: 69cbdee759092b362376ca17
                                     auditableVersionNumber: 1
                                     agreementVersions:
                                         - contract:
@@ -996,9 +996,9 @@ paths:
             tags:
                 - AgreementCollections
             summary: Update an agreement collection
-            operationId: updateAgreementCollectionByElement
+            operationId: updateAgreementCollectionByScope
             description: |
-                Updates an existing agreement collection within the element.
+                Updates an existing agreement collection within the scope.
                 The `auditableVersionNumber` can be changed to point to a different version
                 or set to `null` if no version should be auditable.
             requestBody:
@@ -1024,7 +1024,7 @@ paths:
                                     _id: 69cbe9901d5009a04361925d
                                     name: tpa-US-PSG2-2526
                                     displayName: TPA US PSG2 2526 (actualizado)
-                                    elementId: 69cbdee759092b362376ca17
+                                    scopeId: 69cbdee759092b362376ca17
                                     auditableVersionNumber: null
                                     agreementVersions:
                                         - contract:
@@ -1054,7 +1054,7 @@ paths:
             tags:
                 - AgreementCollections
             summary: Delete an agreement collection
-            operationId: deleteAgreementCollectionByElement
+            operationId: deleteAgreementCollectionByScope
             description: |
                 Deletes an agreement collection and all its associated versions and signatures.
             responses:
@@ -1079,10 +1079,10 @@ paths:
     # ──────────────────────────────────────────────
     # AgreementVersions
     # ──────────────────────────────────────────────
-    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}/agreementVersions:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions:
         parameters:
             - $ref: '#/components/parameters/orgName'
-            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/scopeId'
             - $ref: '#/components/parameters/agColName'
         get:
             tags:
@@ -1245,10 +1245,10 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
-    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}/agreementVersions/auditableVersion:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/auditableVersion:
         parameters:
             - $ref: '#/components/parameters/orgName'
-            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/scopeId'
             - $ref: '#/components/parameters/agColName'
         get:
             tags:
@@ -1360,10 +1360,10 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
-    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}/agreementVersions/{versionNumber}:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{versionNumber}:
         parameters:
             - $ref: '#/components/parameters/orgName'
-            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/scopeId'
             - $ref: '#/components/parameters/agColName'
             - $ref: '#/components/parameters/versionNumber'
         delete:
@@ -1393,10 +1393,10 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
-    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}/agreementVersions/activeVersion/terminate:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/activeVersion/terminate:
         parameters:
             - $ref: '#/components/parameters/orgName'
-            - $ref: '#/components/parameters/elementName'
+            - $ref: '#/components/parameters/scopeId'
             - $ref: '#/components/parameters/agColName'
         post:
             tags:
@@ -1445,7 +1445,7 @@ paths:
                                     _id: 69cbe9901d5009a04361925d
                                     name: tpa-US-PSG2-2526
                                     displayName: TPA US PSG2 2526
-                                    elementId: 69cbdee759092b362376ca17
+                                    scopeId: 69cbdee759092b362376ca17
                                     auditableVersionNumber: null
                                     agreementVersions:
                                         - contract:
@@ -1472,7 +1472,7 @@ paths:
     # ──────────────────────────────────────────────
     # States
     # ──────────────────────────────────────────────
-    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}/agreementVersions/auditableVersion/states/consolidated/generate:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/auditableVersion/states/consolidated/generate:
         post:
             tags:
                 - States
@@ -1484,7 +1484,7 @@ paths:
                 Existing states for the same signature and date are reused.
             parameters:
                 - $ref: '#/components/parameters/orgName'
-                - $ref: '#/components/parameters/elementName'
+                - $ref: '#/components/parameters/scopeId'
                 - $ref: '#/components/parameters/agColName'
                 - in: query
                   name: isAsync
@@ -1642,7 +1642,7 @@ paths:
     # ──────────────────────────────────────────────
     # Fetchers
     # ──────────────────────────────────────────────
-    /api/v1/organizations/{orgName}/elements/{elementName}/agreementCollections/{agColName}/agreementVersions/auditableVersion/fetchers/fetch:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/auditableVersion/fetchers/fetch:
         post:
             tags:
                 - Fetchers
@@ -1650,7 +1650,7 @@ paths:
             operationId: fetchAuditableVersionFetchResults
             parameters:
                 - $ref: '#/components/parameters/orgName'
-                - $ref: '#/components/parameters/elementName'
+                - $ref: '#/components/parameters/scopeId'
                 - $ref: '#/components/parameters/agColName'
                 - in: query
                   name: expand
@@ -1786,19 +1786,19 @@ components:
             schema:
                 type: string
             example: tpa-US-PSG2-2526
-        elementName:
-            name: elementName
+        scopeId:
+            name: scopeId
             in: path
             required: true
-            description: Unique name of the element within the organization
+            description: MongoDB ObjectId of the scope within the organization
             schema:
                 type: string
-            example: L1-01
+            example: 69cbdee759092b362376ca17
         agColName:
             name: agColName
             in: path
             required: true
-            description: Unique name of the agreement collection within the element
+            description: Unique name of the agreement collection within the scope
             schema:
                 type: string
             example: tpa-US-PSG2-2526
@@ -4232,12 +4232,12 @@ components:
         AgreementCollection:
             type: object
             description: |
-                An agreement collection groups multiple agreement versions for an element.
+                An agreement collection groups multiple agreement versions for a scope.
                 Only one version can be auditable at a time, tracked by `auditableVersionNumber`.
             required:
                 - _id
                 - name
-                - elementId
+                - scopeId
             properties:
                 _id:
                     type: string
@@ -4245,7 +4245,7 @@ components:
                     example: 69cbe9901d5009a04361925d
                 name:
                     type: string
-                    description: Collection name, unique within the element. Only letters, numbers, hyphens and underscores.
+                    description: Collection name, unique within the scope. Only letters, numbers, hyphens and underscores.
                     pattern: '^[A-Za-z0-9_-]+$'
                     minLength: 3
                     maxLength: 100
@@ -4255,9 +4255,9 @@ components:
                     description: Human-readable display name (max 200 characters)
                     maxLength: 200
                     example: TPA US PSG2 2526
-                elementId:
+                scopeId:
                     type: string
-                    description: ObjectId of the element this collection belongs to
+                    description: ObjectId of the scope this collection belongs to
                     example: 69cbdee759092b362376ca17
                 auditableVersionNumber:
                     type: integer
