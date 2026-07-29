@@ -1790,7 +1790,7 @@ components:
             name: scopeId
             in: path
             required: true
-            description: MongoDB ObjectId of the scope within the organization
+            description: Id of the scope within the organization
             schema:
                 type: string
             example: 69cbdee759092b362376ca17
