@@ -5,6 +5,12 @@ import { IAgreementCollection } from '../models/agreementCollection.model.js';
 import { assembleAgreementVersions } from './agreementVersion.service.js';
 import { deleteSignaturesByIds } from './signature.service.js';
 
+export const getAgreementCollectionsByOrganization = async (orgName: string) => {
+    const scopeIds = await scopeManagerIntegration.getScopeIdsByOrganization(orgName);
+
+    return await agreementCollectionRepository.getAgreementCollectionsByScopeIds(scopeIds);
+};
+
 export const getAgreementCollectionsByScope = async (
     orgName: string,
     scopeId: string,

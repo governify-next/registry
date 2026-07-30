@@ -6,8 +6,15 @@ import {
     existingAgreementCollection,
 } from '../middlewares/agreementCollection.validator.js';
 import { existingScope } from '../middlewares/scope.validator.js';
+import { existingOrganization } from '../middlewares/organization.validator.js';
 
 export const agreementCollectionRoutes = Router();
+
+agreementCollectionRoutes.get(
+    '/organizations/:orgName/agreementCollections',
+    existingOrganization,
+    agreementCollectionController.getAgreementCollectionsByOrganization,
+);
 
 agreementCollectionRoutes.get(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections',

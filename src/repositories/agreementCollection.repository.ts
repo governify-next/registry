@@ -9,6 +9,10 @@ export const getAgreementCollectionsByScope = async (scopeId: Types.ObjectId) =>
     return await AgreementCollection.find({ scopeId: scopeId });
 };
 
+export const getAgreementCollectionsByScopeIds = async (scopeIds: string[]) => {
+    return await AgreementCollection.find({ scopeId: { $in: scopeIds } });
+};
+
 export const createAgreementCollectionByScope = async (
     data: Partial<IAgreementCollection>,
     scopeId: Types.ObjectId,

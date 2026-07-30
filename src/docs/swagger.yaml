@@ -825,6 +825,62 @@ paths:
     # ──────────────────────────────────────────────
     # AgreementCollections
     # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/agreementCollections:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+        get:
+            tags:
+                - AgreementCollections
+            summary: List all agreement collections of an organization
+            operationId: getAgreementCollectionsByOrganization
+            description: |
+                Returns every agreement collection belonging to any scope of the specified
+                organization.
+            responses:
+                '200':
+                    description: List of agreement collections retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/AgreementCollection'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - _id: 69cbe9901d5009a04361925d
+                                      name: tpa-US-PSG2-2526
+                                      displayName: TPA US PSG2 2526
+                                      scopeId: 69cbdee759092b362376ca17
+                                      auditableVersionNumber: 1
+                                      agreementVersions:
+                                          - contract:
+                                                validity:
+                                                    timezone: America/Los_Angeles
+                                                    initial: '2024-01-01T00:00:00.000Z'
+                                                    end: '2024-12-31T23:59:59.000Z'
+                                                    earlyTermination: null
+                                                agreementTemplateId: 69cbd30332c8b7152e9aa73a
+                                                signaturesId:
+                                                    - 69cbea571d5009a043619276
+                                            versionNumber: 1
+                                      fields: []
+                                      permissions: []
+                                      __v: 0
+                                error: null
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
     /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections:
         parameters:
             - $ref: '#/components/parameters/orgName'

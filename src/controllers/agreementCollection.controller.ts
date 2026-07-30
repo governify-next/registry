@@ -2,6 +2,22 @@ import { Request, Response, NextFunction } from 'express';
 import { sendSuccess } from '../utils/standardResponse.js';
 import * as agreementCollectionService from '../services/agreementCollection.service.js';
 
+export const getAgreementCollectionsByOrganization = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const agreementCollections =
+            await agreementCollectionService.getAgreementCollectionsByOrganization(
+                req.params.orgName,
+            );
+        return sendSuccess(res, { data: agreementCollections });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const getAgreementCollectionsByScope = async (
     req: Request,
     res: Response,

@@ -39,3 +39,22 @@ export const getOrganizationByName = async (orgName: string) => {
 
     return result.data;
 };
+
+export const getScopeIdsByOrganization = async (orgName: string) => {
+    const response = await fetch(
+        `${SCOPE_MANAGER_SERVICE_URL}/api/v1/organizations/${orgName}/scopes?flat=true`,
+        {
+            method: 'GET',
+            headers: serviceHeaders,
+        },
+    );
+
+    const result = await response.json();
+
+    if (!result.success)
+        throw new Error(
+            `Failed to fetch scopes of organization '${orgName}' from scope-manager (status: ${response.status})`,
+        );
+
+    return result.data.map((scope: { _id: string }) => scope._id);
+};
