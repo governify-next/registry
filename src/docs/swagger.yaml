@@ -881,6 +881,158 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
+    /api/v1/organizations/{orgName}/agreementCollections/{agColId}:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/agColId'
+        get:
+            tags:
+                - AgreementCollections
+            summary: Get an agreement collection by id
+            operationId: getAgreementCollectionById
+            description: |
+                Returns a specific agreement collection by its id, regardless of the scope it
+                belongs to. The collection must belong to a scope of the specified organization.
+                Supports an optional `expand` query parameter to assemble version data
+                with resolved signatures, guarantees and metric configurations.
+            parameters:
+                - in: query
+                  name: expand
+                  schema:
+                      type: string
+                      enum: ['true', 'false']
+                      default: 'false'
+                  description: If `true`, returns versions with fully assembled signature and guarantee data.
+            responses:
+                '200':
+                    description: Agreement collection found
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementCollection'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 69cbe9901d5009a04361925d
+                                    name: tpa-US-PSG2-2526
+                                    displayName: TPA US PSG2 2526
+                                    scopeId: 69cbdee759092b362376ca17
+                                    auditableVersionNumber: 1
+                                    agreementVersions:
+                                        - contract:
+                                              validity:
+                                                  timezone: America/Los_Angeles
+                                                  initial: '2024-01-01T00:00:00.000Z'
+                                                  end: '2024-12-31T23:59:59.000Z'
+                                                  earlyTermination: null
+                                              agreementTemplateId: 69cbd30332c8b7152e9aa73a
+                                              signaturesId:
+                                                  - 69cbea571d5009a043619276
+                                          versionNumber: 1
+                                    fields: []
+                                    permissions: []
+                                    __v: 0
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        put:
+            tags:
+                - AgreementCollections
+            summary: Update an agreement collection
+            operationId: updateAgreementCollectionById
+            description: |
+                Updates an existing agreement collection identified by its id.
+                The `auditableVersionNumber` can be changed to point to a different version
+                or set to `null` if no version should be auditable.
+            requestBody:
+                $ref: '#/components/requestBodies/AgreementCollectionUpdateBody'
+            responses:
+                '200':
+                    description: Agreement collection updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementCollection'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    _id: 69cbe9901d5009a04361925d
+                                    name: tpa-US-PSG2-2526
+                                    displayName: TPA US PSG2 2526 (actualizado)
+                                    scopeId: 69cbdee759092b362376ca17
+                                    auditableVersionNumber: null
+                                    agreementVersions:
+                                        - contract:
+                                              validity:
+                                                  timezone: America/Los_Angeles
+                                                  initial: '2024-01-01T00:00:00.000Z'
+                                                  end: '2024-12-31T23:59:59.000Z'
+                                                  earlyTermination: null
+                                              agreementTemplateId: 69cbd30332c8b7152e9aa73a
+                                              signaturesId:
+                                                  - 69cbea571d5009a043619276
+                                          versionNumber: 1
+                                    fields: []
+                                    permissions: []
+                                    __v: 0
+                                    updatedAt: '2024-01-01T12:00:00.000Z'
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '409':
+                    $ref: '#/components/responses/Conflict'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        delete:
+            tags:
+                - AgreementCollections
+            summary: Delete an agreement collection
+            operationId: deleteAgreementCollectionById
+            description: |
+                Deletes an agreement collection and all its associated versions and signatures.
+            responses:
+                '200':
+                    description: Agreement collection deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: object
+                                              nullable: true
+                                              example: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
     /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections:
         parameters:
             - $ref: '#/components/parameters/orgName'
@@ -981,154 +1133,6 @@ paths:
                     $ref: '#/components/responses/NotFound'
                 '409':
                     $ref: '#/components/responses/Conflict'
-                '500':
-                    $ref: '#/components/responses/InternalError'
-
-    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}:
-        parameters:
-            - $ref: '#/components/parameters/orgName'
-            - $ref: '#/components/parameters/scopeId'
-            - $ref: '#/components/parameters/agColName'
-        get:
-            tags:
-                - AgreementCollections
-            summary: Get an agreement collection by name
-            operationId: getAgreementCollectionByScope
-            description: |
-                Returns a specific agreement collection by name within the scope.
-                Supports an optional `expand` query parameter to assemble version data
-                with resolved signatures, guarantees and metric configurations.
-            parameters:
-                - in: query
-                  name: expand
-                  schema:
-                      type: string
-                      enum: ['true', 'false']
-                      default: 'false'
-                  description: If `true`, returns versions with fully assembled signature and guarantee data.
-            responses:
-                '200':
-                    description: Agreement collection found
-                    content:
-                        application/json:
-                            schema:
-                                allOf:
-                                    - $ref: '#/components/schemas/SuccessResponse'
-                                    - type: object
-                                      properties:
-                                          data:
-                                              $ref: '#/components/schemas/AgreementCollection'
-                            example:
-                                success: true
-                                message: OK
-                                httpStatus: 200
-                                appCode: SUCCESS
-                                data:
-                                    _id: 69cbe9901d5009a04361925d
-                                    name: tpa-US-PSG2-2526
-                                    displayName: TPA US PSG2 2526
-                                    scopeId: 69cbdee759092b362376ca17
-                                    auditableVersionNumber: 1
-                                    agreementVersions:
-                                        - contract:
-                                              validity:
-                                                  timezone: America/Los_Angeles
-                                                  initial: '2024-01-01T00:00:00.000Z'
-                                                  end: '2024-12-31T23:59:59.000Z'
-                                                  earlyTermination: null
-                                              agreementTemplateId: 69cbd30332c8b7152e9aa73a
-                                              signaturesId:
-                                                  - 69cbea571d5009a043619276
-                                          versionNumber: 1
-                                    fields: []
-                                    permissions: []
-                                    __v: 0
-                                error: null
-                '404':
-                    $ref: '#/components/responses/NotFound'
-                '500':
-                    $ref: '#/components/responses/InternalError'
-        put:
-            tags:
-                - AgreementCollections
-            summary: Update an agreement collection
-            operationId: updateAgreementCollectionByScope
-            description: |
-                Updates an existing agreement collection within the scope.
-                The `auditableVersionNumber` can be changed to point to a different version
-                or set to `null` if no version should be auditable.
-            requestBody:
-                $ref: '#/components/requestBodies/AgreementCollectionUpdateBody'
-            responses:
-                '200':
-                    description: Agreement collection updated successfully
-                    content:
-                        application/json:
-                            schema:
-                                allOf:
-                                    - $ref: '#/components/schemas/SuccessResponse'
-                                    - type: object
-                                      properties:
-                                          data:
-                                              $ref: '#/components/schemas/AgreementCollection'
-                            example:
-                                success: true
-                                message: OK
-                                httpStatus: 200
-                                appCode: SUCCESS
-                                data:
-                                    _id: 69cbe9901d5009a04361925d
-                                    name: tpa-US-PSG2-2526
-                                    displayName: TPA US PSG2 2526 (actualizado)
-                                    scopeId: 69cbdee759092b362376ca17
-                                    auditableVersionNumber: null
-                                    agreementVersions:
-                                        - contract:
-                                              validity:
-                                                  timezone: America/Los_Angeles
-                                                  initial: '2024-01-01T00:00:00.000Z'
-                                                  end: '2024-12-31T23:59:59.000Z'
-                                                  earlyTermination: null
-                                              agreementTemplateId: 69cbd30332c8b7152e9aa73a
-                                              signaturesId:
-                                                  - 69cbea571d5009a043619276
-                                          versionNumber: 1
-                                    fields: []
-                                    permissions: []
-                                    __v: 0
-                                    updatedAt: '2024-01-01T12:00:00.000Z'
-                                error: null
-                '400':
-                    $ref: '#/components/responses/ValidationError'
-                '404':
-                    $ref: '#/components/responses/NotFound'
-                '409':
-                    $ref: '#/components/responses/Conflict'
-                '500':
-                    $ref: '#/components/responses/InternalError'
-        delete:
-            tags:
-                - AgreementCollections
-            summary: Delete an agreement collection
-            operationId: deleteAgreementCollectionByScope
-            description: |
-                Deletes an agreement collection and all its associated versions and signatures.
-            responses:
-                '200':
-                    description: Agreement collection deleted successfully
-                    content:
-                        application/json:
-                            schema:
-                                allOf:
-                                    - $ref: '#/components/schemas/SuccessResponse'
-                                    - type: object
-                                      properties:
-                                          data:
-                                              type: object
-                                              nullable: true
-                                              example: null
-                '404':
-                    $ref: '#/components/responses/NotFound'
                 '500':
                     $ref: '#/components/responses/InternalError'
 
@@ -1858,6 +1862,14 @@ components:
             schema:
                 type: string
             example: tpa-US-PSG2-2526
+        agColId:
+            name: agColId
+            in: path
+            required: true
+            description: Id of the agreement collection
+            schema:
+                type: string
+            example: 69cbe9901d5009a04361925d
         versionNumber:
             name: versionNumber
             in: path

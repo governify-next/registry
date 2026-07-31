@@ -3,7 +3,7 @@ import * as agreementCollectionController from '../controllers/agreementCollecti
 import {
     validateCreateAgreementCollection,
     validateUpdateAgreementCollection,
-    existingAgreementCollection,
+    existingAgreementCollectionById,
 } from '../middlewares/agreementCollection.validator.js';
 import { existingScope } from '../middlewares/scope.validator.js';
 import { existingOrganization } from '../middlewares/organization.validator.js';
@@ -17,16 +17,31 @@ agreementCollectionRoutes.get(
 );
 
 agreementCollectionRoutes.get(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections',
-    existingScope,
-    agreementCollectionController.getAgreementCollectionsByScope,
+    '/organizations/:orgName/agreementCollections/:agColId',
+    existingOrganization,
+    existingAgreementCollectionById,
+    agreementCollectionController.getAgreementCollectionById,
+);
+
+agreementCollectionRoutes.put(
+    '/organizations/:orgName/agreementCollections/:agColId',
+    existingOrganization,
+    existingAgreementCollectionById,
+    validateUpdateAgreementCollection,
+    agreementCollectionController.updateAgreementCollectionById,
+);
+
+agreementCollectionRoutes.delete(
+    '/organizations/:orgName/agreementCollections/:agColId',
+    existingOrganization,
+    existingAgreementCollectionById,
+    agreementCollectionController.deleteAgreementCollectionById,
 );
 
 agreementCollectionRoutes.get(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections',
     existingScope,
-    existingAgreementCollection,
-    agreementCollectionController.getAgreementCollectionByScope,
+    agreementCollectionController.getAgreementCollectionsByScope,
 );
 
 agreementCollectionRoutes.post(
@@ -34,18 +49,4 @@ agreementCollectionRoutes.post(
     existingScope,
     validateCreateAgreementCollection,
     agreementCollectionController.createAgreementCollectionByScope,
-);
-
-agreementCollectionRoutes.put(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName',
-    existingScope,
-    validateUpdateAgreementCollection,
-    agreementCollectionController.updateAgreementCollectionByScope,
-);
-
-agreementCollectionRoutes.delete(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName',
-    existingScope,
-    existingAgreementCollection,
-    agreementCollectionController.deleteAgreementCollectionByScope,
 );

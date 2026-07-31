@@ -15,11 +15,11 @@ export const createSignaturesByVersion = async (
 ) => {
     const createdSignatures = await Promise.all(
         signatures.map(async (sig) => {
-            // Obtenemos el guarantee template id a partir del name
+            // Get the guarantee template id from the name
             const guaranteeTemplate = await getGuaranteeTemplateByName(sig.guaranteeName);
             const guaranteeTemplateId = guaranteeTemplate!._id;
 
-            // Obtenemos la guarantee a partir de la guarantee template y el agreement template
+            // Get the guarantee from the guarantee template and the agreement template
             const guarantee = await getGuaranteeByTemplateIds(templateId, guaranteeTemplateId);
 
             return await signatureRepository.createSignature(guarantee!._id, sig.metrics);
@@ -34,7 +34,6 @@ export const getSignaturesByIds = async (signatureIds: Types.ObjectId[]) => {
 };
 
 export const assembleBySignature = async (agreementVersion: IAgreementVersion) => {
-    // Buscamos las signatures de la version por los ids
     const signatureIds = agreementVersion.contract.signaturesId;
     const signatures = await getSignaturesByIds(signatureIds);
 

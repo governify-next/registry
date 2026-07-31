@@ -16,21 +16,21 @@ export const createAgreementVersionByCollection = async (
     agreementName: string,
     data: IAgreementVersionPayload,
 ) => {
-    // TODO: validar en middleware que no se pase un signaturesId ni versionNumber. EarlyTermination también se podría quitar para el post
+    // TODO: validate in middleware that cannot pass a signaturesId or versionNumber. EarlyTermination could also be removed for the post
 
     const { signatures, ...versionData } = data;
 
-    // 1. Obtenemos el AgreementCollection
+    // 1. Get the agreement collection
     const agreementCollection = await getCleanAgreementCollectionByScope(
         orgName,
         scopeId,
         agreementName,
     );
 
-    // 2. Obtenemos el nuevo version number
+    // 2. Get the new version number
     const newVersionNumber = agreementCollection!.agreementVersions.length + 1;
 
-    // 3. Obtenemos el id del template
+    // 3. Get the agreement template id
     const organization = await scopeManagerIntegration.getOrganizationByName(orgName);
     const agreementTemplate = await getCleanAgreementTemplateByOrganization(
         organization!._id,
@@ -38,11 +38,11 @@ export const createAgreementVersionByCollection = async (
     );
     const agreementTemplateId = agreementTemplate!._id;
 
-    // 4. Creamos las signatures
+    // 4. Create the signatures
     const newSignatures = await createSignaturesByVersion(signatures, agreementTemplateId);
     const signaturesId = newSignatures.map((s) => s._id);
 
-    // 5. Construimos y creamos el AgreementVersion
+    // 5. Build and create the agreementVersion
     const agreementVersion = {
         versionNumber: newVersionNumber,
         contract: {
@@ -87,7 +87,7 @@ export const getAuditableVersionByCollection = async (
     agreementName: string,
     expand: boolean,
 ) => {
-    // TODO: Validar en el middleware que el collection que se llama para el auditable version no la tenga en null y posiblemente que sea válida
+    // TODO: Validate in middleware that the collection that is called for the auditable version is not null and possibly that is valid
     const agreementCollection = await getCleanAgreementCollectionByScope(
         orgName,
         scopeId,

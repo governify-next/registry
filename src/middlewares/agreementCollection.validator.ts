@@ -2,6 +2,7 @@ import { body, checkExact, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError, DuplicateKeyError, NotFoundError } from '../utils/customErrors.js';
 import * as agreementCollectionService from '../services/agreementCollection.service.js';
+import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
 
 // ─── Validaciones de campo ────────────────────────────
 
@@ -69,12 +70,38 @@ const uniqueAgreementCollectionInScope = async (
     next: NextFunction,
 ) => {
     try {
-        // Si es update y el nombre no cambió, no hay conflicto
-        if (req.params.agColName && req.params.agColName === req.body.name) return next();
-
         const existing = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
             req.params.scopeId,
+            req.body.name,
+        );
+
+        if (existing)
+            return next(
+                new DuplicateKeyError(
+                    `An AgreementCollection with name '${req.body.name}' already exists in this scope`,
+                ),
+            );
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
+const uniqueAgreementCollectionOnUpdate = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const collection = await agreementCollectionService.getAgreementCollectionById(
+            req.params.agColId,
+        );
+
+        if (collection!.name === req.body.name) return next();
+
+        const existing = await agreementCollectionService.getAgreementCollectionByScopeIdAndName(
+            collection!.scopeId,
             req.body.name,
         );
 
@@ -112,6 +139,40 @@ export const existingAgreementCollection = async (
     }
 };
 
+export const existingAgreementCollectionById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const collection = await agreementCollectionService.getAgreementCollectionById(
+            req.params.agColId,
+        );
+
+        if (!collection)
+            return next(
+                new NotFoundError(`AgreementCollection with id'${req.params.agColId}' not found`),
+            );
+
+        // Verificamos que la colección pertenece a la organización por medio del scopeId
+        const scope = await scopeManagerIntegration.getScopeByOrgAndScopeId(
+            req.params.orgName,
+            collection.scopeId.toString(),
+        );
+
+        if (!scope)
+            return next(
+                new NotFoundError(
+                    `AgreementCollection with id'${req.params.agColId}' not found in organization '${req.params.orgName}'`,
+                ),
+            );
+
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
 const validAuditableVersion = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { auditableVersionNumber } = req.body;
@@ -119,10 +180,8 @@ const validAuditableVersion = async (req: Request, res: Response, next: NextFunc
         // Si es null, no hay nada que validar
         if (auditableVersionNumber === null) return next();
 
-        const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
-            req.params.orgName,
-            req.params.scopeId,
-            req.params.agColName,
+        const collection = await agreementCollectionService.getAgreementCollectionById(
+            req.params.agColId,
         );
 
         const version = collection!.agreementVersions.find(
@@ -160,7 +219,6 @@ export const validateCreateAgreementCollection = [
 export const validateUpdateAgreementCollection = [
     checkExact(updateFieldValidations, { locations: ['body'] }), // cualquier campo no presente en las validaciones será rechazado
     collectValidationErrors,
-    existingAgreementCollection,
-    uniqueAgreementCollectionInScope,
+    uniqueAgreementCollectionOnUpdate,
     validAuditableVersion,
 ];

@@ -38,7 +38,7 @@ export const getAgreementCollectionsByScope = async (
     }
 };
 
-export const getAgreementCollectionByScope = async (
+export const getAgreementCollectionById = async (
     req: Request,
     res: Response,
     next: NextFunction,
@@ -46,10 +46,8 @@ export const getAgreementCollectionByScope = async (
     try {
         const expand = req.query.expand === 'true';
 
-        const agreementCollection = await agreementCollectionService.getAgreementCollectionByScope(
-            req.params.orgName,
-            req.params.scopeId,
-            req.params.agColName,
+        const agreementCollection = await agreementCollectionService.getAgreementCollectionById(
+            req.params.agColId,
             expand,
         );
         return sendSuccess(res, { data: agreementCollection });
@@ -80,19 +78,16 @@ export const createAgreementCollectionByScope = async (
     }
 };
 
-export const updateAgreementCollectionByScope = async (
+export const updateAgreementCollectionById = async (
     req: Request,
     res: Response,
     next: NextFunction,
 ) => {
     try {
-        const agreementCollection =
-            await agreementCollectionService.updateAgreementCollectionByScope(
-                req.params.orgName,
-                req.params.scopeId,
-                req.params.agColName,
-                req.body,
-            );
+        const agreementCollection = await agreementCollectionService.updateAgreementCollectionById(
+            req.params.agColId,
+            req.body,
+        );
         return sendSuccess(res, {
             data: agreementCollection,
             message: 'Agreement collection updated',
@@ -102,17 +97,13 @@ export const updateAgreementCollectionByScope = async (
     }
 };
 
-export const deleteAgreementCollectionByScope = async (
+export const deleteAgreementCollectionById = async (
     req: Request,
     res: Response,
     next: NextFunction,
 ) => {
     try {
-        await agreementCollectionService.deleteAgreementCollectionByScope(
-            req.params.orgName,
-            req.params.scopeId,
-            req.params.agColName,
-        );
+        await agreementCollectionService.deleteAgreementCollectionById(req.params.agColId);
         return sendSuccess(res, {
             data: null,
             message: 'Agreement collection deleted',

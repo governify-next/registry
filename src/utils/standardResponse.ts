@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { Error as MongooseError } from 'mongoose';
 import { StdError } from './customErrors.js';
 
 type NormalizedError = {
@@ -16,6 +17,10 @@ function normalizeError(err: unknown): NormalizedError {
             appCode: err.appCode,
             details: err.details,
         };
+    }
+    // Malformed id in routes
+    if (err instanceof MongooseError.CastError) {
+        return { message: 'Invalid id', httpStatus: 400, appCode: 'VALIDATION_ERROR' };
     }
     if (err instanceof Error) {
         return { message: err.message, httpStatus: 500, appCode: 'UNKNOWN_ERROR' };

@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 import AgreementCollection, { IAgreementCollection } from '../models/agreementCollection.model.js';
 
-export const getAgreementCollectionById = async (agColId: Types.ObjectId) => {
+export const getAgreementCollectionById = async (agColId: string) => {
     return await AgreementCollection.findById(agColId);
 };
 
@@ -25,12 +25,12 @@ export const getAgreementCollectionByScope = async (scopeId: Types.ObjectId, agC
 };
 
 export const updateAgreementCollectionByScope = async (
-    agColId: Types.ObjectId,
+    agColId: string,
     data: Partial<IAgreementCollection>,
 ) => {
     return await AgreementCollection.findOneAndUpdate({ _id: agColId }, data, { new: true });
 };
 
-export const deleteAgreementCollectionByScope = async (agColId: Types.ObjectId) => {
+export const deleteAgreementCollectionByScope = async (agColId: string) => {
     return await AgreementCollection.findOneAndDelete({ _id: agColId });
 };

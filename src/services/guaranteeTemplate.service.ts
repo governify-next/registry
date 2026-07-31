@@ -26,10 +26,8 @@ export const updateGuaranteeTemplate = async (
     guaranteeName: string,
     data: Partial<IGuaranteeTemplate>,
 ) => {
-    // 1. Extraemos solo los campos modificables
     const { metrics, name, info, numericExpression } = data;
 
-    // 2. Actualizamos guaranteeTemplate
     return await guaranteeTemplateRepository.updateGuaranteeTemplate(guaranteeName, {
         name,
         info,
