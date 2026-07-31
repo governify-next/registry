@@ -56,7 +56,7 @@ const agreementCollectionSchema = new Schema<IAgreementCollection>(
         agreementVersions: { type: [agreementVersionSchema], default: [] },
     },
     {
-        timestamps: true, // createdAt y updatedAt
+        timestamps: true, // createdAt and updatedAt
     },
 );
 

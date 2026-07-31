@@ -9,8 +9,8 @@ import { validateFetcherExists } from '../integrations/collector.integration.js'
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 /**
- * Extrae los nombres de métrica referenciados en una expresión numérica.
- * El primer caracter de las métricas debe empezar por una letra (ej: MT_ELEMENT_xx_...)
+ * Extracts the metric names referenced in a numeric expression.
+ * The first character of a metric must be a letter (e.g. MT_ELEMENT_xx_...)
  */
 const extractMetricNames = (expression: string): string[] => {
     const tokens = expression.match(/[A-Za-z_][A-Za-z0-9_-]*/g) || [];
@@ -18,41 +18,41 @@ const extractMetricNames = (expression: string): string[] => {
 };
 
 /**
- * Valida que una expresión sea una fórmula matemática válida.
- * Tokens permitidos: nombres de métrica, números (opcionalmente con decimales), operadores +-/* y paréntesis.
+ * Validates that an expression is a valid mathematical formula.
+ * Allowed tokens: metric names, numbers (optionally with decimals), the operators +-/* and parentheses.
  *
- * Reglas:
- * 1. La expresión debe estar compuesta únicamente por tokens válidos (sin caracteres sueltos).
- * 2. Dos operandos (nombre o número) no pueden ir seguidos sin un operador entre ellos.
- * 3. Los paréntesis deben estar balanceados.
+ * Rules:
+ * 1. The expression must be made up of valid tokens only (no stray characters).
+ * 2. Two operands (name or number) cannot follow each other without an operator between them.
+ * 3. Parentheses must be balanced.
  */
 const isValidMathExpression = (expression: string): boolean => {
-    // Ejemplo: "(MT_A/MT_B)*100"
+    // Example: "(MT_A/MT_B)*100"
     const TOKEN_REGEX = /[A-Za-z_][A-Za-z0-9_-]*|\d+(\.\d+)?|[+\-*/()]/g;
     const tokens = expression.match(TOKEN_REGEX);
-    //  Rompe en: ["(", "MT_A", "/", "MT_B", ")", "*", "100"]
+    //  Splits into: ["(", "MT_A", "/", "MT_B", ")", "*", "100"]
 
-    // Reconstruimos para ver si se ha ignorado algún elemento incluido
+    // Rebuild it to check whether any included element was ignored
     if (!tokens || tokens.join('') !== expression) return false;
 
-    // Recorremos cada token uno a uno
+    // Walk through each token one by one
     let depth = 0;
-    let prev = ''; // token anterior
+    let prev = ''; // previous token
     const isOperand = (t: string) => /^[A-Za-z_\d]/.test(t);
     const isOperator = (t: string) => /^[+\-*/]$/.test(t);
 
     for (const token of tokens) {
-        // La expresión no puede empezar por operador: +MT_A, *100
+        // The expression cannot start with an operator: +MT_A, *100
         if (isOperator(token) && prev === '') return false;
-        // Dos operandos seguidos sin operador: 100MT_A
+        // Two operands in a row without an operator: 100MT_A
         if (isOperand(token) && isOperand(prev)) return false;
-        // Operando seguido de "(": 100(...)
+        // Operand followed by "(": 100(...)
         if (token === '(' && isOperand(prev)) return false;
-        // ")" seguido de operando: (...)100
+        // ")" followed by an operand: (...)100
         if (isOperand(token) && prev === ')') return false;
-        // Operador justo después de "(": (*MT_A)
+        // Operator right after "(": (*MT_A)
         if (isOperator(token) && prev === '(') return false;
-        // ")" justo después de operador o "(": (MT_A/) o ()
+        // ")" right after an operator or "(": (MT_A/) or ()
         if (token === ')' && (isOperator(prev) || prev === '(')) return false;
 
         if (token === '(') depth++;
@@ -62,13 +62,13 @@ const isValidMathExpression = (expression: string): boolean => {
         prev = token;
     }
 
-    // La expresión no puede terminar en operador: MT_A+, 100/
+    // The expression cannot end with an operator: MT_A+, 100/
     if (isOperator(prev)) return false;
 
-    return depth === 0; // al final del todo, debemos tener profundidad 0 o los paréntesis estaban mal balanceados
+    return depth === 0; // at the very end depth must be 0, otherwise the parentheses were unbalanced
 };
 
-// ─── Validaciones de campo ────────────────────────────
+// ─── Field validations ────────────────────────────
 
 const nameValidation = body('name')
     .exists({ checkNull: true })
@@ -205,11 +205,11 @@ const collectValidationErrors = (req: Request, res: Response, next: NextFunction
     next();
 };
 
-// ─── Validaciones de lógica de negocio ─────────────────────────────────
+// ─── Business logic validations ─────────────────────────────────
 
 const uniqueGuaranteeTemplateName = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        // Si es update y el nombre no cambia, no hay conflicto
+        // On update, if the name does not change there is no conflict
         if (req.params.guaranteeName && req.params.guaranteeName === req.body.name) return next();
 
         const existing = await guaranteeTemplateService.getGuaranteeTemplateByName(req.body.name);
@@ -240,7 +240,7 @@ const validNumericExpression = (req: Request, res: Response, next: NextFunction)
     const expression: string = req.body.numericExpression;
     const metricNames: string[] = req.body.metrics.map((m: { metricName: string }) => m.metricName);
 
-    // 1. Comprobamos que la expresión sea válida matemáticamente
+    // 1. Check that the expression is mathematically valid
     if (!isValidMathExpression(expression))
         return next(
             new ValidationError(
@@ -248,7 +248,7 @@ const validNumericExpression = (req: Request, res: Response, next: NextFunction)
             ),
         );
 
-    // 2. Comprobamos consistencia expresión <-> metricConfigs
+    // 2. Check consistency between the expression and metricConfigs
     const referencedMetrics = extractMetricNames(expression);
 
     const unusedMetrics = metricNames.filter((name) => !referencedMetrics.includes(name));
@@ -347,7 +347,7 @@ const guaranteeTemplateNotInUse = async (req: Request, res: Response, next: Next
 // ─── Middleware ────────────────────────────────────────────────────
 
 export const validateCreateGuaranteeTemplate = [
-    // 1. Validación de campos
+    // 1. Field validation
     nameValidation,
     nullFieldValidation('comparator'),
     nullFieldValidation('threshold'),
@@ -356,7 +356,7 @@ export const validateCreateGuaranteeTemplate = [
     numericExpressionValidation,
     ...metricsStructureValidation,
     collectValidationErrors,
-    // 2. Validación de lógica
+    // 2. Logic validation
     uniqueGuaranteeTemplateName,
     noDuplicateMetricNames,
     validNumericExpression,
@@ -364,13 +364,13 @@ export const validateCreateGuaranteeTemplate = [
 ];
 
 export const validateUpdateGuaranteeTemplate = [
-    // 1. Validación de los campos modificables
+    // 1. Validation of the editable fields
     nameValidation,
     ...infoValidation,
     numericExpressionValidation,
     ...metricsStructureValidation,
     collectValidationErrors,
-    // 2. Validación de lógica
+    // 2. Logic validation
     existingGuaranteeTemplate,
     uniqueGuaranteeTemplateName,
     noDuplicateMetricNames,

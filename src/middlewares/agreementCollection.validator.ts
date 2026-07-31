@@ -4,7 +4,7 @@ import { ValidationError, DuplicateKeyError, NotFoundError } from '../utils/cust
 import * as agreementCollectionService from '../services/agreementCollection.service.js';
 import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
 
-// ─── Validaciones de campo ────────────────────────────
+// ─── Field validations ────────────────────────────
 
 const nameValidation = body('name')
     .exists({ checkNull: true })
@@ -62,7 +62,7 @@ const collectValidationErrors = (req: Request, res: Response, next: NextFunction
     next();
 };
 
-// ─── Validaciones de lógica de negocio ─────────────────────────────────
+// ─── Business logic validations ─────────────────────────────────
 
 const uniqueAgreementCollectionInScope = async (
     req: Request,
@@ -154,7 +154,7 @@ export const existingAgreementCollectionById = async (
                 new NotFoundError(`AgreementCollection with id'${req.params.agColId}' not found`),
             );
 
-        // Verificamos que la colección pertenece a la organización por medio del scopeId
+        // Check that the collection belongs to the organization through its scopeId
         const scope = await scopeManagerIntegration.getScopeByOrgAndScopeId(
             req.params.orgName,
             collection.scopeId.toString(),
@@ -177,7 +177,7 @@ const validAuditableVersion = async (req: Request, res: Response, next: NextFunc
     try {
         const { auditableVersionNumber } = req.body;
 
-        // Si es null, no hay nada que validar
+        // If it is null there is nothing to validate
         if (auditableVersionNumber === null) return next();
 
         const collection = await agreementCollectionService.getAgreementCollectionById(
@@ -211,13 +211,13 @@ const validAuditableVersion = async (req: Request, res: Response, next: NextFunc
 // ─── Middleware ────────────────────────────────────────────────────
 
 export const validateCreateAgreementCollection = [
-    checkExact(fieldValidations, { locations: ['body'] }), // TODO: seguir esta técnica en el resto de middlewares
+    checkExact(fieldValidations, { locations: ['body'] }), // TODO: follow this technique in the rest of the middlewares
     collectValidationErrors,
     uniqueAgreementCollectionInScope,
 ];
 
 export const validateUpdateAgreementCollection = [
-    checkExact(updateFieldValidations, { locations: ['body'] }), // cualquier campo no presente en las validaciones será rechazado
+    checkExact(updateFieldValidations, { locations: ['body'] }), // any field not present in the validations will be rejected
     collectValidationErrors,
     uniqueAgreementCollectionOnUpdate,
     validAuditableVersion,

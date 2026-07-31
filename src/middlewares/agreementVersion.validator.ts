@@ -9,7 +9,7 @@ import {
 import { validateEventConfig } from '../integrations/computer.integration.js';
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
 
-// ─── Validaciones de campo ────────────────────────────
+// ─── Field validations ────────────────────────────
 
 const agreementTemplateNameValidation = body('contract.agreementTemplateName')
     .exists({ checkNull: true })
@@ -117,7 +117,7 @@ const collectValidationErrors = (req: Request, res: Response, next: NextFunction
     next();
 };
 
-// ─── Validaciones de lógica de negocio ─────────────────────────────────
+// ─── Business logic validations ─────────────────────────────────
 
 const endAfterInitial = (req: Request, res: Response, next: NextFunction) => {
     const { initial, end } = req.body.contract.validity;
@@ -219,7 +219,7 @@ const validateSignatureConfigsInExternalServices = async (
                     (m) => m.metricName === metric.metricName,
                 );
 
-                // Validar que las métricas especificadas estén en la template
+                // Validate that the given metrics exist in the template
                 if (!templateMetric) {
                     errors.push(
                         `${sig.guaranteeName}: metricName '${metric.metricName}' not found in template`,
