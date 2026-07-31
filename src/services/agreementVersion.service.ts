@@ -27,8 +27,9 @@ export const createAgreementVersionByCollection = async (
         agreementName,
     );
 
-    // 2. Get the new version number
-    const newVersionNumber = agreementCollection!.agreementVersions.length + 1;
+    // 2. Get the new version number, the highest one plus one, or 1 if there are no versions
+    const versionNumbers = agreementCollection!.agreementVersions.map((v) => v.versionNumber);
+    const newVersionNumber = Math.max(0, ...versionNumbers) + 1;
 
     // 3. Get the agreement template id
     const organization = await scopeManagerIntegration.getOrganizationByName(orgName);
