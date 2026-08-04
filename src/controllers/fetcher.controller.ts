@@ -57,3 +57,27 @@ export const getConsolidationFetchesForAuditableVersion = async (
         next(err);
     }
 };
+
+export const createConsolidationFetchTasksForAuditableVersion = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const { orgName, elementName, agColName } = req.params;
+        const enabled = req.query.enabled === 'true';
+
+        const fetchTasks = await fetcherService.createConsolidationFetchTasksForAuditableVersion(
+            orgName,
+            elementName,
+            agColName,
+            enabled,
+        );
+        return sendSuccess(res, {
+            data: fetchTasks,
+            message: 'Consolidation fetch tasks created',
+        });
+    } catch (err) {
+        next(err);
+    }
+};

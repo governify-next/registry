@@ -4,7 +4,7 @@ import { ValidationError, DuplicateKeyError, ExternalServiceError } from '../uti
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
 import * as guaranteeService from '../services/guarantee.service.js';
 import { validateEventExists, validateAggregator } from '../integrations/computer.integration.js';
-import { validateFetcherExists } from '../integrations/collector.integration.js';
+import { validateFetcherExists } from '../integrations/fetcher.integration.js';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
