@@ -36,6 +36,8 @@ paths:
             tags:
                 - Health
             summary: Health check
+            operationId: healthCheck
+            description: Returns the server health status. This endpoint does not use the standard response wrapper.
             responses:
                 '200':
                     description: OK
@@ -43,9 +45,16 @@ paths:
                         application/json:
                             schema:
                                 type: object
+                                required:
+                                    - status
+                                    - message
                                 properties:
                                     status:
                                         type: string
+                                        example: ok
+                                    message:
+                                        type: string
+                                        example: Health check passed
 
     # ──────────────────────────────────────────────
     # GuaranteeTemplates
@@ -478,7 +487,7 @@ paths:
             requestBody:
                 $ref: '#/components/requestBodies/AgreementTemplateBody'
             responses:
-                '200':
+                '201':
                     description: Agreement template created successfully
                     content:
                         application/json:
@@ -492,7 +501,7 @@ paths:
                             example:
                                 success: true
                                 message: Agreement template created
-                                httpStatus: 200
+                                httpStatus: 201
                                 appCode: SUCCESS
                                 data:
                                     _id: 665f1a2b3c4d5e6f7a8b9c0d
@@ -899,9 +908,8 @@ paths:
                 - in: query
                   name: expand
                   schema:
-                      type: string
-                      enum: ['true', 'false']
-                      default: 'false'
+                      type: boolean
+                      default: false
                   description: If `true`, returns versions with fully assembled signature and guarantee data.
             responses:
                 '200':
@@ -914,7 +922,9 @@ paths:
                                     - type: object
                                       properties:
                                           data:
-                                              $ref: '#/components/schemas/AgreementCollection'
+                                              oneOf:
+                                                  - $ref: '#/components/schemas/AgreementCollection'
+                                                  - $ref: '#/components/schemas/AgreementCollectionExpanded'
                             example:
                                 success: true
                                 message: OK
@@ -1044,6 +1054,16 @@ paths:
             operationId: getAgreementCollectionsByScope
             description: |
                 Returns all agreement collections belonging to the specified scope.
+                When `expand=true`, every agreement version is returned with its resolved
+                signatures, guarantees and metric configurations.
+            parameters:
+                - in: query
+                  name: expand
+                  required: false
+                  schema:
+                      type: boolean
+                      default: false
+                  description: If true, returns fully assembled agreement versions.
             responses:
                 '200':
                     description: List of agreement collections retrieved successfully
@@ -1057,7 +1077,9 @@ paths:
                                           data:
                                               type: array
                                               items:
-                                                  $ref: '#/components/schemas/AgreementCollection'
+                                                  oneOf:
+                                                      - $ref: '#/components/schemas/AgreementCollection'
+                                                      - $ref: '#/components/schemas/AgreementCollectionExpanded'
                             example:
                                 success: true
                                 message: OK
@@ -1100,7 +1122,7 @@ paths:
             requestBody:
                 $ref: '#/components/requestBodies/AgreementCollectionBody'
             responses:
-                '200':
+                '201':
                     description: Agreement collection created successfully
                     content:
                         application/json:
@@ -1113,8 +1135,8 @@ paths:
                                               $ref: '#/components/schemas/AgreementCollection'
                             example:
                                 success: true
-                                message: OK
-                                httpStatus: 200
+                                message: Agreement collection created
+                                httpStatus: 201
                                 appCode: SUCCESS
                                 data:
                                     _id: 69cbe9901d5009a04361925d
@@ -1268,7 +1290,7 @@ paths:
             requestBody:
                 $ref: '#/components/requestBodies/AgreementVersionBody'
             responses:
-                '200':
+                '201':
                     description: Agreement version created successfully
                     content:
                         application/json:
@@ -1281,8 +1303,8 @@ paths:
                                               $ref: '#/components/schemas/AgreementVersionRaw'
                             example:
                                 success: true
-                                message: OK
-                                httpStatus: 200
+                                message: Agreement version created
+                                httpStatus: 201
                                 appCode: SUCCESS
                                 data:
                                     contract:
@@ -1532,6 +1554,141 @@ paths:
     # ──────────────────────────────────────────────
     # States
     # ──────────────────────────────────────────────
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/auditableVersion/states/generate:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/scopeId'
+            - $ref: '#/components/parameters/agColName'
+        post:
+            tags:
+                - States
+            summary: Generate states for an auditable agreement version
+            operationId: generateStatesForAuditableVersion
+            description: |
+                Generates one state per signature in the auditable agreement version for
+                the requested evaluation date. Existing states for the same signature and
+                date are reused.
+            parameters:
+                - in: query
+                  name: isAsync
+                  required: false
+                  schema:
+                      type: boolean
+                      default: false
+                  description: If true, states are created and metric computation continues asynchronously.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - date
+                            properties:
+                                date:
+                                    type: string
+                                    format: date-time
+                                    description: Date at which every signature guarantee is evaluated.
+                        example:
+                            date: '2026-05-21T00:00:00.000Z'
+            responses:
+                '200':
+                    description: States created or generated successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/State'
+                            example:
+                                success: true
+                                message: States created and generated
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - _id: 665e5f6a7b8c9d0e1f2a3b4c
+                                      signatureId: 69cbea571d5009a043619276
+                                      date: '2026-05-21T00:00:00.000Z'
+                                      consolidated: true
+                                      status: COMPLETED
+                                      compliant: true
+                                      indeterminate: false
+                                error: null
+                '207':
+                    description: Generation completed with one or more indeterminate states
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/State'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/ExternalServiceError'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/auditableVersion/states:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/scopeId'
+            - $ref: '#/components/parameters/agColName'
+        get:
+            tags:
+                - States
+            summary: Get states for an auditable agreement version
+            operationId: getStatesForAuditableVersion
+            description: |
+                Returns the fully assembled auditable agreement version and groups every
+                stored state under the signature that produced it.
+            responses:
+                '200':
+                    description: States retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AuditableVersionStates'
+                            example:
+                                success: true
+                                message: States retrieved
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    organizationName: universidad-sevilla
+                                    scopeId: 69cbdee759092b362376ca17
+                                    agreementCollectionName: tpa-US-PSG2-2526
+                                    agreementVersion:
+                                        versionNumber: 1
+                                        contract:
+                                            agreementTemplateName: tpa-US-PSG2-2526
+                                            signatures:
+                                                - signatureId: 69cbea571d5009a043619276
+                                                  states:
+                                                      - _id: 665e5f6a7b8c9d0e1f2a3b4c
+                                                        status: COMPLETED
+                                                        compliant: true
+                                error: null
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
     /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/auditableVersion/states/consolidated/generate:
         post:
             tags:
@@ -1539,8 +1696,10 @@ paths:
             summary: Generate consolidated states for auditable agreement version
             operationId: generateConsolidatedStatesForAuditableVersion
             description: |
-                Generates states for every exact consolidation date within the inclusive
-                `startDate` and `endDate` range, using each signature guarantee window.
+                Generates states either for one exact consolidation `date` or for every
+                consolidation date within the inclusive `startDate` and `endDate` range,
+                using each signature guarantee window. When `date` is used, only guarantees
+                with a consolidation point at that exact date produce a state.
                 Existing states for the same signature and date are reused.
             parameters:
                 - $ref: '#/components/parameters/orgName'
@@ -1559,10 +1718,17 @@ paths:
                     application/json:
                         schema:
                             type: object
-                            required:
-                                - startDate
-                                - endDate
+                            oneOf:
+                                - required:
+                                      - date
+                                - required:
+                                      - startDate
+                                      - endDate
                             properties:
+                                date:
+                                    type: string
+                                    format: date-time
+                                    description: Exact consolidation date. Cannot be combined with `startDate` or `endDate`.
                                 startDate:
                                     type: string
                                     format: date-time
@@ -1571,12 +1737,22 @@ paths:
                                     type: string
                                     format: date-time
                                     description: Inclusive upper bound for consolidation dates. Must be after or equal to `startDate`.
-                        example:
-                            startDate: '2026-05-01T00:00:00.000Z'
-                            endDate: '2026-05-03T23:59:59.999Z'
+                        examples:
+                            exactDate:
+                                summary: Generate states at one consolidation date
+                                value:
+                                    date: '2026-05-21T00:00:00.000Z'
+                            dateRange:
+                                summary: Generate states within a date range
+                                value:
+                                    startDate: '2026-05-01T00:00:00.000Z'
+                                    endDate: '2026-05-03T23:59:59.999Z'
             responses:
                 '200':
-                    description: Consolidated states generated successfully
+                    description: |
+                        Consolidated states generated successfully. If no guarantee has a
+                        consolidation point in the requested date or range, `data` is an empty
+                        array and the response message explains that no points were found.
                     content:
                         application/json:
                             schema:
@@ -1708,6 +1884,9 @@ paths:
                 - Fetchers
             summary: Generate fetch results for auditable agreement version
             operationId: fetchAuditableVersionFetchResults
+            description: |
+                Generates the fetch results required by every metric in the auditable
+                agreement version. Duplicate fetch configurations are processed only once.
             parameters:
                 - $ref: '#/components/parameters/orgName'
                 - $ref: '#/components/parameters/scopeId'
@@ -1718,6 +1897,13 @@ paths:
                   schema:
                       type: boolean
                   description: If true, returns full fetch results. By default, only fetch result ids are returned.
+                - in: query
+                  name: isAsync
+                  required: false
+                  schema:
+                      type: boolean
+                      default: false
+                  description: If true, fetch results are created and processed asynchronously.
             requestBody:
                 required: true
                 content:
@@ -1733,7 +1919,7 @@ paths:
                         example:
                             date: '2026-05-19T00:00:00.000Z'
             responses:
-                '200':
+                '201':
                     description: Fetch results generated successfully
                     content:
                         application/json:
@@ -1749,7 +1935,7 @@ paths:
                             example:
                                 success: true
                                 message: Fetch results generated
-                                httpStatus: 200
+                                httpStatus: 201
                                 appCode: SUCCESS
                                 data:
                                     - 665e5f6a7b8c9d0e1f2a3b4c
@@ -1777,6 +1963,104 @@ paths:
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/ExternalServiceError'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/auditableVersion/fetchers/consolidated:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/scopeId'
+            - $ref: '#/components/parameters/agColName'
+        get:
+            tags:
+                - Fetchers
+            summary: Get planned consolidation fetches
+            operationId: getConsolidationFetchesForAuditableVersion
+            description: |
+                Returns each unique fetcher configuration required by the auditable
+                agreement version together with its consolidation dates.
+            responses:
+                '200':
+                    description: Consolidation fetches retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/ConsolidationFetch'
+                            example:
+                                success: true
+                                message: Consolidation fetches retrieved
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                      fetcherConfig:
+                                          workspaceId: YOUR_ZENHUB_WORKSPACE_ID
+                                      consolidationDates:
+                                          - '2026-05-21T00:00:00.000Z'
+                                          - '2026-05-28T00:00:00.000Z'
+                                error: null
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/auditableVersion/tasks/fetchers/consolidated:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/scopeId'
+            - $ref: '#/components/parameters/agColName'
+        post:
+            tags:
+                - Fetchers
+            summary: Create recurring consolidation fetch tasks
+            operationId: createConsolidationFetchTasksForAuditableVersion
+            description: |
+                Creates one recurring Director task for each unique fetcher configuration
+                used by the auditable agreement version.
+            parameters:
+                - in: query
+                  name: enabled
+                  required: false
+                  schema:
+                      type: boolean
+                      default: false
+                  description: Whether the newly created recurring tasks are enabled immediately.
+            responses:
+                '200':
+                    description: Consolidation fetch tasks created successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/RecurringFetchTask'
+                            example:
+                                success: true
+                                message: Consolidation fetch tasks created
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - _id: 665e5f6a7b8c9d0e1f2a3b5a
+                                      script: fetchFetcher
+                                      type: RECURRING
+                                      enabled: false
+                                error: null
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -4358,6 +4642,17 @@ components:
                     type: string
                     format: date-time
 
+        AgreementCollectionExpanded:
+            allOf:
+                - $ref: '#/components/schemas/AgreementCollection'
+                - type: object
+                  description: Agreement collection with fully assembled agreement versions
+                  properties:
+                      agreementVersions:
+                          type: array
+                          items:
+                              $ref: '#/components/schemas/AgreementVersionExpanded'
+
         AgreementCollectionInput:
             type: object
             description: Payload for creating an agreement collection
@@ -4578,6 +4873,111 @@ components:
                                     type: object
                                     additionalProperties: true
                                     example: {}
+
+        AuditableVersionStates:
+            type: object
+            description: Auditable agreement version with the stored states grouped by signature
+            required:
+                - organizationName
+                - scopeId
+                - agreementCollectionName
+                - agreementVersion
+            properties:
+                organizationName:
+                    type: string
+                    example: universidad-sevilla
+                scopeId:
+                    type: string
+                    example: 69cbdee759092b362376ca17
+                agreementCollectionName:
+                    type: string
+                    example: tpa-US-PSG2-2526
+                agreementVersion:
+                    $ref: '#/components/schemas/AgreementVersionWithStates'
+
+        AgreementVersionWithStates:
+            allOf:
+                - $ref: '#/components/schemas/AgreementVersionExpanded'
+                - type: object
+                  properties:
+                      contract:
+                          type: object
+                          properties:
+                              signatures:
+                                  type: array
+                                  items:
+                                      $ref: '#/components/schemas/ExpandedSignatureWithStates'
+
+        ExpandedSignatureWithStates:
+            allOf:
+                - $ref: '#/components/schemas/ExpandedSignature'
+                - type: object
+                  required:
+                      - states
+                  properties:
+                      states:
+                          type: array
+                          description: States generated for this signature
+                          items:
+                              $ref: '#/components/schemas/State'
+
+        ConsolidationFetch:
+            type: object
+            description: Unique fetcher configuration and its planned consolidation dates
+            required:
+                - fetcherId
+                - fetcherConfig
+                - consolidationDates
+            properties:
+                fetcherId:
+                    type: string
+                    example: FT_GQL_ZENHUB_ISSUES
+                fetcherConfig:
+                    type: object
+                    additionalProperties: true
+                    example:
+                        workspaceId: YOUR_ZENHUB_WORKSPACE_ID
+                consolidationDates:
+                    type: array
+                    items:
+                        type: string
+                        format: date-time
+                    example:
+                        - '2026-05-21T00:00:00.000Z'
+                        - '2026-05-28T00:00:00.000Z'
+
+        RecurringFetchTask:
+            type: object
+            description: Recurring fetch task returned by the Director service
+            additionalProperties: true
+            properties:
+                _id:
+                    type: string
+                    example: 665e5f6a7b8c9d0e1f2a3b5a
+                script:
+                    type: string
+                    example: fetchFetcher
+                inputArgs:
+                    type: object
+                    additionalProperties: true
+                type:
+                    type: string
+                    example: RECURRING
+                enabled:
+                    type: boolean
+                    example: false
+                startDate:
+                    type: string
+                    format: date-time
+                endDate:
+                    type: string
+                    format: date-time
+                anchorDate:
+                    type: string
+                    format: date-time
+                interval:
+                    type: integer
+                    description: Recurrence interval in milliseconds
 
         # ── AgreementVersion ──────────────────────
         AgreementVersionRaw:

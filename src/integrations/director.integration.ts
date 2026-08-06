@@ -1,6 +1,6 @@
 import { bootEnv } from '../config/bootConfig.js';
 import { ExternalServiceError } from '../utils/customErrors.js';
-import { serviceHeaders } from '../utils/serviceAuth.js';
+import { getServiceHeaders } from '../utils/serviceAuthentication.js';
 
 const DIRECTOR_SERVICE_URL = bootEnv.DIRECTOR_SERVICE_URL;
 
@@ -25,7 +25,7 @@ export const createRecurringFetchTask = async (
 ) => {
     const response = await fetch(`${DIRECTOR_SERVICE_URL}/api/v1/tasks`, {
         method: 'POST',
-        headers: serviceHeaders,
+        headers: getServiceHeaders(),
         body: JSON.stringify({
             script: 'fetchFetcher',
             inputArgs,

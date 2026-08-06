@@ -1,6 +1,6 @@
 import { bootEnv } from '../config/bootConfig.js';
 import { ExternalServiceError } from '../utils/customErrors.js';
-import { serviceHeaders } from '../utils/serviceAuth.js';
+import { getServiceHeaders } from '../utils/serviceAuthentication.js';
 
 const FETCHER_SERVICE_URL = bootEnv.FETCHER_SERVICE_URL;
 
@@ -18,7 +18,7 @@ export const checkHealth = async (): Promise<boolean> => {
 export const validateFetcherExists = async (fetcherId: string): Promise<string | null> => {
     const response = await fetch(`${FETCHER_SERVICE_URL}/api/v1/fetchers/${fetcherId}`, {
         method: 'GET',
-        headers: serviceHeaders,
+        headers: getServiceHeaders(),
     });
     const result = await response.json();
     if (response.status >= 500) {
@@ -40,7 +40,7 @@ export const generateFetchResult = async (
         `${FETCHER_SERVICE_URL}/api/v1/fetchers/${fetcherId}/fetchResults/generate?isAsync=${isAsync}`,
         {
             method: 'POST',
-            headers: serviceHeaders,
+            headers: getServiceHeaders(),
             body: JSON.stringify({ date, fetcherConfig }),
         },
     );

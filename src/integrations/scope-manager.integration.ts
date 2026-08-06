@@ -1,5 +1,5 @@
 import { bootEnv } from '../config/bootConfig.js';
-import { serviceHeaders } from '../utils/serviceAuth.js';
+import { getServiceHeaders } from '../utils/serviceAuthentication.js';
 
 const SCOPE_MANAGER_SERVICE_URL = bootEnv.SCOPE_MANAGER_SERVICE_URL;
 
@@ -8,7 +8,7 @@ export const getScopeByOrgAndScopeId = async (orgName: string, scopeId: string) 
         `${SCOPE_MANAGER_SERVICE_URL}/api/v1/organizations/${orgName}/scopes/${scopeId}`,
         {
             method: 'GET',
-            headers: serviceHeaders,
+            headers: getServiceHeaders(),
         },
     );
 
@@ -27,7 +27,7 @@ export const getScopeByOrgAndScopeId = async (orgName: string, scopeId: string) 
 export const getOrganizationByName = async (orgName: string) => {
     const response = await fetch(`${SCOPE_MANAGER_SERVICE_URL}/api/v1/organizations/${orgName}`, {
         method: 'GET',
-        headers: serviceHeaders,
+        headers: getServiceHeaders(),
     });
 
     const result = await response.json();
@@ -45,7 +45,7 @@ export const getScopeIdsByOrganization = async (orgName: string) => {
         `${SCOPE_MANAGER_SERVICE_URL}/api/v1/organizations/${orgName}/scopes?flat=true`,
         {
             method: 'GET',
-            headers: serviceHeaders,
+            headers: getServiceHeaders(),
         },
     );
 

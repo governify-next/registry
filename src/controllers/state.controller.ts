@@ -37,16 +37,26 @@ export const generateConsolidatedStatesForAuditableVersion = async (
     try {
         const isAsync = req.query.isAsync === 'true';
         const { orgName, scopeId, agColName } = req.params;
-        const { startDate, endDate } = req.body;
+        const { date, startDate, endDate } = req.body;
+        const requestedStartDate = new Date(date ?? startDate);
+        const requestedEndDate = new Date(date ?? endDate);
 
         const states = await stateService.generateConsolidatedStatesForAuditableVersion(
             isAsync,
             orgName,
             scopeId,
             agColName,
-            new Date(startDate),
-            new Date(endDate),
+            requestedStartDate,
+            requestedEndDate,
         );
+
+        if (states.length === 0) {
+            return sendSuccess(res, {
+                data: states,
+                message: 'No guarantees have consolidation points in the requested date or range',
+                httpStatus: 200,
+            });
+        }
 
         const hasIndeterminateStates = !isAsync && states.some((state) => state.indeterminate);
 

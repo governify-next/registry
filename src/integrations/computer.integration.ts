@@ -2,7 +2,7 @@ import { bootEnv } from '../config/bootConfig.js';
 import { IWindow } from '../types/window.types.js';
 import { IMetricConfig } from '../types/metric.types.js';
 import { ExternalServiceError } from '../utils/customErrors.js';
-import { serviceHeaders } from '../utils/serviceAuth.js';
+import { getServiceHeaders } from '../utils/serviceAuthentication.js';
 
 const COMPUTER_SERVICE_URL = bootEnv.COMPUTER_SERVICE_URL;
 
@@ -21,7 +21,7 @@ export const checkHealth = async (): Promise<boolean> => {
 export const validateEventExists = async (eventId: string): Promise<string | null> => {
     const response = await fetch(`${COMPUTER_SERVICE_URL}/api/v1/events/${eventId}`, {
         method: 'GET',
-        headers: serviceHeaders,
+        headers: getServiceHeaders(),
     });
     const result = await response.json();
 
@@ -43,7 +43,7 @@ export const validateEventConfig = async (
 ): Promise<string | null> => {
     const response = await fetch(`${COMPUTER_SERVICE_URL}/api/v1/events/${eventId}/validate`, {
         method: 'POST',
-        headers: serviceHeaders,
+        headers: getServiceHeaders(),
         body: JSON.stringify({ fetcherConfigs, processConfig }),
     });
 
@@ -67,7 +67,7 @@ export const validateAggregator = async (
         `${COMPUTER_SERVICE_URL}/api/v1/aggregators/${aggregatorType}/validate`,
         {
             method: 'POST',
-            headers: serviceHeaders,
+            headers: getServiceHeaders(),
             body: JSON.stringify({ aggregatorConfig }),
         },
     );
@@ -89,7 +89,7 @@ export const computeMetric = async (
 ) => {
     const response = await fetch(`${COMPUTER_SERVICE_URL}/api/v1/metric/compute`, {
         method: 'POST',
-        headers: serviceHeaders,
+        headers: getServiceHeaders(),
         body: JSON.stringify({ event: { ...event, date, window }, aggregation }),
     });
     const result = await response.json();

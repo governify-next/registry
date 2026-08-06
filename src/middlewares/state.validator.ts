@@ -8,19 +8,46 @@ const collectValidationErrors = (req: Request, res: Response, next: NextFunction
     next();
 };
 
+const dateValidation = body('date')
+    .optional()
+    .isISO8601()
+    .withMessage('date must be a valid ISO 8601 date');
+
 const startDateValidation = body('startDate')
-    .exists({ checkNull: true })
-    .withMessage('startDate is required')
+    .optional()
     .isISO8601()
     .withMessage('startDate must be a valid ISO 8601 date');
 
 const endDateValidation = body('endDate')
-    .exists({ checkNull: true })
-    .withMessage('endDate is required')
+    .optional()
     .isISO8601()
     .withMessage('endDate must be a valid ISO 8601 date');
 
+const dateOrRangeValidation = body().custom((value: unknown) => {
+    const payload =
+        value !== null && typeof value === 'object'
+            ? (value as Record<string, unknown>)
+            : ({} as Record<string, unknown>);
+    const hasDate = payload.date !== undefined && payload.date !== null;
+    const hasStartDate = payload.startDate !== undefined && payload.startDate !== null;
+    const hasEndDate = payload.endDate !== undefined && payload.endDate !== null;
+
+    if (hasDate && (hasStartDate || hasEndDate)) {
+        throw new Error('date cannot be combined with startDate or endDate');
+    }
+
+    if (!hasDate && (!hasStartDate || !hasEndDate)) {
+        throw new Error('Either date or both startDate and endDate are required');
+    }
+
+    return true;
+});
+
 const endDateAfterOrEqualStartDate = (req: Request, res: Response, next: NextFunction) => {
+    if (req.body.date !== undefined) {
+        return next();
+    }
+
     const startDate = new Date(req.body.startDate);
     const endDate = new Date(req.body.endDate);
 
@@ -32,8 +59,10 @@ const endDateAfterOrEqualStartDate = (req: Request, res: Response, next: NextFun
 };
 
 export const validateGenerateConsolidatedStatesBody = [
+    dateValidation,
     startDateValidation,
     endDateValidation,
+    dateOrRangeValidation,
     collectValidationErrors,
     endDateAfterOrEqualStartDate,
 ];
