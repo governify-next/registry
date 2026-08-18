@@ -18,7 +18,7 @@ export interface IAgreementCollection extends Document {
     name: string;
     displayName: string;
     scopeId: Types.ObjectId;
-    auditableVersionNumber: number;
+    auditableVersionNumber: number | null;
     fields: Record<string, unknown>;
     permissions: Record<string, unknown>;
     agreementVersions: IAgreementVersion[];

@@ -3,6 +3,8 @@ import { IWindow } from '../types/window.types.js';
 import { IMetricConfig } from '../types/metric.types.js';
 import { ExternalServiceError } from '../utils/customErrors.js';
 import { getServiceHeaders } from '../utils/serviceAuthentication.js';
+import { ITemporalContext } from '../types/temporal.types.js';
+import { IMetric } from '../types/metric.types.js';
 
 const COMPUTER_SERVICE_URL = bootEnv.COMPUTER_SERVICE_URL;
 
@@ -82,7 +84,7 @@ export const validateAggregator = async (
 };
 
 export const computeMetric = async (
-    date: Date,
+    temporalContext: ITemporalContext,
     window: IWindow,
     event: IMetricConfig['event'],
     aggregation: IMetricConfig['aggregation'],
@@ -90,7 +92,7 @@ export const computeMetric = async (
     const response = await fetch(`${COMPUTER_SERVICE_URL}/api/v1/metric/compute`, {
         method: 'POST',
         headers: getServiceHeaders(),
-        body: JSON.stringify({ event: { ...event, date, window }, aggregation }),
+        body: JSON.stringify({ temporalContext, event: { ...event, window }, aggregation }),
     });
     const result = await response.json();
 
@@ -101,5 +103,5 @@ export const computeMetric = async (
         );
     }
 
-    return result.data;
+    return result.data as Omit<IMetric, 'metricName' | 'errorMessage'>;
 };

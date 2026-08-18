@@ -2,38 +2,38 @@ import { Router } from 'express';
 import * as fetcherController from '../controllers/fetcher.controller.js';
 import { existingScope } from '../middlewares/scope.validator.js';
 import { existingAgreementCollection } from '../middlewares/agreementCollection.validator.js';
-import { existingAuditableVersion } from '../middlewares/agreementVersion.validator.js';
+import { existingSelectedAgreementVersion } from '../middlewares/agreementVersion.validator.js';
 import { validateFetcherHealth } from '../middlewares/fetcher.validator.js';
-import { validateFetchAuditableVersionBody } from '../middlewares/fetch.validator.js';
+import { validateFetchAgreementVersionBody } from '../middlewares/fetch.validator.js';
 import { validateDirectorHealth } from '../middlewares/director.validator.js';
 
 export const fetcherRoutes = Router();
 
 // This is not used for now
 fetcherRoutes.post(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/auditableVersion/fetchers/fetch',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/:agreementVersion/fetchers/fetch',
     validateFetcherHealth,
     existingScope,
     existingAgreementCollection,
-    existingAuditableVersion,
-    validateFetchAuditableVersionBody,
-    fetcherController.fetchAuditableVersionFetchResults,
+    existingSelectedAgreementVersion,
+    validateFetchAgreementVersionBody,
+    fetcherController.fetchAgreementVersionFetchResults,
 );
 
 // This is not used for now
 fetcherRoutes.get(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/auditableVersion/fetchers/consolidated',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/:agreementVersion/fetchers/consolidated',
     existingScope,
     existingAgreementCollection,
-    existingAuditableVersion,
-    fetcherController.getConsolidationFetchesForAuditableVersion,
+    existingSelectedAgreementVersion,
+    fetcherController.getConsolidationFetchesForAgreementVersion,
 );
 
 fetcherRoutes.post(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/auditableVersion/tasks/fetchers/consolidated',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/:agreementVersion/tasks/fetchers/consolidated',
     validateDirectorHealth,
     existingScope,
     existingAgreementCollection,
-    existingAuditableVersion,
-    fetcherController.createConsolidationFetchTasksForAuditableVersion,
+    existingSelectedAgreementVersion,
+    fetcherController.createConsolidationFetchTasksForAgreementVersion,
 );

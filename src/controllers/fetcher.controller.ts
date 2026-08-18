@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { sendSuccess } from '../utils/standardResponse.js';
 import * as fetcherService from '../services/fetcher.service.js';
 
-export const fetchAuditableVersionFetchResults = async (
+export const fetchAgreementVersionFetchResults = async (
     req: Request,
     res: Response,
     next: NextFunction,
@@ -10,14 +10,15 @@ export const fetchAuditableVersionFetchResults = async (
     try {
         const expand = req.query.expand === 'true';
         const isAsync = req.query.isAsync === 'true';
-        const { orgName, scopeId, agColName } = req.params;
+        const { orgName, scopeId, agColName, agreementVersion } = req.params;
         const { date } = req.body;
 
         const { fetchResults, hasFailedFetchResults } =
-            await fetcherService.fetchAuditableVersionFetchResults(
+            await fetcherService.fetchAgreementVersionFetchResults(
                 orgName,
                 scopeId,
                 agColName,
+                agreementVersion,
                 new Date(date),
                 expand,
                 isAsync,
@@ -35,18 +36,19 @@ export const fetchAuditableVersionFetchResults = async (
     }
 };
 
-export const getConsolidationFetchesForAuditableVersion = async (
+export const getConsolidationFetchesForAgreementVersion = async (
     req: Request,
     res: Response,
     next: NextFunction,
 ) => {
     try {
-        const { orgName, scopeId, agColName } = req.params;
+        const { orgName, scopeId, agColName, agreementVersion } = req.params;
 
-        const fetches = await fetcherService.getConsolidationFetchesForAuditableVersion(
+        const fetches = await fetcherService.getConsolidationFetchesForAgreementVersion(
             orgName,
             scopeId,
             agColName,
+            agreementVersion,
         );
 
         return sendSuccess(res, {
@@ -58,19 +60,20 @@ export const getConsolidationFetchesForAuditableVersion = async (
     }
 };
 
-export const createConsolidationFetchTasksForAuditableVersion = async (
+export const createConsolidationFetchTasksForAgreementVersion = async (
     req: Request,
     res: Response,
     next: NextFunction,
 ) => {
     try {
-        const { orgName, elementName, agColName } = req.params;
-        const enabled = req.query.enabled === 'true';
+        const { orgName, scopeId, agColName, agreementVersion } = req.params;
+        const enabled = req.query.enabled === undefined || req.query.enabled === 'true';
 
-        const fetchTasks = await fetcherService.createConsolidationFetchTasksForAuditableVersion(
+        const fetchTasks = await fetcherService.createConsolidationFetchTasksForAgreementVersion(
             orgName,
-            elementName,
+            scopeId,
             agColName,
+            agreementVersion,
             enabled,
         );
         return sendSuccess(res, {

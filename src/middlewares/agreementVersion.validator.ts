@@ -2,6 +2,7 @@ import { body, checkExact, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
 import { ExternalServiceError, ValidationError, NotFoundError } from '../utils/customErrors.js';
 import * as agreementCollectionService from '../services/agreementCollection.service.js';
+import * as agreementVersionService from '../services/agreementVersion.service.js';
 import {
     existingAgreementTemplate,
     existingGuaranteeTemplates,
@@ -161,6 +162,27 @@ export const existingAuditableVersion = async (req: Request, res: Response, next
 
         if (collection!.auditableVersionNumber === null)
             return next(new NotFoundError('No auditable version in this collection'));
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const existingSelectedAgreementVersion = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
+            req.params.orgName,
+            req.params.scopeId,
+            req.params.agColName,
+        );
+        agreementVersionService.resolveAgreementVersionSelector(
+            collection!,
+            req.params.agreementVersion,
+        );
         next();
     } catch (err) {
         next(err);

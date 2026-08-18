@@ -1,4 +1,4 @@
-import { body, validationResult } from 'express-validator';
+import { body, query, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError } from '../utils/customErrors.js';
 
@@ -12,6 +12,51 @@ const dateValidation = body('date')
     .optional()
     .isISO8601()
     .withMessage('date must be a valid ISO 8601 date');
+
+const requiredDateValidation = body('date')
+    .exists({ checkNull: true })
+    .withMessage('date is required')
+    .isISO8601()
+    .withMessage('date must be a valid ISO 8601 date');
+
+const temporalModeValidation = body('temporalMode')
+    .exists({ checkNull: true })
+    .withMessage('temporalMode is required')
+    .bail()
+    .isIn(['CAPTURE', 'REPLAY'])
+    .withMessage('temporalMode must be CAPTURE or REPLAY');
+
+const existingStatePolicyValidation = body('ifExists')
+    .exists({ checkNull: true })
+    .withMessage('ifExists is required')
+    .bail()
+    .isIn(['KEEP', 'REPLACE'])
+    .withMessage('ifExists must be KEEP or REPLACE');
+
+const signatureIdsValidation = [
+    body('signatureIds')
+        .optional()
+        .isArray({ min: 1 })
+        .withMessage('signatureIds must be a non-empty array'),
+    body('signatureIds.*')
+        .isMongoId()
+        .withMessage('Every signatureIds entry must be a valid MongoDB ObjectId'),
+    body('signatureIds')
+        .optional()
+        .custom((signatureIds: unknown) => {
+            if (!Array.isArray(signatureIds)) return true;
+            const normalizedIds = signatureIds.map((id) => String(id).toLowerCase());
+            if (new Set(normalizedIds).size !== normalizedIds.length) {
+                throw new Error('signatureIds must not contain duplicates');
+            }
+            return true;
+        }),
+];
+
+const enabledQueryValidation = query('enabled')
+    .optional()
+    .isIn(['true', 'false'])
+    .withMessage('enabled must be true or false');
 
 const startDateValidation = body('startDate')
     .optional()
@@ -63,6 +108,23 @@ export const validateGenerateConsolidatedStatesBody = [
     startDateValidation,
     endDateValidation,
     dateOrRangeValidation,
+    temporalModeValidation,
+    existingStatePolicyValidation,
+    ...signatureIdsValidation,
     collectValidationErrors,
     endDateAfterOrEqualStartDate,
+];
+
+export const validateGenerateStatesBody = [
+    requiredDateValidation,
+    temporalModeValidation,
+    existingStatePolicyValidation,
+    ...signatureIdsValidation,
+    collectValidationErrors,
+];
+
+export const validateCreateConsolidationStateTasksRequest = [
+    enabledQueryValidation,
+    ...signatureIdsValidation,
+    collectValidationErrors,
 ];

@@ -23,7 +23,7 @@ tags:
     - name: AgreementVersions
       description: Agreement version management within a collection
     - name: States
-      description: State generation and retrieval for auditable agreement versions
+      description: State generation for selected agreement versions and retrieval for the auditable version
     - name: Fetchers
       description: Fetch result orchestration from Registry
 
@@ -1554,20 +1554,125 @@ paths:
     # ──────────────────────────────────────────────
     # States
     # ──────────────────────────────────────────────
-    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/auditableVersion/states/generate:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{agreementVersion}/states:
         parameters:
             - $ref: '#/components/parameters/orgName'
             - $ref: '#/components/parameters/scopeId'
             - $ref: '#/components/parameters/agColName'
+            - $ref: '#/components/parameters/agreementVersionSelector'
+        get:
+            tags:
+                - States
+            summary: Get states for a selected agreement version
+            operationId: getStatesForAgreementVersion
+            description: |
+                Returns the fully assembled selected agreement version and groups every stored
+                state under the signature that produced it.
+            responses:
+                '200':
+                    description: States retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementVersionStates'
+                            example:
+                                success: true
+                                message: States retrieved
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    organizationName: universidad-sevilla
+                                    scopeId: 69cbdee759092b362376ca17
+                                    agreementCollectionName: tpa-US-PSG2-2526
+                                    agreementVersion:
+                                        versionNumber: 1
+                                        contract:
+                                            agreementTemplateName: tpa-US-PSG2-2526
+                                            signatures:
+                                                - signatureId: 69cbea571d5009a043619276
+                                                  states:
+                                                      - _id: 665e5f6a7b8c9d0e1f2a3b4c
+                                                        status: COMPLETED
+                                                        compliant: true
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{agreementVersion}/states/generate:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/scopeId'
+            - $ref: '#/components/parameters/agColName'
+            - $ref: '#/components/parameters/agreementVersionSelector'
         post:
             tags:
                 - States
-            summary: Generate states for an auditable agreement version
-            operationId: generateStatesForAuditableVersion
+            summary: Generate states for a selected agreement version
+            operationId: generateStatesForAgreementVersion
             description: |
-                Generates one state per signature in the auditable agreement version for
-                the requested evaluation date. Existing states for the same signature and
-                date are reused.
+                Generates one state per selected signature in the agreement version selected by
+                the path parameter. A numeric selector is one-based: `1` selects
+                `agreementVersions[0]`, `2` selects `agreementVersions[1]`, and so on.
+                `auditableVersion` resolves the collection's current auditable version.
+                The request `date` is propagated as `temporalContext.effectiveAt` to Computer and
+                Fetcher for every metric.
+
+                **Temporal acquisition**
+
+                Stored fetch results are identified by the exact effective date and fetcher
+                configuration. An existing result is reused in either mode. On a cache miss, or
+                when an existing result is `FAILED`, acquisition behaves as follows:
+
+                | `temporalMode` | `SNAPSHOT` fetcher | `HISTORICAL` fetcher |
+                | --- | --- | --- |
+                | `CAPTURE` | Calls the external source and stores the observation for the exact requested date. | Calls the external source for the requested date and stores the result. |
+                | `REPLAY` | Never calls the external source. Produces `UNAVAILABLE` with reason `PAST_SNAPSHOT_NOT_CAPTURED` when no reusable result exists. | Calls the historical source for the requested date and stores the result. |
+
+                `CAPTURE` is intended to run at the exact instant represented by `date` when a
+                snapshot source is involved. Registry propagates the date but does not compare it
+                with the current wall-clock time.
+
+                **Computer result to stored state**
+
+                Each Computer call resolves a single metric. Registry stores the returned metric
+                status and then evaluates the guarantee using all its metrics:
+
+                | Computer outcome | Stored metric | Effect on the state |
+                | --- | --- | --- |
+                | HTTP success with `status: COMPUTED` | `COMPUTED`, with `value` and evidences | The metric can be used in the numeric expression. |
+                | HTTP success with `status: UNAVAILABLE` | `UNAVAILABLE`, `value: null` | If no metric failed, state is `COMPLETED` but `indeterminate: true`. |
+                | HTTP success with `status: FAILED` | `FAILED`, `value: null` | State is `FAILED` and `indeterminate: true`. |
+                | Computer cannot be reached or returns a non-success response | Registry stores that metric as `FAILED` with `errorMessage` | State is `FAILED` and `indeterminate: true`; the per-metric Computer error is represented in the state instead of being returned as the endpoint HTTP error. |
+
+                Therefore a state is `COMPLETED` and determinate only when every metric is
+                `COMPUTED` and the numeric expression produces a finite value. `UNAVAILABLE` is a
+                domain outcome, not an execution failure, so it produces a `COMPLETED` but
+                indeterminate state. A `FAILED` metric takes precedence over unavailable metrics.
+
+                **Existing-state and execution policies**
+
+                - `KEEP`: if the `(signatureId, date)` state already exists, it is returned exactly
+                  as stored and neither Computer nor Fetcher is called. Otherwise it is generated.
+                - `REPLACE`: the existing document is reinitialized and recomputed with the requested
+                  temporal mode; its replacement attempt is incremented.
+                - `isAsync=false`: waits for computation and returns HTTP `207` when at least one
+                  returned state is indeterminate; otherwise returns HTTP `200`.
+                - `isAsync=true`: returns the claimed states immediately, normally as `IN_PROGRESS`
+                  with `PENDING` metrics, using HTTP `200`. Final results are persisted in the background.
+
+                When `signatureIds` is omitted, every signature is processed. When supplied,
+                only those signatures are processed. The array must be non-empty, contain unique
+                ObjectIds, and every identifier must belong to the selected agreement version.
+                The complete selection is validated before any state generation begins.
             parameters:
                 - in: query
                   name: isAsync
@@ -1584,16 +1689,51 @@ paths:
                             type: object
                             required:
                                 - date
+                                - temporalMode
+                                - ifExists
                             properties:
                                 date:
                                     type: string
                                     format: date-time
                                     description: Date at which every signature guarantee is evaluated.
+                                temporalMode:
+                                    type: string
+                                    enum: [CAPTURE, REPLAY]
+                                    description: |
+                                        Temporal acquisition policy propagated to Computer and Fetcher.
+                                        `CAPTURE` permits external acquisition for snapshot and historical
+                                        fetchers. `REPLAY` forbids external acquisition only for snapshot
+                                        fetchers; historical fetchers may still query their source.
+                                ifExists:
+                                    type: string
+                                    enum: [KEEP, REPLACE]
+                                    description: |
+                                        Existing-state policy for the `(signatureId, date)` key. `KEEP`
+                                        returns an existing state without recomputation. `REPLACE`
+                                        reinitializes and recomputes the same document.
+                                signatureIds:
+                                    type: array
+                                    minItems: 1
+                                    uniqueItems: true
+                                    description: Optional subset of agreement signature ObjectIds. Omit to generate every signature.
+                                    items:
+                                        type: string
+                                        pattern: '^[a-fA-F0-9]{24}$'
+                                        example: 69cbea571d5009a043619276
                         example:
                             date: '2026-05-21T00:00:00.000Z'
+                            temporalMode: REPLAY
+                            ifExists: REPLACE
+                            signatureIds:
+                                - 69cbea571d5009a043619276
+                                - 69cbea571d5009a043619277
             responses:
                 '200':
-                    description: States created or generated successfully
+                    description: |
+                        Successful response with no synchronous indeterminate states. This is also
+                        the response used by asynchronous generation, whose newly claimed states are
+                        normally returned as `IN_PROGRESS` with `PENDING` metrics. With `KEEP`, an
+                        already stored state is returned unchanged and may already be terminal.
                     content:
                         application/json:
                             schema:
@@ -1620,7 +1760,13 @@ paths:
                                       indeterminate: false
                                 error: null
                 '207':
-                    description: Generation completed with one or more indeterminate states
+                    description: |
+                        Synchronous generation completed, but at least one returned state has
+                        `indeterminate: true`. The response still has `success: true`. Typical cases
+                        are a snapshot cache miss during `REPLAY` (`status: COMPLETED` with an
+                        `UNAVAILABLE` metric), a Computer/domain failure (`status: FAILED`), or a
+                        numeric expression that did not produce a finite value. This response is not
+                        used for `isAsync=true`.
                     content:
                         application/json:
                             schema:
@@ -1632,79 +1778,99 @@ paths:
                                               type: array
                                               items:
                                                   $ref: '#/components/schemas/State'
-                '404':
-                    $ref: '#/components/responses/NotFound'
-                '422':
-                    $ref: '#/components/responses/ExternalServiceError'
-                '500':
-                    $ref: '#/components/responses/InternalError'
-
-    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/auditableVersion/states:
-        parameters:
-            - $ref: '#/components/parameters/orgName'
-            - $ref: '#/components/parameters/scopeId'
-            - $ref: '#/components/parameters/agColName'
-        get:
-            tags:
-                - States
-            summary: Get states for an auditable agreement version
-            operationId: getStatesForAuditableVersion
-            description: |
-                Returns the fully assembled auditable agreement version and groups every
-                stored state under the signature that produced it.
-            responses:
-                '200':
-                    description: States retrieved successfully
-                    content:
-                        application/json:
-                            schema:
-                                allOf:
-                                    - $ref: '#/components/schemas/SuccessResponse'
-                                    - type: object
-                                      properties:
-                                          data:
-                                              $ref: '#/components/schemas/AuditableVersionStates'
                             example:
                                 success: true
-                                message: States retrieved
-                                httpStatus: 200
+                                message: States created and generated
+                                httpStatus: 207
                                 appCode: SUCCESS
                                 data:
-                                    organizationName: universidad-sevilla
-                                    scopeId: 69cbdee759092b362376ca17
-                                    agreementCollectionName: tpa-US-PSG2-2526
-                                    agreementVersion:
-                                        versionNumber: 1
-                                        contract:
-                                            agreementTemplateName: tpa-US-PSG2-2526
-                                            signatures:
-                                                - signatureId: 69cbea571d5009a043619276
-                                                  states:
-                                                      - _id: 665e5f6a7b8c9d0e1f2a3b4c
-                                                        status: COMPLETED
-                                                        compliant: true
+                                    - _id: 665e5f6a7b8c9d0e1f2a3b4c
+                                      signatureId: 69cbea571d5009a043619276
+                                      date: '2026-05-21T00:00:00.000Z'
+                                      status: COMPLETED
+                                      numericExpressionValue: null
+                                      compliant: null
+                                      indeterminate: true
+                                      metrics:
+                                          - metricName: COUNT_DONEISSUES_MEMBER
+                                            status: UNAVAILABLE
+                                            value: null
+                                            evidences: []
+                                            errorMessage: null
+                                            metricConfig:
+                                                event:
+                                                    eventId: EV_ZENHUB_ISSUES_BY_COLUMN_FILTERED_BY_UPDATED_AT_DATE_ASSOCIATED_TO_MEMBER
+                                                    fetcherConfigs:
+                                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                          fetcherConfig:
+                                                              workspaceId: YOUR_ZENHUB_WORKSPACE_ID
+                                                          fetchResult:
+                                                              id: 665e5f6a7b8c9d0e1f2a3b4d
+                                                              status: UNAVAILABLE
+                                                              unavailableReason: PAST_SNAPSHOT_NOT_CAPTURED
+                                                    processConfig:
+                                                        columns:
+                                                            - Done
+                                                        username: johndoe
+                                                aggregation:
+                                                    aggregatorType: count
+                                                    aggregatorConfig: {}
                                 error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
                     $ref: '#/components/responses/InternalError'
 
-    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/auditableVersion/states/consolidated/generate:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{agreementVersion}/states/consolidated/generate:
         post:
             tags:
                 - States
-            summary: Generate consolidated states for auditable agreement version
-            operationId: generateConsolidatedStatesForAuditableVersion
+            summary: Generate consolidated states for a selected agreement version
+            operationId: generateConsolidatedStatesForAgreementVersion
             description: |
-                Generates states either for one exact consolidation `date` or for every
+                Selects the agreement version using a one-based number (`1` selects
+                `agreementVersions[0]`) or the literal `auditableVersion`. Generates states either
+                for one exact consolidation `date` or for every
                 consolidation date within the inclusive `startDate` and `endDate` range,
                 using each signature guarantee window. When `date` is used, only guarantees
                 with a consolidation point at that exact date produce a state.
-                Existing states for the same signature and date are reused.
+
+                Every consolidation date is propagated independently as
+                `temporalContext.effectiveAt`. The same fetch result reuse and acquisition rules
+                apply at each date:
+
+                | `temporalMode` | `SNAPSHOT` fetcher without a reusable exact result | `HISTORICAL` fetcher without a reusable exact result |
+                | --- | --- | --- |
+                | `CAPTURE` | Calls the external source and stores the result. | Calls the historical source and stores the result. |
+                | `REPLAY` | Does not call the source; returns `UNAVAILABLE / PAST_SNAPSHOT_NOT_CAPTURED`. | Calls the historical source and stores the result. |
+
+                Computer and state statuses are resolved independently for every generated state:
+
+                | Metric outcomes | State status | `indeterminate` | HTTP status when synchronous |
+                | --- | --- | --- | --- |
+                | Every metric is `COMPUTED` and the expression produces a finite value | `COMPLETED` | `false` | `200` |
+                | No metric is `FAILED`, but at least one is `UNAVAILABLE` | `COMPLETED` | `true` | `207` |
+                | At least one metric is `FAILED`, including a Computer non-success response | `FAILED` | `true` | `207` |
+                | Metrics are still being processed (`isAsync=true`) | `IN_PROGRESS` | `null` | `200` |
+
+                A batch returns `207` when any synchronously generated state is indeterminate,
+                even if the other states are determinate. Computer communication errors are caught
+                per metric and stored as `FAILED` metrics with `errorMessage`.
+
+                `KEEP` returns each existing `(signatureId, date)` state without recomputation.
+                `REPLACE` reinitializes and recomputes it. With `isAsync=true`, claimed states are
+                returned immediately with HTTP `200` and computation continues in the background.
+
+                Both `temporalMode` and `ifExists` are required in the request body.
+                Optional `signatureIds` uses the same all-or-nothing selection rules as regular
+                state generation and filters signatures before consolidation dates are calculated.
             parameters:
                 - $ref: '#/components/parameters/orgName'
                 - $ref: '#/components/parameters/scopeId'
                 - $ref: '#/components/parameters/agColName'
+                - $ref: '#/components/parameters/agreementVersionSelector'
                 - in: query
                   name: isAsync
                   required: false
@@ -1718,6 +1884,9 @@ paths:
                     application/json:
                         schema:
                             type: object
+                            required:
+                                - temporalMode
+                                - ifExists
                             oneOf:
                                 - required:
                                       - date
@@ -1737,22 +1906,54 @@ paths:
                                     type: string
                                     format: date-time
                                     description: Inclusive upper bound for consolidation dates. Must be after or equal to `startDate`.
+                                temporalMode:
+                                    type: string
+                                    enum: [CAPTURE, REPLAY]
+                                    description: |
+                                        Temporal acquisition policy used independently for every generated
+                                        consolidation date. In `REPLAY`, snapshot fetchers are cache-only,
+                                        while historical fetchers may query their source.
+                                ifExists:
+                                    type: string
+                                    enum: [KEEP, REPLACE]
+                                    description: |
+                                        Existing-state policy applied independently to every generated state.
+                                        `KEEP` skips recomputation for existing keys; `REPLACE` recomputes them.
+                                signatureIds:
+                                    type: array
+                                    minItems: 1
+                                    uniqueItems: true
+                                    description: Optional subset of agreement signature ObjectIds. Omit to process every signature.
+                                    items:
+                                        type: string
+                                        pattern: '^[a-fA-F0-9]{24}$'
+                                        example: 69cbea571d5009a043619276
                         examples:
                             exactDate:
                                 summary: Generate states at one consolidation date
                                 value:
                                     date: '2026-05-21T00:00:00.000Z'
+                                    temporalMode: REPLAY
+                                    ifExists: KEEP
+                                    signatureIds:
+                                        - 69cbea571d5009a043619276
                             dateRange:
                                 summary: Generate states within a date range
                                 value:
                                     startDate: '2026-05-01T00:00:00.000Z'
                                     endDate: '2026-05-03T23:59:59.999Z'
+                                    temporalMode: REPLAY
+                                    ifExists: REPLACE
+                                    signatureIds:
+                                        - 69cbea571d5009a043619276
+                                        - 69cbea571d5009a043619277
             responses:
                 '200':
                     description: |
-                        Consolidated states generated successfully. If no guarantee has a
-                        consolidation point in the requested date or range, `data` is an empty
-                        array and the response message explains that no points were found.
+                        All synchronously returned states are determinate, or generation is
+                        asynchronous. If no selected guarantee has a consolidation point in the
+                        requested date or range, `data` is an empty array and the response message
+                        explains that no points were found.
                     content:
                         application/json:
                             schema:
@@ -1791,8 +1992,10 @@ paths:
                                                 value: 1
                                       metrics:
                                           - metricName: COUNT_DONEISSUES_MEMBER
+                                            status: COMPUTED
                                             value: 2
                                             evidences: []
+                                            errorMessage: null
                                             metricConfig:
                                                 event:
                                                     eventId: EV_ZENHUB_ISSUES_BY_COLUMN_FILTERED_BY_UPDATED_AT_DATE_ASSOCIATED_TO_MEMBER
@@ -1800,7 +2003,10 @@ paths:
                                                         - fetcherId: FT_GQL_ZENHUB_ISSUES
                                                           fetcherConfig:
                                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
-                                                          fetchResultId: 665e5f6a7b8c9d0e1f2a3b4d
+                                                          fetchResult:
+                                                              id: 665e5f6a7b8c9d0e1f2a3b4d
+                                                              status: COMPLETED
+                                                              unavailableReason: null
                                                     processConfig:
                                                         columns:
                                                             - Done
@@ -1810,7 +2016,11 @@ paths:
                                                     aggregatorConfig: {}
                                 error: null
                 '207':
-                    description: Generation completed with one or more indeterminate states
+                    description: |
+                        Synchronous generation completed with at least one indeterminate state.
+                        This includes `COMPLETED` states containing `UNAVAILABLE` metrics and
+                        `FAILED` states containing failed metrics. The response remains successful
+                        (`success: true`) and may also contain determinate states.
                     content:
                         application/json:
                             schema:
@@ -1849,8 +2059,10 @@ paths:
                                                 value: 1
                                       metrics:
                                           - metricName: COUNT_DONEISSUES_MEMBER
+                                            status: FAILED
                                             value: null
                                             evidences: []
+                                            errorMessage: null
                                             metricConfig:
                                                 event:
                                                     eventId: EV_ZENHUB_ISSUES_BY_COLUMN_FILTERED_BY_UPDATED_AT_DATE_ASSOCIATED_TO_MEMBER
@@ -1858,6 +2070,10 @@ paths:
                                                         - fetcherId: FT_GQL_ZENHUB_ISSUES
                                                           fetcherConfig:
                                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
+                                                          fetchResult:
+                                                              id: 665e5f6a7b8c9d0e1f2a3b4f
+                                                              status: FAILED
+                                                              unavailableReason: null
                                                     processConfig:
                                                         columns:
                                                             - Done
@@ -1870,27 +2086,247 @@ paths:
                     $ref: '#/components/responses/ValidationError'
                 '404':
                     $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{agreementVersion}/tasks/states/consolidated:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/scopeId'
+            - $ref: '#/components/parameters/agColName'
+            - $ref: '#/components/parameters/agreementVersionSelector'
+        get:
+            tags:
+                - States
+            summary: Get recurring consolidated-state tasks for an agreement version
+            operationId: getConsolidationStateTasksForAgreementVersion
+            description: |
+                Returns the Director `generateConsolidatedStates` tasks associated with the selected
+                agreement version. `auditableVersion` is resolved to the current one-based numeric
+                `agreementVersion` before searching.
+
+                Registry restricts the Director search by `script`, the agreement collection ObjectId
+                (`inputArgs.agColId`), and the resolved numeric `inputArgs.agreementVersion`. Tasks for
+                fetchers, other agreement collections, or other agreement versions are not returned.
+                When there are no matching tasks, `data` is an empty array.
+            responses:
+                '200':
+                    description: Consolidation state tasks retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/RecurringStateTask'
+                            example:
+                                success: true
+                                message: Consolidation state tasks retrieved
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - _id: 665e5f6a7b8c9d0e1f2a3b5b
+                                      script: generateConsolidatedStates
+                                      inputArgs:
+                                          orgName: universidad-sevilla
+                                          scopeId: 665e5f6a7b8c9d0e1f2a3b41
+                                          agColName: tpa-US-PSG2-2526
+                                          orgId: 665e5f6a7b8c9d0e1f2a3b40
+                                          agColId: 665e5f6a7b8c9d0e1f2a3b42
+                                          agreementVersion: 2
+                                          signatureId: 69cbea571d5009a043619276
+                                      type: RECURRING
+                                      enabled: true
+                                      startDate: '2026-05-01T00:00:00.000Z'
+                                      endDate: '2026-09-01T00:00:00.000Z'
+                                      anchorDate: '2026-05-08T00:00:00.000Z'
+                                      interval: 604800000
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
                 '422':
                     $ref: '#/components/responses/ExternalServiceError'
                 '500':
                     $ref: '#/components/responses/InternalError'
+        post:
+            tags:
+                - States
+            summary: Create recurring consolidated-state tasks per signature
+            operationId: createConsolidationStateTasksForAgreementVersion
+            description: |
+                Creates one recurring Director `generateConsolidatedStates` task for every selected
+                signature in the agreement version. When `signatureIds` is omitted, every signature
+                is selected. When supplied, the non-empty selection is validated completely before
+                any Director task is created.
 
+                A request using `auditableVersion` is resolved when tasks are created. Each task
+                stores the resulting one-based numeric `agreementVersion`, so it remains associated
+                with that selected entry instead of following later auditable-version changes.
+                If agreement version entries are deleted or reordered, their tasks must be removed
+                or recreated because the endpoint selector is positional.
+
+                Each signature produces a separate task because its guarantee owns its window:
+
+                - `interval` is the signature window period converted to milliseconds.
+                - `anchorDate` is the first consolidation instant, calculated as the window
+                  `anchorDate + period`.
+                - `startDate` and `endDate` are taken from agreement validity; an earlier
+                  `earlyTermination` becomes the task end.
+                - At execution time, Director sends the exact scheduled instant to Registry with
+                  `temporalMode: CAPTURE`, `ifExists: KEEP`, and only that task's `signatureId`.
+
+                Task creation requests are sent in parallel. If Director rejects one of them,
+                Registry returns `422`; tasks already accepted by Director are not rolled back.
+                Director deduplicates equivalent task definitions. Repeating the same request
+                returns the existing tasks without scheduling additional executions.
+            parameters:
+                - in: query
+                  name: enabled
+                  required: false
+                  schema:
+                      type: boolean
+                      default: true
+                  description: Whether the newly created recurring tasks are enabled immediately.
+            requestBody:
+                required: false
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                signatureIds:
+                                    type: array
+                                    minItems: 1
+                                    uniqueItems: true
+                                    description: Signatures for which tasks are created. Omit to use all signatures.
+                                    items:
+                                        type: string
+                                        pattern: '^[a-fA-F0-9]{24}$'
+                        examples:
+                            allSignatures:
+                                summary: Create enabled tasks for every signature
+                                value: {}
+                            selectedSignatures:
+                                summary: Create tasks for selected signatures
+                                value:
+                                    signatureIds:
+                                        - 69cbea571d5009a043619276
+                                        - 69cbea571d5009a043619277
+            responses:
+                '201':
+                    description: Consolidation state tasks created successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/RecurringStateTask'
+                            example:
+                                success: true
+                                message: Consolidation state tasks created
+                                httpStatus: 201
+                                appCode: SUCCESS
+                                data:
+                                    - _id: 665e5f6a7b8c9d0e1f2a3b5b
+                                      script: generateConsolidatedStates
+                                      inputArgs:
+                                          orgName: universidad-sevilla
+                                          scopeId: 665e5f6a7b8c9d0e1f2a3b41
+                                          agColName: tpa-US-PSG2-2526
+                                          orgId: 665e5f6a7b8c9d0e1f2a3b40
+                                          agColId: 665e5f6a7b8c9d0e1f2a3b42
+                                          agreementVersion: 2
+                                          signatureId: 69cbea571d5009a043619276
+                                      type: RECURRING
+                                      enabled: true
+                                      startDate: '2026-05-01T00:00:00.000Z'
+                                      endDate: '2026-09-01T00:00:00.000Z'
+                                      anchorDate: '2026-05-08T00:00:00.000Z'
+                                      interval: 604800000
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/ExternalServiceError'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        delete:
+            tags:
+                - States
+            summary: Delete recurring consolidated-state tasks for an agreement version
+            operationId: deleteConsolidationStateTasksForAgreementVersion
+            description: |
+                Deletes the Director `generateConsolidatedStates` tasks associated with the selected
+                agreement version. `auditableVersion` is resolved to the current one-based numeric
+                `agreementVersion` before deleting.
+
+                Registry always sends a restricted Director filter containing `script`,
+                `inputArgs.agColId`, and the resolved numeric `inputArgs.agreementVersion`. The
+                deletion therefore does not affect fetcher tasks, other agreement collections, or
+                other agreement versions. Director also removes the matching tasks' execution records
+                and active schedules. Repeating the request is safe and returns zero counters.
+            responses:
+                '200':
+                    description: Consolidation state tasks deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/ConsolidationStateTaskDeletionResult'
+                            example:
+                                success: true
+                                message: Consolidation state tasks deleted
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    deletedTasksCount: 2
+                                    deletedExecutionsCount: 14
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/ExternalServiceError'
+                '500':
+                    $ref: '#/components/responses/InternalError'
     # ──────────────────────────────────────────────
     # Fetchers
     # ──────────────────────────────────────────────
-    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/auditableVersion/fetchers/fetch:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{agreementVersion}/fetchers/fetch:
         post:
             tags:
                 - Fetchers
-            summary: Generate fetch results for auditable agreement version
-            operationId: fetchAuditableVersionFetchResults
+            summary: Generate fetch results for a selected agreement version
+            operationId: fetchAgreementVersionFetchResults
             description: |
-                Generates the fetch results required by every metric in the auditable
-                agreement version. Duplicate fetch configurations are processed only once.
+                Generates the fetch results required by every metric in the selected agreement
+                version. A numeric `agreementVersion` is one-based (`1` selects
+                `agreementVersions[0]`); `auditableVersion` automatically resolves the collection's
+                auditable version. Duplicate fetch
+                configurations are processed only once.
             parameters:
                 - $ref: '#/components/parameters/orgName'
                 - $ref: '#/components/parameters/scopeId'
                 - $ref: '#/components/parameters/agColName'
+                - $ref: '#/components/parameters/agreementVersionSelector'
                 - in: query
                   name: expand
                   required: false
@@ -1970,19 +2406,20 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
-    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/auditableVersion/fetchers/consolidated:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{agreementVersion}/fetchers/consolidated:
         parameters:
             - $ref: '#/components/parameters/orgName'
             - $ref: '#/components/parameters/scopeId'
             - $ref: '#/components/parameters/agColName'
+            - $ref: '#/components/parameters/agreementVersionSelector'
         get:
             tags:
                 - Fetchers
             summary: Get planned consolidation fetches
-            operationId: getConsolidationFetchesForAuditableVersion
+            operationId: getConsolidationFetchesForAgreementVersion
             description: |
-                Returns each unique fetcher configuration required by the auditable
-                agreement version together with its consolidation dates.
+                Returns each unique fetcher configuration required by the selected agreement
+                version together with its consolidation dates.
             responses:
                 '200':
                     description: Consolidation fetches retrieved successfully
@@ -2010,31 +2447,51 @@ paths:
                                           - '2026-05-21T00:00:00.000Z'
                                           - '2026-05-28T00:00:00.000Z'
                                 error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
                     $ref: '#/components/responses/InternalError'
 
-    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/auditableVersion/tasks/fetchers/consolidated:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{agreementVersion}/tasks/fetchers/consolidated:
         parameters:
             - $ref: '#/components/parameters/orgName'
             - $ref: '#/components/parameters/scopeId'
             - $ref: '#/components/parameters/agColName'
+            - $ref: '#/components/parameters/agreementVersionSelector'
         post:
             tags:
                 - Fetchers
             summary: Create recurring consolidation fetch tasks
-            operationId: createConsolidationFetchTasksForAuditableVersion
+            operationId: createConsolidationFetchTasksForAgreementVersion
             description: |
-                Creates one recurring Director task for each unique fetcher configuration
-                used by the auditable agreement version.
+                Creates a recurring Director `fetchFetcher` task for each unique combination of
+                fetcher configuration and guarantee window used by the selected agreement version.
+                Different windows produce different tasks because their anchor and interval differ.
+
+                Each Director task is created with:
+
+                - `inputArgs.fetcherId` and `inputArgs.fetcherConfig`, used by `fetchFetcher`.
+                - `inputArgs.orgId`, `scopeId`, `agColId`, and `versionNumber`, stored as metadata
+                  so Director tasks can later be searched, enabled, disabled, or deleted by scope.
+                  `versionNumber` is the selected entry's domain version number, not its array index.
+                - `type: RECURRING`, with `startDate` and `endDate` taken from agreement validity.
+                - `anchorDate` and `interval` derived from the corresponding guarantee window.
+
+                At execution time, Director passes the task's exact scheduled instant to Fetcher as
+                `temporalContext.effectiveAt` with `mode: CAPTURE`. The temporal context is therefore
+                generated by Director and is not stored in `inputArgs`.
+
+                Task creation requests are sent in parallel. If Director rejects one of them, Registry
+                returns `422`; tasks already accepted by Director are not rolled back.
             parameters:
                 - in: query
                   name: enabled
                   required: false
                   schema:
                       type: boolean
-                      default: false
+                      default: true
                   description: Whether the newly created recurring tasks are enabled immediately.
             responses:
                 '200':
@@ -2058,9 +2515,23 @@ paths:
                                 data:
                                     - _id: 665e5f6a7b8c9d0e1f2a3b5a
                                       script: fetchFetcher
+                                      inputArgs:
+                                          fetcherId: FT_GQL_ZENHUB_ISSUES
+                                          fetcherConfig:
+                                              workspaceId: YOUR_ZENHUB_WORKSPACE_ID
+                                          orgId: 665e5f6a7b8c9d0e1f2a3b40
+                                          scopeId: 665e5f6a7b8c9d0e1f2a3b41
+                                          agColId: 665e5f6a7b8c9d0e1f2a3b42
+                                          versionNumber: 3
                                       type: RECURRING
-                                      enabled: false
+                                      enabled: true
+                                      startDate: '2026-05-01T00:00:00.000Z'
+                                      endDate: '2026-09-01T00:00:00.000Z'
+                                      anchorDate: '2026-05-01T00:00:00.000Z'
+                                      interval: 604800000
                                 error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -2146,6 +2617,22 @@ components:
             schema:
                 type: string
             example: tpa-US-PSG2-2526
+        agreementVersionSelector:
+            name: agreementVersion
+            in: path
+            required: true
+            description: |
+                Agreement version selector
+            schema:
+                type: string
+                pattern: '^(auditableVersion|[1-9][0-9]*)$'
+            examples:
+                auditable:
+                    summary: Resolve the current auditable version
+                    value: auditableVersion
+                byNumber:
+                    summary: Select the first agreementVersions array entry
+                    value: '1'
         agColId:
             name: agColId
             in: path
@@ -4718,7 +5205,18 @@ components:
         # ── State ─────────────────────────────────
         State:
             type: object
-            description: Computed state for a signature guarantee at a concrete evaluation date
+            description: |
+                State of a signature guarantee at one exact evaluation date. State execution
+                status and evaluation determinacy are separate concepts:
+
+                | `status` | Meaning |
+                | --- | --- |
+                | `IN_PROGRESS` | Metric computation has not finished. Metrics are normally `PENDING`, `endDate` is null, and evaluation fields are null. |
+                | `COMPLETED` | Processing ended without a failed metric. The state can still be indeterminate when a metric is `UNAVAILABLE` or the numeric expression has no finite result. |
+                | `FAILED` | At least one metric failed, or state generation encountered an execution error. The state is indeterminate. |
+
+                In particular, `COMPLETED` does not imply `compliant` is known. Consumers must
+                inspect `indeterminate` and `compliant` as well as `status`.
             properties:
                 _id:
                     type: string
@@ -4728,6 +5226,13 @@ components:
                     type: string
                     description: ObjectId of the evaluated signature
                     example: 69cbea571d5009a043619276
+                generationId:
+                    type: string
+                    description: Identifier of the active calculation generation, used to prevent an older concurrent generation from overwriting a newer replacement.
+                attempt:
+                    type: integer
+                    minimum: 1
+                    description: Number of state generations for this `(signatureId, date)` document. Incremented by `REPLACE`.
                 startDate:
                     type: string
                     format: date-time
@@ -4751,6 +5256,9 @@ components:
                 status:
                     type: string
                     enum: [IN_PROGRESS, COMPLETED, FAILED]
+                    description: |
+                        Execution outcome. `COMPLETED` may still have `indeterminate: true`
+                        when data was unavailable.
                     example: COMPLETED
                 numericExpression:
                     type: string
@@ -4765,18 +5273,22 @@ components:
                 replacedNumericExpression:
                     type: string
                     nullable: true
+                    description: Numeric expression with metric names replaced by their values. Null until evaluation or whenever the state is indeterminate.
                     example: '2'
                 numericExpressionValue:
                     type: number
                     nullable: true
+                    description: Finite result of the numeric expression. Null while pending or when evaluation is indeterminate.
                     example: 2
                 compliant:
                     type: boolean
                     nullable: true
+                    description: Compliance result against `comparator` and `threshold`. Null while pending or when `indeterminate` is true.
                     example: true
                 indeterminate:
                     type: boolean
                     nullable: true
+                    description: Null while processing, false when compliance was evaluated, and true when unavailable/failed metrics or an invalid numeric result prevent evaluation.
                     example: false
                 window:
                     type: object
@@ -4819,14 +5331,35 @@ components:
 
         StateMetric:
             type: object
-            description: Metric value and evidence generated for a state
+            description: |
+                Metric value and evidence stored in a state. For metrics returned by Computer, status
+                follows the fetch-result precedence `FAILED` > `UNAVAILABLE` > `COMPUTED`:
+
+                | Condition | Metric status |
+                | --- | --- |
+                | Metric has not been processed yet | `PENDING` |
+                | At least one fetch result is `FAILED`, or Computer cannot produce a value | `FAILED` |
+                | No fetch failed and at least one fetch result is `UNAVAILABLE` | `UNAVAILABLE` |
+                | All fetch results are `COMPLETED` and aggregation produced a value | `COMPUTED` |
+
+                If Registry cannot obtain a metric response from Computer, it also stores the metric as
+                `FAILED`, sets `errorMessage`, and keeps the original configuration without `fetchResult`.
+
+                Computer returns domain-level `UNAVAILABLE` and `FAILED` metrics as successful HTTP
+                responses. Registry therefore uses the metric's `status`, not only the Computer HTTP
+                status, to decide the final state outcome.
             properties:
                 metricName:
                     type: string
                     example: COUNT_DONEISSUES_MEMBER
+                status:
+                    type: string
+                    enum: [PENDING, COMPUTED, UNAVAILABLE, FAILED]
+                    description: Final metric status, derived from its fetch results and aggregation outcome.
                 value:
                     type: number
                     nullable: true
+                    description: Aggregated value for `COMPUTED`; null for other statuses.
                     example: 2
                 evidences:
                     type: array
@@ -4834,6 +5367,10 @@ components:
                         type: object
                         additionalProperties: true
                     example: []
+                errorMessage:
+                    type: string
+                    nullable: true
+                    description: Error captured by Registry when Computer did not return a usable metric response; otherwise null.
                 metricConfig:
                     type: object
                     properties:
@@ -4855,10 +5392,44 @@ components:
                                                 type: object
                                                 nullable: true
                                                 additionalProperties: true
-                                            fetchResultId:
-                                                type: string
-                                                description: ObjectId of the fetch result used as evidence, when available
-                                                example: 665e5f6a7b8c9d0e1f2a3b4d
+                                            fetchResult:
+                                                type: object
+                                                description: |
+                                                    Fetch result used by this exact configuration. It is absent
+                                                    while pending or when Computer could not return a metric.
+                                                    `UNAVAILABLE / PAST_SNAPSHOT_NOT_CAPTURED` identifies a
+                                                    snapshot replay for which no exact stored observation existed.
+                                                additionalProperties: false
+                                                properties:
+                                                    id:
+                                                        type: string
+                                                        description: ObjectId of the fetch result used as evidence
+                                                        example: 665e5f6a7b8c9d0e1f2a3b4d
+                                                    status:
+                                                        type: string
+                                                        enum:
+                                                            [
+                                                                IN_PROGRESS,
+                                                                COMPLETED,
+                                                                UNAVAILABLE,
+                                                                FAILED,
+                                                            ]
+                                                        example: COMPLETED
+                                                        description: |
+                                                            Result that contributed to the metric status. A
+                                                            `FAILED` result dominates an `UNAVAILABLE` result.
+                                                    unavailableReason:
+                                                        type: string
+                                                        nullable: true
+                                                        description: |
+                                                            Domain reason when the result is `UNAVAILABLE`; null
+                                                            for `COMPLETED`, `FAILED`, and `IN_PROGRESS`. The current
+                                                            replay cache-miss reason is `PAST_SNAPSHOT_NOT_CAPTURED`.
+                                                        example: PAST_SNAPSHOT_NOT_CAPTURED
+                                                required:
+                                                    - id
+                                                    - status
+                                                    - unavailableReason
                                 processConfig:
                                     type: object
                                     nullable: true
@@ -4874,9 +5445,9 @@ components:
                                     additionalProperties: true
                                     example: {}
 
-        AuditableVersionStates:
+        AgreementVersionStates:
             type: object
-            description: Auditable agreement version with the stored states grouped by signature
+            description: Selected agreement version with the stored states grouped by signature
             required:
                 - organizationName
                 - scopeId
@@ -4958,14 +5529,13 @@ components:
                     type: string
                     example: fetchFetcher
                 inputArgs:
-                    type: object
-                    additionalProperties: true
+                    $ref: '#/components/schemas/RecurringFetchTaskInputArgs'
                 type:
                     type: string
                     example: RECURRING
                 enabled:
                     type: boolean
-                    example: false
+                    example: true
                 startDate:
                     type: string
                     format: date-time
@@ -4978,6 +5548,146 @@ components:
                 interval:
                     type: integer
                     description: Recurrence interval in milliseconds
+
+        RecurringFetchTaskInputArgs:
+            type: object
+            description: |
+                Input for Director's `fetchFetcher` script. Identity fields are task-management
+                metadata and are not forwarded to Fetcher. Director builds the CAPTURE temporal
+                context from the scheduled execution instant.
+            additionalProperties: false
+            required:
+                - fetcherId
+                - fetcherConfig
+                - orgId
+                - scopeId
+                - agColId
+                - versionNumber
+            properties:
+                fetcherId:
+                    type: string
+                    example: FT_GQL_ZENHUB_ISSUES
+                fetcherConfig:
+                    type: object
+                    additionalProperties: true
+                    example:
+                        workspaceId: YOUR_ZENHUB_WORKSPACE_ID
+                orgId:
+                    type: string
+                    pattern: '^[a-fA-F0-9]{24}$'
+                    description: Organization ObjectId used to manage related Director tasks.
+                    example: 665e5f6a7b8c9d0e1f2a3b40
+                scopeId:
+                    type: string
+                    pattern: '^[a-fA-F0-9]{24}$'
+                    description: Scope ObjectId used to manage related Director tasks.
+                    example: 665e5f6a7b8c9d0e1f2a3b41
+                agColId:
+                    type: string
+                    pattern: '^[a-fA-F0-9]{24}$'
+                    description: Agreement collection ObjectId used to manage related Director tasks.
+                    example: 665e5f6a7b8c9d0e1f2a3b42
+                versionNumber:
+                    type: integer
+                    minimum: 1
+                    description: Auditable agreement version associated with the task.
+                    example: 3
+
+        RecurringStateTask:
+            type: object
+            description: Recurring per-signature consolidated-state task returned by Director
+            additionalProperties: true
+            properties:
+                _id:
+                    type: string
+                    example: 665e5f6a7b8c9d0e1f2a3b5b
+                script:
+                    type: string
+                    enum: [generateConsolidatedStates]
+                inputArgs:
+                    $ref: '#/components/schemas/RecurringStateTaskInputArgs'
+                type:
+                    type: string
+                    enum: [RECURRING]
+                enabled:
+                    type: boolean
+                    example: true
+                startDate:
+                    type: string
+                    format: date-time
+                endDate:
+                    type: string
+                    format: date-time
+                anchorDate:
+                    type: string
+                    format: date-time
+                    description: First consolidation instant for this signature.
+                interval:
+                    type: integer
+                    minimum: 1
+                    description: Signature window period in milliseconds.
+
+        RecurringStateTaskInputArgs:
+            type: object
+            additionalProperties: false
+            description: Input for Director's per-signature `generateConsolidatedStates` script.
+            required:
+                - orgName
+                - scopeId
+                - agColName
+                - orgId
+                - agColId
+                - agreementVersion
+                - signatureId
+            properties:
+                orgName:
+                    type: string
+                    example: universidad-sevilla
+                scopeId:
+                    type: string
+                    pattern: '^[a-fA-F0-9]{24}$'
+                    description: Resolved Scope ObjectId.
+                    example: 665e5f6a7b8c9d0e1f2a3b41
+                agColName:
+                    type: string
+                    example: tpa-US-PSG2-2526
+                orgId:
+                    type: string
+                    pattern: '^[a-fA-F0-9]{24}$'
+                    description: Organization ObjectId used to manage related Director tasks.
+                    example: 665e5f6a7b8c9d0e1f2a3b40
+                agColId:
+                    type: string
+                    pattern: '^[a-fA-F0-9]{24}$'
+                    description: Agreement collection ObjectId used to manage related Director tasks.
+                    example: 665e5f6a7b8c9d0e1f2a3b42
+                agreementVersion:
+                    type: integer
+                    minimum: 1
+                    description: Fixed one-based agreementVersions array selector used by the script.
+                    example: 2
+                signatureId:
+                    type: string
+                    pattern: '^[a-fA-F0-9]{24}$'
+                    description: The only signature processed by this task.
+                    example: 69cbea571d5009a043619276
+
+        ConsolidationStateTaskDeletionResult:
+            type: object
+            additionalProperties: false
+            description: Number of Director tasks and related execution records deleted.
+            required:
+                - deletedTasksCount
+                - deletedExecutionsCount
+            properties:
+                deletedTasksCount:
+                    type: integer
+                    minimum: 0
+                    example: 2
+                deletedExecutionsCount:
+                    type: integer
+                    minimum: 0
+                    example: 14
 
         # ── AgreementVersion ──────────────────────
         AgreementVersionRaw:

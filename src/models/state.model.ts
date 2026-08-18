@@ -13,6 +13,8 @@ export enum StateStatus {
 
 export interface IState extends Document {
     signatureId: Types.ObjectId;
+    generationId: string;
+    attempt: number;
     startDate: Date;
     endDate: Date | null;
     date: Date;
@@ -32,6 +34,8 @@ export interface IState extends Document {
 const stateSchema = new Schema<IState>(
     {
         signatureId: { type: Types.ObjectId, required: true },
+        generationId: { type: String, required: true },
+        attempt: { type: Number, required: true, default: 1 },
         startDate: { type: Date, required: true },
         endDate: { type: Date, default: null },
         date: { type: Date, required: true },
@@ -49,6 +53,8 @@ const stateSchema = new Schema<IState>(
     },
     { timestamps: true, minimize: false },
 );
+
+stateSchema.index({ signatureId: 1, date: 1 }, { unique: true });
 
 const State = mongoose.model<IState>('State', stateSchema);
 
