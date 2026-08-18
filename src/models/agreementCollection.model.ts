@@ -17,6 +17,7 @@ export interface IAgreementVersion {
 export interface IAgreementCollection extends Document {
     name: string;
     displayName: string;
+    description: string;
     scopeId: Types.ObjectId;
     auditableVersionNumber: number | null;
     fields: Record<string, unknown>;
@@ -49,6 +50,7 @@ const agreementCollectionSchema = new Schema<IAgreementCollection>(
     {
         name: { type: String },
         displayName: { type: String },
+        description: { type: String, required: true },
         scopeId: { type: Schema.Types.ObjectId, ref: 'Scope', required: true },
         auditableVersionNumber: { type: Number, default: null },
         fields: { type: Schema.Types.Mixed, required: true },

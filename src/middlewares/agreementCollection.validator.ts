@@ -26,6 +26,14 @@ const displayNameValidation = body('displayName')
     .isLength({ max: 200 })
     .withMessage('displayName must be at most 200 characters');
 
+const descriptionValidation = body('description')
+    .exists({ checkNull: true })
+    .withMessage('description is required')
+    .isString()
+    .withMessage('description must be a string')
+    .isLength({ min: 3, max: 500 })
+    .withMessage('description must be between 3 and 500 characters');
+
 const fieldsValidation = body('fields')
     .exists({ checkNull: true })
     .withMessage('fields is required');
@@ -48,6 +56,7 @@ const auditableVersionNumberValidation = body('auditableVersionNumber')
 const fieldValidations = [
     nameValidation,
     displayNameValidation,
+    descriptionValidation,
     fieldsValidation,
     permissionsValidation,
 ];

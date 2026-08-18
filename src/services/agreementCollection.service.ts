@@ -76,11 +76,12 @@ export const updateAgreementCollectionById = async (
     agColId: string,
     data: Partial<IAgreementCollection>,
 ) => {
-    const { name, displayName, auditableVersionNumber, fields, permissions } = data;
+    const { name, displayName, description, auditableVersionNumber, fields, permissions } = data;
 
     return await agreementCollectionRepository.updateAgreementCollectionByScope(agColId, {
         name,
         displayName,
+        description,
         auditableVersionNumber,
         fields,
         permissions,

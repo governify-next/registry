@@ -868,6 +868,7 @@ paths:
                                     - _id: 69cbe9901d5009a04361925d
                                       name: tpa-US-PSG2-2526
                                       displayName: TPA US PSG2 2526
+                                      description: Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                                       scopeId: 69cbdee759092b362376ca17
                                       auditableVersionNumber: 1
                                       agreementVersions:
@@ -934,6 +935,7 @@ paths:
                                     _id: 69cbe9901d5009a04361925d
                                     name: tpa-US-PSG2-2526
                                     displayName: TPA US PSG2 2526
+                                    description: Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                                     scopeId: 69cbdee759092b362376ca17
                                     auditableVersionNumber: 1
                                     agreementVersions:
@@ -964,6 +966,7 @@ paths:
             operationId: updateAgreementCollectionById
             description: |
                 Updates an existing agreement collection identified by its id.
+                `description` is required and must contain between 3 and 500 characters.
                 The `auditableVersionNumber` can be changed to point to a different version
                 or set to `null` if no version should be auditable.
             requestBody:
@@ -989,6 +992,7 @@ paths:
                                     _id: 69cbe9901d5009a04361925d
                                     name: tpa-US-PSG2-2526
                                     displayName: TPA US PSG2 2526 (actualizado)
+                                    description: Updated Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                                     scopeId: 69cbdee759092b362376ca17
                                     auditableVersionNumber: null
                                     agreementVersions:
@@ -1089,6 +1093,7 @@ paths:
                                     - _id: 69cbe9901d5009a04361925d
                                       name: tpa-US-PSG2-2526
                                       displayName: TPA US PSG2 2526
+                                      description: Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                                       scopeId: 69cbdee759092b362376ca17
                                       auditableVersionNumber: 1
                                       agreementVersions:
@@ -1117,6 +1122,7 @@ paths:
             operationId: createAgreementCollectionByScope
             description: |
                 Creates a new agreement collection within the specified scope.
+                `description` is required and must contain between 3 and 500 characters.
                 The collection is created empty (no versions). Versions are added later
                 through the agreement version endpoints.
             requestBody:
@@ -1142,6 +1148,7 @@ paths:
                                     _id: 69cbe9901d5009a04361925d
                                     name: tpa-US-PSG2-2526
                                     displayName: TPA US PSG2 2526
+                                    description: Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                                     scopeId: 69cbdee759092b362376ca17
                                     auditableVersionNumber: null
                                     agreementVersions: []
@@ -1527,6 +1534,7 @@ paths:
                                     _id: 69cbe9901d5009a04361925d
                                     name: tpa-US-PSG2-2526
                                     displayName: TPA US PSG2 2526
+                                    description: Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                                     scopeId: 69cbdee759092b362376ca17
                                     auditableVersionNumber: null
                                     agreementVersions:
@@ -2924,6 +2932,7 @@ components:
                     example:
                         name: tpa-US-PSG2-2526
                         displayName: TPA US PSG2 2526
+                        description: Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                         fields: []
                         permissions: []
 
@@ -2937,6 +2946,7 @@ components:
                     example:
                         name: tpa-US-PSG2-2526
                         displayName: TPA US PSG2 2526 (actualizado)
+                        description: Updated Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                         fields: []
                         permissions: []
                         auditableVersionNumber: null
@@ -5076,6 +5086,7 @@ components:
             required:
                 - _id
                 - name
+                - description
                 - scopeId
             properties:
                 _id:
@@ -5094,6 +5105,12 @@ components:
                     description: Human-readable display name (max 200 characters)
                     maxLength: 200
                     example: TPA US PSG2 2526
+                description:
+                    type: string
+                    description: Human-readable description, required with the same constraints as an organization description.
+                    minLength: 3
+                    maxLength: 500
+                    example: Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                 scopeId:
                     type: string
                     description: ObjectId of the scope this collection belongs to
@@ -5146,6 +5163,7 @@ components:
             required:
                 - name
                 - displayName
+                - description
                 - fields
                 - permissions
             properties:
@@ -5159,6 +5177,11 @@ components:
                     type: string
                     maxLength: 200
                     example: TPA US PSG2 2526
+                description:
+                    type: string
+                    minLength: 3
+                    maxLength: 500
+                    example: Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                 fields:
                     type: array
                     items:
@@ -5174,6 +5197,7 @@ components:
             required:
                 - name
                 - displayName
+                - description
                 - fields
                 - permissions
                 - auditableVersionNumber
@@ -5188,6 +5212,11 @@ components:
                     type: string
                     maxLength: 200
                     example: TPA US PSG2 2526 (actualizado)
+                description:
+                    type: string
+                    minLength: 3
+                    maxLength: 500
+                    example: Updated Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                 fields:
                     type: array
                     items:
