@@ -54,14 +54,15 @@ export const resolveAgreementVersionSelector = (
 export const getAgreementVersionBySelector = async (
     orgName: string,
     scopeId: string,
-    agreementCollectionId: string,
+    agColName: string,
     agreementVersion: string,
     expand: boolean,
+    signatureIds?: string[],
 ) => {
     const agreementCollection = await getCleanAgreementCollectionByScope(
         orgName,
         scopeId,
-        agreementCollectionId,
+        agColName,
     );
     const selectedAgreementVersion = resolveAgreementVersionSelector(
         agreementCollection!,
@@ -69,7 +70,7 @@ export const getAgreementVersionBySelector = async (
     );
 
     if (!expand) return selectedAgreementVersion;
-    return await assembleBySignature(selectedAgreementVersion);
+    return await assembleBySignature(selectedAgreementVersion, signatureIds);
 };
 
 export const createAgreementVersionByCollection = async (
@@ -144,48 +145,27 @@ export const getAgreementVersionsByCollection = async (
     return await assembleAgreementVersions(agreementCollection!.agreementVersions);
 };
 
-export const getAuditableVersionByCollection = async (
+export const deleteAgreementVersionBySelector = async (
     orgName: string,
     scopeId: string,
     agColId: string,
-    expand: boolean,
+    agreementVersion: string,
 ) => {
     const agreementCollection = await getCleanAgreementCollectionByScope(orgName, scopeId, agColId);
-
-    const agreementVersion = agreementCollection!.agreementVersions.find(
-        (v) => v.versionNumber === agreementCollection!.auditableVersionNumber,
+    const selectedAgreementVersion = resolveAgreementVersionSelector(
+        agreementCollection!,
+        agreementVersion,
     );
-
-    if (!expand) return agreementVersion;
-
-    return await assembleBySignature(agreementVersion!);
-};
-
-export const deleteVersionByCollection = async (
-    orgName: string,
-    scopeId: string,
-    agreementName: string,
-    versionNumber: number,
-) => {
-    const agreementCollection = await getCleanAgreementCollectionByScope(
-        orgName,
-        scopeId,
-        agreementName,
-    );
-
-    const version = agreementCollection!.agreementVersions.find(
-        (v) => v.versionNumber === versionNumber,
-    );
-
-    const signatureIds = version!.contract.signaturesId;
+    const signatureIds = selectedAgreementVersion.contract.signaturesId;
 
     await deleteSignaturesByIds(signatureIds);
 
-    const isAuditable = agreementCollection!.auditableVersionNumber === versionNumber;
+    const isAuditable =
+        agreementCollection!.auditableVersionNumber === selectedAgreementVersion.versionNumber;
 
-    return await agreementVersionRepository.deleteVersionByCollection(
+    return await agreementVersionRepository.deleteAgreementVersionByCollection(
         agreementCollection!._id,
-        versionNumber,
+        selectedAgreementVersion.versionNumber,
         isAuditable,
     );
 };

@@ -232,6 +232,7 @@ export const generateStatesForAgreementVersion = async (
         agColName,
         agreementVersion,
         true,
+        signatureIds,
     );
     const agreementSignatures =
         'signatures' in selectedAgreementVersion!.contract
@@ -270,6 +271,7 @@ export const generateConsolidatedStatesForAgreementVersion = async (
         agColName,
         agreementVersion,
         true,
+        signatureIds,
     );
 
     const agreementSignatures =
@@ -349,6 +351,7 @@ export const createConsolidationStateTasksForAgreementVersion = async (
         agColId,
         agreementVersion,
         true,
+        signatureIds,
     );
     const agreementSignatures =
         'signatures' in selectedAgreementVersion.contract

@@ -129,29 +129,6 @@ const endAfterInitial = (req: Request, res: Response, next: NextFunction) => {
     next();
 };
 
-export const existingVersionNumber = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
-            req.params.orgName,
-            req.params.scopeId,
-            req.params.agColName,
-        );
-
-        const versionNumber = Number(req.params.versionNumber);
-        if (!Number.isInteger(versionNumber) || versionNumber < 1)
-            return next(new ValidationError('versionNumber must be a positive integer'));
-
-        const version = collection!.agreementVersions.find(
-            (v) => v.versionNumber === versionNumber,
-        );
-        if (!version)
-            return next(new NotFoundError(`Version ${versionNumber} not found in this collection`));
-        next();
-    } catch (err) {
-        next(err);
-    }
-};
-
 export const existingAuditableVersion = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
@@ -200,7 +177,7 @@ const earlyTerminationInRange = async (req: Request, res: Response, next: NextFu
         const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
             req.params.scopeId,
-            req.params.agColName,
+            req.params.agColId,
         );
 
         const version = collection!.agreementVersions.find(
