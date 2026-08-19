@@ -157,7 +157,7 @@ export const existingAuditableVersion = async (req: Request, res: Response, next
         const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
             req.params.scopeId,
-            req.params.agColName,
+            req.params.agColId,
         );
 
         if (collection!.auditableVersionNumber === null)

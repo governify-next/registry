@@ -20,7 +20,7 @@ agreementVersionRoutes.get(
 );
 
 agreementVersionRoutes.get(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/auditableVersion',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/auditableVersion',
     existingScope,
     existingAgreementCollection,
     existingAuditableVersion,

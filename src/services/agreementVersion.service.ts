@@ -147,15 +147,10 @@ export const getAgreementVersionsByCollection = async (
 export const getAuditableVersionByCollection = async (
     orgName: string,
     scopeId: string,
-    agreementName: string,
+    agColId: string,
     expand: boolean,
 ) => {
-    // TODO: Validate in middleware that the collection that is called for the auditable version is not null and possibly that is valid
-    const agreementCollection = await getCleanAgreementCollectionByScope(
-        orgName,
-        scopeId,
-        agreementName,
-    );
+    const agreementCollection = await getCleanAgreementCollectionByScope(orgName, scopeId, agColId);
 
     const agreementVersion = agreementCollection!.agreementVersions.find(
         (v) => v.versionNumber === agreementCollection!.auditableVersionNumber,

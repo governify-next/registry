@@ -55,7 +55,7 @@ export const getAuditableVersionByCollection = async (
         const auditableVersion = await agreementVersionService.getAuditableVersionByCollection(
             req.params.orgName,
             req.params.scopeId,
-            req.params.agColName,
+            req.params.agColId,
             expand,
         );
         return sendSuccess(res, { data: auditableVersion });
