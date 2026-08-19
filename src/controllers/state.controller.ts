@@ -111,14 +111,13 @@ export const createConsolidationStateTasksForAgreementVersion = async (
     next: NextFunction,
 ) => {
     try {
-        const { orgName, scopeId, agColName, agreementVersion } = req.params;
+        const { orgName, scopeId, agColId, agreementVersion } = req.params;
         const { signatureIds } = req.body ?? {};
         const enabled = req.query.enabled === undefined || req.query.enabled === 'true';
-
         const stateTasks = await stateService.createConsolidationStateTasksForAgreementVersion(
             orgName,
             scopeId,
-            agColName,
+            agColId,
             agreementVersion,
             enabled,
             signatureIds as string[] | undefined,
@@ -140,11 +139,11 @@ export const getConsolidationStateTasksForAgreementVersion = async (
     next: NextFunction,
 ) => {
     try {
-        const { orgName, scopeId, agColName, agreementVersion } = req.params;
+        const { orgName, scopeId, agColId, agreementVersion } = req.params;
         const stateTasks = await stateService.getConsolidationStateTasksForAgreementVersion(
             orgName,
             scopeId,
-            agColName,
+            agColId,
             agreementVersion,
         );
 
@@ -163,11 +162,11 @@ export const deleteConsolidationStateTasksForAgreementVersion = async (
     next: NextFunction,
 ) => {
     try {
-        const { orgName, scopeId, agColName, agreementVersion } = req.params;
+        const { orgName, scopeId, agColId, agreementVersion } = req.params;
         const result = await stateService.deleteConsolidationStateTasksForAgreementVersion(
             orgName,
             scopeId,
-            agColName,
+            agColId,
             agreementVersion,
         );
 

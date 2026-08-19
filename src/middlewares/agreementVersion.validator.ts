@@ -177,7 +177,7 @@ export const existingSelectedAgreementVersion = async (
         const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
             req.params.scopeId,
-            req.params.agColName,
+            req.params.agColId,
         );
         agreementVersionService.resolveAgreementVersionSelector(
             collection!,

@@ -338,7 +338,7 @@ const selectSignatures = <TSignature extends { signatureId: { toString(): string
 export const createConsolidationStateTasksForAgreementVersion = async (
     orgName: string,
     scopeId: string,
-    agColName: string,
+    agColId: string,
     agreementVersion: string,
     enabled: boolean,
     signatureIds?: string[],
@@ -346,7 +346,7 @@ export const createConsolidationStateTasksForAgreementVersion = async (
     const selectedAgreementVersion = await agreementVersionService.getAgreementVersionBySelector(
         orgName,
         scopeId,
-        agColName,
+        agColId,
         agreementVersion,
         true,
     );
@@ -362,9 +362,8 @@ export const createConsolidationStateTasksForAgreementVersion = async (
     ]);
     const agreementCollection = await agreementCollectionRepository.getAgreementCollectionByScope(
         scope!._id,
-        agColName,
+        agColId,
     );
-
     const agreementVersionIndex = agreementCollection!.agreementVersions.findIndex(
         (candidateAgreementVersion) =>
             candidateAgreementVersion.versionNumber === selectedAgreementVersion.versionNumber,
@@ -376,7 +375,6 @@ export const createConsolidationStateTasksForAgreementVersion = async (
     const resolvedAgreementVersion = agreementVersionIndex + 1;
     const orgId = organization!._id.toString();
     const resolvedScopeId = scope!._id.toString();
-    const agColId = agreementCollection!._id.toString();
     const startDate = new Date(selectedAgreementVersion.contract.validity.initial);
     const validityEndDate = new Date(selectedAgreementVersion.contract.validity.end);
     const earlyTermination = selectedAgreementVersion.contract.validity.earlyTermination;
@@ -391,9 +389,9 @@ export const createConsolidationStateTasksForAgreementVersion = async (
             const inputArgs = {
                 orgName,
                 scopeId: resolvedScopeId,
-                agColName,
+                agColName: agreementCollection!.name,
                 orgId,
-                agColId,
+                agColId: agreementCollection!._id.toString(),
                 agreementVersion: resolvedAgreementVersion,
                 signatureId: signature.signatureId.toString(),
             };
@@ -413,13 +411,13 @@ export const createConsolidationStateTasksForAgreementVersion = async (
 const getConsolidationStateTaskFiltersForAgreementVersion = async (
     orgName: string,
     scopeId: string,
-    agColName: string,
+    agColId: string,
     agreementVersion: string,
 ): Promise<directorIntegration.IDirectorTaskFilters> => {
     const scope = await scopeManagerIntegration.getScopeByOrgAndScopeId(orgName, scopeId);
     const agreementCollection = await agreementCollectionRepository.getAgreementCollectionByScope(
         scope!._id,
-        agColName,
+        agColId,
     );
     const selectedAgreementVersion = agreementVersionService.resolveAgreementVersionSelector(
         agreementCollection!,
@@ -443,13 +441,13 @@ const getConsolidationStateTaskFiltersForAgreementVersion = async (
 export const getConsolidationStateTasksForAgreementVersion = async (
     orgName: string,
     scopeId: string,
-    agColName: string,
+    agColId: string,
     agreementVersion: string,
 ) => {
     const filters = await getConsolidationStateTaskFiltersForAgreementVersion(
         orgName,
         scopeId,
-        agColName,
+        agColId,
         agreementVersion,
     );
     return await directorIntegration.getTasksByFilters(filters);
@@ -458,13 +456,13 @@ export const getConsolidationStateTasksForAgreementVersion = async (
 export const deleteConsolidationStateTasksForAgreementVersion = async (
     orgName: string,
     scopeId: string,
-    agColName: string,
+    agColId: string,
     agreementVersion: string,
 ) => {
     const filters = await getConsolidationStateTaskFiltersForAgreementVersion(
         orgName,
         scopeId,
-        agColName,
+        agColId,
         agreementVersion,
     );
     return await directorIntegration.deleteTasksByFilters(filters);
