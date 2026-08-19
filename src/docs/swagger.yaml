@@ -2100,11 +2100,11 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
-    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{agreementVersion}/tasks/states/consolidated:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColId}/agreementVersions/{agreementVersion}/tasks/states/consolidated:
         parameters:
             - $ref: '#/components/parameters/orgName'
             - $ref: '#/components/parameters/scopeId'
-            - $ref: '#/components/parameters/agColName'
+            - $ref: '#/components/parameters/agColId'
             - $ref: '#/components/parameters/agreementVersionSelector'
         get:
             tags:
@@ -2116,10 +2116,11 @@ paths:
                 agreement version. `auditableVersion` is resolved to the current one-based numeric
                 `agreementVersion` before searching.
 
-                Registry restricts the Director search by `script`, the agreement collection ObjectId
-                (`inputArgs.agColId`), and the resolved numeric `inputArgs.agreementVersion`. Tasks for
-                fetchers, other agreement collections, or other agreement versions are not returned.
-                When there are no matching tasks, `data` is an empty array.
+
+                Registry restricts the Director search by `script`, the agreement collection id stored
+                in each task (`inputArgs.agColId`), and the resolved numeric `inputArgs.agreementVersion`.
+                Tasks for fetchers, other agreement collections, or other agreement versions are not
+                returned. When there are no matching tasks, `data` is an empty array.
             responses:
                 '200':
                     description: Consolidation state tasks retrieved successfully
@@ -2648,7 +2649,7 @@ components:
             name: agColId
             in: path
             required: true
-            description: Id of the agreement collection
+            description: Agreement collection id
             schema:
                 type: string
             example: 69cbe9901d5009a04361925d

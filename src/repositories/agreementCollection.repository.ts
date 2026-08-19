@@ -20,8 +20,8 @@ export const createAgreementCollectionByScope = async (
     return await AgreementCollection.create({ ...data, scopeId: scopeId });
 };
 
-export const getAgreementCollectionByScope = async (scopeId: Types.ObjectId, agColName: string) => {
-    return await AgreementCollection.findOne({ name: agColName, scopeId: scopeId });
+export const getAgreementCollectionByScope = async (scopeId: Types.ObjectId, agColId: string) => {
+    return await AgreementCollection.findOne({ _id: agColId, scopeId: scopeId });
 };
 
 export const updateAgreementCollectionByScope = async (

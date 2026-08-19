@@ -35,11 +35,11 @@ export const getAgreementCollectionsByScope = async (
 export const getCleanAgreementCollectionByScope = async (
     orgName: string,
     scopeId: string,
-    agColName: string,
+    agColId: string,
 ) => {
     const scope = await scopeManagerIntegration.getScopeByOrgAndScopeId(orgName, scopeId);
 
-    return await agreementCollectionRepository.getAgreementCollectionByScope(scope._id, agColName);
+    return await agreementCollectionRepository.getAgreementCollectionByScope(scope._id, agColId);
 };
 
 export const getAgreementCollectionById = async (agColId: string, expand: boolean = false) => {

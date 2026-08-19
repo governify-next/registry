@@ -14,7 +14,7 @@ import { validateDirectorHealth } from '../middlewares/director.validator.js';
 export const stateRoutes = Router();
 
 const consolidationStateTasksPath =
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/:agreementVersion/tasks/states/consolidated';
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/tasks/states/consolidated';
 
 stateRoutes.post(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/:agreementVersion/states/generate',

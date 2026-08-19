@@ -135,12 +135,11 @@ export const existingAgreementCollection = async (
         const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
             req.params.scopeId,
-            req.params.agColName,
+            req.params.agColId,
         );
-
         if (!collection)
             return next(
-                new NotFoundError(`AgreementCollection '${req.params.agColName}' not found`),
+                new NotFoundError(`AgreementCollection with id: '${req.params.agColId}' not found`),
             );
         next();
     } catch (err) {

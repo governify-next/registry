@@ -54,7 +54,7 @@ export const resolveAgreementVersionSelector = (
 export const getAgreementVersionBySelector = async (
     orgName: string,
     scopeId: string,
-    agreementName: string,
+    agreementCollectionId: string,
     agreementVersion: string,
     expand: boolean,
     signatureIds?: string[],
@@ -62,7 +62,7 @@ export const getAgreementVersionBySelector = async (
     const agreementCollection = await getCleanAgreementCollectionByScope(
         orgName,
         scopeId,
-        agreementName,
+        agreementCollectionId,
     );
     const selectedAgreementVersion = resolveAgreementVersionSelector(
         agreementCollection!,
