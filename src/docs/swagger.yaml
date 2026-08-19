@@ -1334,20 +1334,22 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
-    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/auditableVersion:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{agreementVersion}:
         parameters:
             - $ref: '#/components/parameters/orgName'
             - $ref: '#/components/parameters/scopeId'
             - $ref: '#/components/parameters/agColName'
+            - $ref: '#/components/parameters/agreementVersionSelector'
         get:
             tags:
                 - AgreementVersions
-            summary: Get the auditable version of a collection
-            operationId: getAuditableVersionByCollection
+            summary: Get a selected agreement version
+            operationId: getAgreementVersionBySelector
             description: |
-                Returns the currently auditable version of the collection.
-                If no auditable version is set (auditableVersionNumber is null),
-                returns a 404 error.
+                Returns the agreement version selected by `agreementVersion`. A numeric selector is
+                one-based: `1` selects `agreementVersions[0]`, `2` selects
+                `agreementVersions[1]`, and so on. `auditableVersion` resolves the collection's
+                current auditable version and returns `404` when none is configured.
             parameters:
                 - in: query
                   name: expand
@@ -1358,7 +1360,7 @@ paths:
                   description: If `true`, returns the version with fully assembled signature and guarantee data.
             responses:
                 '200':
-                    description: Auditable version found
+                    description: Selected agreement version found
                     content:
                         application/json:
                             schema:
@@ -1444,25 +1446,22 @@ paths:
                                                         columns:
                                                             - In Progress
                                 error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
                     $ref: '#/components/responses/InternalError'
-
-    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{versionNumber}:
-        parameters:
-            - $ref: '#/components/parameters/orgName'
-            - $ref: '#/components/parameters/scopeId'
-            - $ref: '#/components/parameters/agColName'
-            - $ref: '#/components/parameters/versionNumber'
         delete:
             tags:
                 - AgreementVersions
-            summary: Delete a version from a collection
-            operationId: deleteAgreementVersionByCollection
+            summary: Delete a selected agreement version
+            operationId: deleteAgreementVersionBySelector
             description: |
-                Deletes a specific agreement version by its version number.
-                Also deletes all associated signatures.
+                Deletes the agreement version selected by `agreementVersion` and all its associated
+                signatures. Numeric selectors are one-based array positions, while
+                `auditableVersion` selects the current auditable version. When the deleted entry is
+                auditable, `auditableVersionNumber` is reset to `null`.
             responses:
                 '200':
                     description: Agreement version deleted successfully
@@ -1477,6 +1476,8 @@ paths:
                                               type: object
                                               nullable: true
                                               example: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
@@ -2653,15 +2654,6 @@ components:
             schema:
                 type: string
             example: 69cbe9901d5009a04361925d
-        versionNumber:
-            name: versionNumber
-            in: path
-            required: true
-            description: Version number of the agreement version
-            schema:
-                type: integer
-                minimum: 1
-            example: 1
         partId:
             name: partId
             in: path

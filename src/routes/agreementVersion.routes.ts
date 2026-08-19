@@ -5,8 +5,7 @@ import { existingAgreementCollection } from '../middlewares/agreementCollection.
 import {
     validateCreateAgreementVersion,
     validateTerminateVersion,
-    existingAuditableVersion,
-    existingVersionNumber,
+    existingSelectedAgreementVersion,
 } from '../middlewares/agreementVersion.validator.js';
 import { validateComputerHealth } from '../middlewares/computer.validator.js';
 
@@ -20,18 +19,18 @@ agreementVersionRoutes.get(
 );
 
 agreementVersionRoutes.get(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/auditableVersion',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/:agreementVersion',
     existingScope,
     existingAgreementCollection,
-    existingAuditableVersion,
-    agreementVersionController.getAuditableVersionByCollection,
+    existingSelectedAgreementVersion,
+    agreementVersionController.getAgreementVersionByCollection,
 );
 
 agreementVersionRoutes.delete(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/:versionNumber',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/:agreementVersion',
     existingScope,
     existingAgreementCollection,
-    existingVersionNumber,
+    existingSelectedAgreementVersion,
     agreementVersionController.deleteAgreementVersionByCollection,
 );
 
