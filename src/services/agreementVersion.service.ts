@@ -57,6 +57,7 @@ export const getAgreementVersionBySelector = async (
     agreementName: string,
     agreementVersion: string,
     expand: boolean,
+    signatureIds?: string[],
 ) => {
     const agreementCollection = await getCleanAgreementCollectionByScope(
         orgName,
@@ -69,7 +70,7 @@ export const getAgreementVersionBySelector = async (
     );
 
     if (!expand) return selectedAgreementVersion;
-    return await assembleBySignature(selectedAgreementVersion);
+    return await assembleBySignature(selectedAgreementVersion, signatureIds);
 };
 
 export const createAgreementVersionByCollection = async (

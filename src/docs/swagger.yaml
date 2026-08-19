@@ -1680,7 +1680,9 @@ paths:
                 When `signatureIds` is omitted, every signature is processed. When supplied,
                 only those signatures are processed. The array must be non-empty, contain unique
                 ObjectIds, and every identifier must belong to the selected agreement version.
-                The complete selection is validated before any state generation begins.
+                The complete selection is validated before any state generation begins. Selected
+                identifiers are filtered before assembly, so unrelated signatures, guarantees and
+                metric configurations are not loaded.
             parameters:
                 - in: query
                   name: isAsync
@@ -1873,7 +1875,8 @@ paths:
 
                 Both `temporalMode` and `ifExists` are required in the request body.
                 Optional `signatureIds` uses the same all-or-nothing selection rules as regular
-                state generation and filters signatures before consolidation dates are calculated.
+                state generation. Signatures are filtered before assembly and before consolidation
+                dates are calculated.
             parameters:
                 - $ref: '#/components/parameters/orgName'
                 - $ref: '#/components/parameters/scopeId'
@@ -2171,7 +2174,7 @@ paths:
                 Creates one recurring Director `generateConsolidatedStates` task for every selected
                 signature in the agreement version. When `signatureIds` is omitted, every signature
                 is selected. When supplied, the non-empty selection is validated completely before
-                any Director task is created.
+                any Director task is created, and only that selection is assembled.
 
                 A request using `auditableVersion` is resolved when tasks are created. Each task
                 stores the resulting one-based numeric `agreementVersion`, so it remains associated
