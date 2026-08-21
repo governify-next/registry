@@ -17,7 +17,7 @@ const consolidationStateTasksPath =
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/tasks/states/consolidated';
 
 stateRoutes.post(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/:agreementVersion/states/generate',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states/generate',
     validateComputerHealth,
     existingScope,
     existingAgreementCollection,
@@ -27,7 +27,7 @@ stateRoutes.post(
 );
 
 stateRoutes.post(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/:agreementVersion/states/consolidated/generate',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states/consolidated/generate',
     validateComputerHealth,
     existingScope,
     existingAgreementCollection,
@@ -37,7 +37,7 @@ stateRoutes.post(
 );
 
 stateRoutes.get(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/:agreementVersion/states',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states',
     existingScope,
     existingAgreementCollection,
     existingSelectedAgreementVersion,

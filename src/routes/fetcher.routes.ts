@@ -11,7 +11,7 @@ export const fetcherRoutes = Router();
 
 // This is not used for now
 fetcherRoutes.post(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/:agreementVersion/fetchers/fetch',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/fetchers/fetch',
     validateFetcherHealth,
     existingScope,
     existingAgreementCollection,
@@ -22,7 +22,7 @@ fetcherRoutes.post(
 
 // This is not used for now
 fetcherRoutes.get(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/:agreementVersion/fetchers/consolidated',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/fetchers/consolidated',
     existingScope,
     existingAgreementCollection,
     existingSelectedAgreementVersion,
@@ -30,7 +30,7 @@ fetcherRoutes.get(
 );
 
 fetcherRoutes.post(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColName/agreementVersions/:agreementVersion/tasks/fetchers/consolidated',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/tasks/fetchers/consolidated',
     validateDirectorHealth,
     existingScope,
     existingAgreementCollection,

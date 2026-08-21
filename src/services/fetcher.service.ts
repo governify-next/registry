@@ -18,7 +18,7 @@ type IFetcherConfigWithWindow = {
 export const fetchAgreementVersionFetchResults = async (
     orgName: string,
     scopeId: string,
-    agColName: string,
+    agColId: string,
     agreementVersion: string,
     date: Date,
     expand: boolean,
@@ -27,7 +27,7 @@ export const fetchAgreementVersionFetchResults = async (
     const selectedAgreementVersion = await agreementVersionService.getAgreementVersionBySelector(
         orgName,
         scopeId,
-        agColName,
+        agColId,
         agreementVersion,
         true,
     );
@@ -56,13 +56,13 @@ export const fetchAgreementVersionFetchResults = async (
 export const getConsolidationFetchesForAgreementVersion = async (
     orgName: string,
     scopeId: string,
-    agColName: string,
+    agColId: string,
     agreementVersion: string,
 ): Promise<ConsolidationFetch[]> => {
     const selectedAgreementVersion = await agreementVersionService.getAgreementVersionBySelector(
         orgName,
         scopeId,
-        agColName,
+        agColId,
         agreementVersion,
         true,
     );
@@ -159,14 +159,14 @@ const buildFetchKey = (fetcherConfig: IFetcherConfig, window: IWindow) => {
 export const createConsolidationFetchTasksForAgreementVersion = async (
     orgName: string,
     scopeId: string,
-    agColName: string,
+    agColId: string,
     agreementVersion: string,
     enabled: boolean,
 ) => {
     const selectedAgreementVersion = await agreementVersionService.getAgreementVersionBySelector(
         orgName,
         scopeId,
-        agColName,
+        agColId,
         agreementVersion,
         true,
     );
@@ -203,12 +203,12 @@ export const createConsolidationFetchTasksForAgreementVersion = async (
     ]);
     const agreementCollection = await agreementCollectionRepository.getAgreementCollectionByScope(
         scope!._id,
-        agColName,
+        agColId,
     );
 
     const orgId = organization!._id.toString();
     const resolvedScopeId = scope!._id.toString();
-    const agColId = agreementCollection!._id.toString();
+    const resolvedAgColId = agreementCollection!._id.toString();
     const versionNumber = selectedAgreementVersion!.versionNumber;
 
     const startDate = new Date(selectedAgreementVersion!.contract.validity.initial);
@@ -222,7 +222,7 @@ export const createConsolidationFetchTasksForAgreementVersion = async (
                 fetcherConfig: fetcherConfig.fetcherConfig!,
                 orgId,
                 scopeId: resolvedScopeId,
-                agColId,
+                agColId: resolvedAgColId,
                 versionNumber,
             };
             return directorIntegration.createRecurringFetchTask(

@@ -220,7 +220,7 @@ export const generateStatesForAgreementVersion = async (
     isAsync: boolean,
     orgName: string,
     scopeId: string,
-    agColName: string,
+    agColId: string,
     agreementVersion: string,
     temporalContext: ITemporalContext,
     existingStatePolicy: ExistingStatePolicy,
@@ -229,7 +229,7 @@ export const generateStatesForAgreementVersion = async (
     const selectedAgreementVersion = await agreementVersionService.getAgreementVersionBySelector(
         orgName,
         scopeId,
-        agColName,
+        agColId,
         agreementVersion,
         true,
         signatureIds,
@@ -257,7 +257,7 @@ export const generateConsolidatedStatesForAgreementVersion = async (
     isAsync: boolean,
     orgName: string,
     scopeId: string,
-    agColName: string,
+    agColId: string,
     agreementVersion: string,
     startDate: Date,
     endDate: Date,
@@ -268,7 +268,7 @@ export const generateConsolidatedStatesForAgreementVersion = async (
     const selectedAgreementVersion = await agreementVersionService.getAgreementVersionBySelector(
         orgName,
         scopeId,
-        agColName,
+        agColId,
         agreementVersion,
         true,
         signatureIds,
@@ -392,7 +392,6 @@ export const createConsolidationStateTasksForAgreementVersion = async (
             const inputArgs = {
                 orgName,
                 scopeId: resolvedScopeId,
-                agColName: agreementCollection!.name,
                 orgId,
                 agColId: agreementCollection!._id.toString(),
                 agreementVersion: resolvedAgreementVersion,
@@ -474,13 +473,13 @@ export const deleteConsolidationStateTasksForAgreementVersion = async (
 export const getStatesForAgreementVersion = async (
     orgName: string,
     scopeId: string,
-    agColName: string,
+    agColId: string,
     agreementVersion: string,
 ) => {
     const selectedAgreementVersion = await agreementVersionService.getAgreementVersionBySelector(
         orgName,
         scopeId,
-        agColName,
+        agColId,
         agreementVersion,
         true,
     );
@@ -501,7 +500,7 @@ export const getStatesForAgreementVersion = async (
     return {
         organizationName: orgName,
         scopeId,
-        agreementCollectionName: agColName,
+        agColId,
         agreementVersion: {
             ...selectedAgreementVersion,
             contract: {

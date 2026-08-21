@@ -10,14 +10,14 @@ export const fetchAgreementVersionFetchResults = async (
     try {
         const expand = req.query.expand === 'true';
         const isAsync = req.query.isAsync === 'true';
-        const { orgName, scopeId, agColName, agreementVersion } = req.params;
+        const { orgName, scopeId, agColId, agreementVersion } = req.params;
         const { date } = req.body;
 
         const { fetchResults, hasFailedFetchResults } =
             await fetcherService.fetchAgreementVersionFetchResults(
                 orgName,
                 scopeId,
-                agColName,
+                agColId,
                 agreementVersion,
                 new Date(date),
                 expand,
@@ -42,12 +42,12 @@ export const getConsolidationFetchesForAgreementVersion = async (
     next: NextFunction,
 ) => {
     try {
-        const { orgName, scopeId, agColName, agreementVersion } = req.params;
+        const { orgName, scopeId, agColId, agreementVersion } = req.params;
 
         const fetches = await fetcherService.getConsolidationFetchesForAgreementVersion(
             orgName,
             scopeId,
-            agColName,
+            agColId,
             agreementVersion,
         );
 
@@ -66,13 +66,13 @@ export const createConsolidationFetchTasksForAgreementVersion = async (
     next: NextFunction,
 ) => {
     try {
-        const { orgName, scopeId, agColName, agreementVersion } = req.params;
+        const { orgName, scopeId, agColId, agreementVersion } = req.params;
         const enabled = req.query.enabled === undefined || req.query.enabled === 'true';
 
         const fetchTasks = await fetcherService.createConsolidationFetchTasksForAgreementVersion(
             orgName,
             scopeId,
-            agColName,
+            agColId,
             agreementVersion,
             enabled,
         );

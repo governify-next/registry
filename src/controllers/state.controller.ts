@@ -10,13 +10,13 @@ export const generateStatesForAgreementVersion = async (
 ) => {
     try {
         const isAsync = req.query.isAsync === 'true';
-        const { orgName, scopeId, agColName, agreementVersion } = req.params;
+        const { orgName, scopeId, agColId, agreementVersion } = req.params;
         const { date, temporalMode, ifExists, signatureIds } = req.body;
         const states = await stateService.generateStatesForAgreementVersion(
             isAsync,
             orgName,
             scopeId,
-            agColName,
+            agColId,
             agreementVersion,
             {
                 effectiveAt: new Date(date),
@@ -43,7 +43,7 @@ export const generateConsolidatedStatesForAgreementVersion = async (
 ) => {
     try {
         const isAsync = req.query.isAsync === 'true';
-        const { orgName, scopeId, agColName, agreementVersion } = req.params;
+        const { orgName, scopeId, agColId, agreementVersion } = req.params;
         const { date, startDate, endDate, temporalMode, ifExists, signatureIds } = req.body;
         const requestedStartDate = new Date(date ?? startDate);
         const requestedEndDate = new Date(date ?? endDate);
@@ -52,7 +52,7 @@ export const generateConsolidatedStatesForAgreementVersion = async (
             isAsync,
             orgName,
             scopeId,
-            agColName,
+            agColId,
             agreementVersion,
             requestedStartDate,
             requestedEndDate,
@@ -89,11 +89,11 @@ export const getStatesForAgreementVersion = async (
     next: NextFunction,
 ) => {
     try {
-        const { orgName, scopeId, agColName, agreementVersion } = req.params;
+        const { orgName, scopeId, agColId, agreementVersion } = req.params;
         const states = await stateService.getStatesForAgreementVersion(
             orgName,
             scopeId,
-            agColName,
+            agColId,
             agreementVersion,
         );
         return sendSuccess(res, {

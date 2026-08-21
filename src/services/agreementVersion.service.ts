@@ -54,16 +54,12 @@ export const resolveAgreementVersionSelector = (
 export const getAgreementVersionBySelector = async (
     orgName: string,
     scopeId: string,
-    agColName: string,
+    agColId: string,
     agreementVersion: string,
     expand: boolean,
     signatureIds?: string[],
 ) => {
-    const agreementCollection = await getCleanAgreementCollectionByScope(
-        orgName,
-        scopeId,
-        agColName,
-    );
+    const agreementCollection = await getCleanAgreementCollectionByScope(orgName, scopeId, agColId);
     const selectedAgreementVersion = resolveAgreementVersionSelector(
         agreementCollection!,
         agreementVersion,
@@ -76,7 +72,7 @@ export const getAgreementVersionBySelector = async (
 export const createAgreementVersionByCollection = async (
     orgName: string,
     scopeId: string,
-    agreementName: string,
+    agColId: string,
     data: IAgreementVersionPayload,
 ) => {
     // TODO: validate in middleware that cannot pass a signaturesId or versionNumber. EarlyTermination could also be removed for the post
@@ -84,11 +80,7 @@ export const createAgreementVersionByCollection = async (
     const { signatures, ...versionData } = data;
 
     // 1. Get the agreement collection
-    const agreementCollection = await getCleanAgreementCollectionByScope(
-        orgName,
-        scopeId,
-        agreementName,
-    );
+    const agreementCollection = await getCleanAgreementCollectionByScope(orgName, scopeId, agColId);
 
     // 2. Get the new version number, the highest one plus one, or 1 if there are no versions
     const versionNumbers = agreementCollection!.agreementVersions.map((v) => v.versionNumber);
@@ -131,14 +123,10 @@ export const createAgreementVersionByCollection = async (
 export const getAgreementVersionsByCollection = async (
     orgName: string,
     scopeId: string,
-    agreementName: string,
+    agColId: string,
     expand: boolean,
 ) => {
-    const agreementCollection = await getCleanAgreementCollectionByScope(
-        orgName,
-        scopeId,
-        agreementName,
-    );
+    const agreementCollection = await getCleanAgreementCollectionByScope(orgName, scopeId, agColId);
 
     if (!expand) return agreementCollection!.agreementVersions;
 
@@ -173,14 +161,10 @@ export const deleteAgreementVersionBySelector = async (
 export const terminateActiveVersion = async (
     orgName: string,
     scopeId: string,
-    agreementName: string,
+    agColId: string,
     earlyTermination: string,
 ) => {
-    const agreementCollection = await getCleanAgreementCollectionByScope(
-        orgName,
-        scopeId,
-        agreementName,
-    );
+    const agreementCollection = await getCleanAgreementCollectionByScope(orgName, scopeId, agColId);
 
     const version = agreementCollection!.agreementVersions.find(
         (v) => v.versionNumber === agreementCollection!.auditableVersionNumber,

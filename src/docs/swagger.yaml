@@ -1563,11 +1563,11 @@ paths:
     # ──────────────────────────────────────────────
     # States
     # ──────────────────────────────────────────────
-    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{agreementVersion}/states:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColId}/agreementVersions/{agreementVersion}/states:
         parameters:
             - $ref: '#/components/parameters/orgName'
             - $ref: '#/components/parameters/scopeId'
-            - $ref: '#/components/parameters/agColName'
+            - $ref: '#/components/parameters/agColId'
             - $ref: '#/components/parameters/agreementVersionSelector'
         get:
             tags:
@@ -1597,7 +1597,7 @@ paths:
                                 data:
                                     organizationName: universidad-sevilla
                                     scopeId: 69cbdee759092b362376ca17
-                                    agreementCollectionName: tpa-US-PSG2-2526
+                                    agColId: 69cbe9901d5009a04361925d
                                     agreementVersion:
                                         versionNumber: 1
                                         contract:
@@ -1616,11 +1616,11 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
-    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{agreementVersion}/states/generate:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColId}/agreementVersions/{agreementVersion}/states/generate:
         parameters:
             - $ref: '#/components/parameters/orgName'
             - $ref: '#/components/parameters/scopeId'
-            - $ref: '#/components/parameters/agColName'
+            - $ref: '#/components/parameters/agColId'
             - $ref: '#/components/parameters/agreementVersionSelector'
         post:
             tags:
@@ -1834,7 +1834,7 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
-    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{agreementVersion}/states/consolidated/generate:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColId}/agreementVersions/{agreementVersion}/states/consolidated/generate:
         post:
             tags:
                 - States
@@ -1881,7 +1881,7 @@ paths:
             parameters:
                 - $ref: '#/components/parameters/orgName'
                 - $ref: '#/components/parameters/scopeId'
-                - $ref: '#/components/parameters/agColName'
+                - $ref: '#/components/parameters/agColId'
                 - $ref: '#/components/parameters/agreementVersionSelector'
                 - in: query
                   name: isAsync
@@ -2147,7 +2147,6 @@ paths:
                                       inputArgs:
                                           orgName: universidad-sevilla
                                           scopeId: 665e5f6a7b8c9d0e1f2a3b41
-                                          agColName: tpa-US-PSG2-2526
                                           orgId: 665e5f6a7b8c9d0e1f2a3b40
                                           agColId: 665e5f6a7b8c9d0e1f2a3b42
                                           agreementVersion: 2
@@ -2192,7 +2191,9 @@ paths:
                 - `startDate` and `endDate` are taken from agreement validity; an earlier
                   `earlyTermination` becomes the task end.
                 - At execution time, Director sends the exact scheduled instant to Registry with
-                  `temporalMode: CAPTURE`, `ifExists: KEEP`, and only that task's `signatureId`.
+                  `temporalMode: CAPTURE`, `ifExists: KEEP`, `isAsync=true`, and only that task's
+                  `signatureId`. Director awaits Registry's acceptance response, then releases its
+                  BullMQ worker while metric computation continues asynchronously in Registry.
 
                 Task creation requests are sent in parallel. If Director rejects one of them,
                 Registry returns `422`; tasks already accepted by Director are not rolled back.
@@ -2256,7 +2257,6 @@ paths:
                                       inputArgs:
                                           orgName: universidad-sevilla
                                           scopeId: 665e5f6a7b8c9d0e1f2a3b41
-                                          agColName: tpa-US-PSG2-2526
                                           orgId: 665e5f6a7b8c9d0e1f2a3b40
                                           agColId: 665e5f6a7b8c9d0e1f2a3b42
                                           agreementVersion: 2
@@ -2323,7 +2323,7 @@ paths:
     # ──────────────────────────────────────────────
     # Fetchers
     # ──────────────────────────────────────────────
-    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{agreementVersion}/fetchers/fetch:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColId}/agreementVersions/{agreementVersion}/fetchers/fetch:
         post:
             tags:
                 - Fetchers
@@ -2338,7 +2338,7 @@ paths:
             parameters:
                 - $ref: '#/components/parameters/orgName'
                 - $ref: '#/components/parameters/scopeId'
-                - $ref: '#/components/parameters/agColName'
+                - $ref: '#/components/parameters/agColId'
                 - $ref: '#/components/parameters/agreementVersionSelector'
                 - in: query
                   name: expand
@@ -2419,11 +2419,11 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
-    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{agreementVersion}/fetchers/consolidated:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColId}/agreementVersions/{agreementVersion}/fetchers/consolidated:
         parameters:
             - $ref: '#/components/parameters/orgName'
             - $ref: '#/components/parameters/scopeId'
-            - $ref: '#/components/parameters/agColName'
+            - $ref: '#/components/parameters/agColId'
             - $ref: '#/components/parameters/agreementVersionSelector'
         get:
             tags:
@@ -2467,11 +2467,11 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
-    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColName}/agreementVersions/{agreementVersion}/tasks/fetchers/consolidated:
+    /api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColId}/agreementVersions/{agreementVersion}/tasks/fetchers/consolidated:
         parameters:
             - $ref: '#/components/parameters/orgName'
             - $ref: '#/components/parameters/scopeId'
-            - $ref: '#/components/parameters/agColName'
+            - $ref: '#/components/parameters/agColId'
             - $ref: '#/components/parameters/agreementVersionSelector'
         post:
             tags:
@@ -2493,8 +2493,10 @@ paths:
                 - `anchorDate` and `interval` derived from the corresponding guarantee window.
 
                 At execution time, Director passes the task's exact scheduled instant to Fetcher as
-                `temporalContext.effectiveAt` with `mode: CAPTURE`. The temporal context is therefore
-                generated by Director and is not stored in `inputArgs`.
+                `temporalContext.effectiveAt` with `mode: CAPTURE` and `isAsync=true`. Director awaits
+                Fetcher's acceptance response, then releases its BullMQ worker while the external
+                acquisition continues asynchronously in Fetcher. The temporal context is generated
+                by Director and is not stored in `inputArgs`.
 
                 Task creation requests are sent in parallel. If Director rejects one of them, Registry
                 returns `422`; tasks already accepted by Director are not rolled back.
@@ -2622,14 +2624,6 @@ components:
             schema:
                 type: string
             example: 69cbdee759092b362376ca17
-        agColName:
-            name: agColName
-            in: path
-            required: true
-            description: Unique name of the agreement collection within the scope
-            schema:
-                type: string
-            example: tpa-US-PSG2-2526
         agreementVersionSelector:
             name: agreementVersion
             in: path
@@ -5476,7 +5470,7 @@ components:
             required:
                 - organizationName
                 - scopeId
-                - agreementCollectionName
+                - agColId
                 - agreementVersion
             properties:
                 organizationName:
@@ -5485,9 +5479,10 @@ components:
                 scopeId:
                     type: string
                     example: 69cbdee759092b362376ca17
-                agreementCollectionName:
+                agColId:
                     type: string
-                    example: tpa-US-PSG2-2526
+                    description: Agreement collection ObjectId.
+                    example: 69cbe9901d5009a04361925d
                 agreementVersion:
                     $ref: '#/components/schemas/AgreementVersionWithStates'
 
@@ -5659,7 +5654,6 @@ components:
             required:
                 - orgName
                 - scopeId
-                - agColName
                 - orgId
                 - agColId
                 - agreementVersion
@@ -5673,9 +5667,6 @@ components:
                     pattern: '^[a-fA-F0-9]{24}$'
                     description: Resolved Scope ObjectId.
                     example: 665e5f6a7b8c9d0e1f2a3b41
-                agColName:
-                    type: string
-                    example: tpa-US-PSG2-2526
                 orgId:
                     type: string
                     pattern: '^[a-fA-F0-9]{24}$'

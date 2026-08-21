@@ -16,7 +16,6 @@ export interface IRecurringFetchTaskInputArgs {
 export interface IRecurringStateTaskInputArgs {
     orgName: string;
     scopeId: string;
-    agColName: string;
     orgId: string;
     agColId: string;
     agreementVersion: number;
