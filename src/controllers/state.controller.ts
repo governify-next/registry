@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { sendSuccess } from '../utils/standardResponse.js';
 import * as stateService from '../services/state.service.js';
 import { ExistingStatePolicy, TemporalMode } from '../types/temporal.types.js';
+import { ComplianceStatus } from '../models/state.model.js';
 
 export const generateStatesForAgreementVersion = async (
     req: Request,
@@ -25,11 +26,13 @@ export const generateStatesForAgreementVersion = async (
             ifExists as ExistingStatePolicy,
             signatureIds as string[] | undefined,
         );
-        const hasIndeterminateStates = !isAsync && states.some((state) => state.indeterminate);
+        const hasIndeterminateComplianceResults =
+            !isAsync &&
+            states.some((state) => state.complianceStatus === ComplianceStatus.INDETERMINATE);
         return sendSuccess(res, {
             data: states,
             message: isAsync ? 'States created' : 'States created and generated',
-            httpStatus: hasIndeterminateStates ? 207 : 200,
+            httpStatus: hasIndeterminateComplianceResults ? 207 : 200,
         });
     } catch (err) {
         next(err);
@@ -69,14 +72,16 @@ export const generateConsolidatedStatesForAgreementVersion = async (
             });
         }
 
-        const hasIndeterminateStates = !isAsync && states.some((state) => state.indeterminate);
+        const hasIndeterminateComplianceResults =
+            !isAsync &&
+            states.some((state) => state.complianceStatus === ComplianceStatus.INDETERMINATE);
 
         return sendSuccess(res, {
             data: states,
             message: isAsync
                 ? 'Consolidated states created'
                 : 'Consolidated states created and generated',
-            httpStatus: hasIndeterminateStates ? 207 : 200,
+            httpStatus: hasIndeterminateComplianceResults ? 207 : 200,
         });
     } catch (err) {
         next(err);

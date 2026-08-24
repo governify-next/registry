@@ -1607,7 +1607,7 @@ paths:
                                                   states:
                                                       - _id: 665e5f6a7b8c9d0e1f2a3b4c
                                                         status: COMPLETED
-                                                        compliant: true
+                                                        complianceStatus: COMPLIANT
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
@@ -1658,14 +1658,14 @@ paths:
                 | Computer outcome | Stored metric | Effect on the state |
                 | --- | --- | --- |
                 | HTTP success with `status: COMPUTED` | `COMPUTED`, with `value` and evidences | The metric can be used in the numeric expression. |
-                | HTTP success with `status: UNAVAILABLE` | `UNAVAILABLE`, `value: null` | If no metric failed, state is `COMPLETED` but `indeterminate: true`. |
-                | HTTP success with `status: FAILED` | `FAILED`, `value: null` | State is `FAILED` and `indeterminate: true`. |
-                | Computer cannot be reached or returns a non-success response | Registry stores that metric as `FAILED` with `errorMessage` | State is `FAILED` and `indeterminate: true`; the per-metric Computer error is represented in the state instead of being returned as the endpoint HTTP error. |
+                | HTTP success with `status: UNAVAILABLE` | `UNAVAILABLE`, `value: null` | If no metric failed, state is `COMPLETED` with `complianceStatus: INDETERMINATE`. |
+                | HTTP success with `status: FAILED` | `FAILED`, `value: null` | State is `FAILED` with `complianceStatus: INDETERMINATE`. |
+                | Computer cannot be reached or returns a non-success response | Registry stores that metric as `FAILED` with `errorMessage` | State is `FAILED` with `complianceStatus: INDETERMINATE`; the per-metric Computer error is represented in the state instead of being returned as the endpoint HTTP error. |
 
                 Therefore a state is `COMPLETED` and determinate only when every metric is
                 `COMPUTED` and the numeric expression produces a finite value. `UNAVAILABLE` is a
-                domain outcome, not an execution failure, so it produces a `COMPLETED` but
-                indeterminate state. A `FAILED` metric takes precedence over unavailable metrics.
+                domain outcome, not an execution failure, so it produces a `COMPLETED` state with
+                `complianceStatus: INDETERMINATE`. A `FAILED` metric takes precedence over unavailable metrics.
 
                 **Existing-state and execution policies**
 
@@ -1674,7 +1674,7 @@ paths:
                 - `REPLACE`: the existing document is reinitialized and recomputed with the requested
                   temporal mode; its replacement attempt is incremented.
                 - `isAsync=false`: waits for computation and returns HTTP `207` when at least one
-                  returned state is indeterminate; otherwise returns HTTP `200`.
+                  returned state has `complianceStatus: INDETERMINATE`; otherwise returns HTTP `200`.
                 - `isAsync=true`: returns the claimed states immediately, normally as `IN_PROGRESS`
                   with `PENDING` metrics, using HTTP `200`. Final results are persisted in the background.
 
@@ -1741,7 +1741,8 @@ paths:
             responses:
                 '200':
                     description: |
-                        Successful response with no synchronous indeterminate states. This is also
+                        Successful response with no synchronous states whose `complianceStatus` is
+                        `INDETERMINATE`. This is also
                         the response used by asynchronous generation, whose newly claimed states are
                         normally returned as `IN_PROGRESS` with `PENDING` metrics. With `KEEP`, an
                         already stored state is returned unchanged and may already be terminal.
@@ -1767,13 +1768,12 @@ paths:
                                       date: '2026-05-21T00:00:00.000Z'
                                       consolidated: true
                                       status: COMPLETED
-                                      compliant: true
-                                      indeterminate: false
+                                      complianceStatus: COMPLIANT
                                 error: null
                 '207':
                     description: |
                         Synchronous generation completed, but at least one returned state has
-                        `indeterminate: true`. The response still has `success: true`. Typical cases
+                        `complianceStatus: INDETERMINATE`. The response still has `success: true`. Typical cases
                         are a snapshot cache miss during `REPLAY` (`status: COMPLETED` with an
                         `UNAVAILABLE` metric), a Computer/domain failure (`status: FAILED`), or a
                         numeric expression that did not produce a finite value. This response is not
@@ -1800,8 +1800,7 @@ paths:
                                       date: '2026-05-21T00:00:00.000Z'
                                       status: COMPLETED
                                       numericExpressionValue: null
-                                      compliant: null
-                                      indeterminate: true
+                                      complianceStatus: INDETERMINATE
                                       metrics:
                                           - metricName: COUNT_DONEISSUES_MEMBER
                                             status: UNAVAILABLE
@@ -1859,14 +1858,16 @@ paths:
 
                 Computer and state statuses are resolved independently for every generated state:
 
-                | Metric outcomes | State status | `indeterminate` | HTTP status when synchronous |
+                | Metric outcomes | State status | `complianceStatus` | HTTP status when synchronous |
                 | --- | --- | --- | --- |
-                | Every metric is `COMPUTED` and the expression produces a finite value | `COMPLETED` | `false` | `200` |
-                | No metric is `FAILED`, but at least one is `UNAVAILABLE` | `COMPLETED` | `true` | `207` |
-                | At least one metric is `FAILED`, including a Computer non-success response | `FAILED` | `true` | `207` |
+                | Every metric is `COMPUTED` and the expression satisfies the comparator | `COMPLETED` | `COMPLIANT` | `200` |
+                | Every metric is `COMPUTED` and the expression does not satisfy the comparator | `COMPLETED` | `NON_COMPLIANT` | `200` |
+                | No metric is `FAILED`, but at least one is `UNAVAILABLE` | `COMPLETED` | `INDETERMINATE` | `207` |
+                | At least one metric is `FAILED`, including a Computer non-success response | `FAILED` | `INDETERMINATE` | `207` |
                 | Metrics are still being processed (`isAsync=true`) | `IN_PROGRESS` | `null` | `200` |
 
-                A batch returns `207` when any synchronously generated state is indeterminate,
+                A batch returns `207` when any synchronously generated state has
+                `complianceStatus: INDETERMINATE`,
                 even if the other states are determinate. Computer communication errors are caught
                 per metric and stored as `FAILED` metrics with `errorMessage`.
 
@@ -1995,8 +1996,7 @@ paths:
                                       threshold: 1
                                       replacedNumericExpression: '2'
                                       numericExpressionValue: 2
-                                      compliant: true
-                                      indeterminate: false
+                                      complianceStatus: COMPLIANT
                                       window:
                                           anchorDate: '2026-05-14T00:00:00.000Z'
                                           period:
@@ -2029,7 +2029,8 @@ paths:
                                 error: null
                 '207':
                     description: |
-                        Synchronous generation completed with at least one indeterminate state.
+                        Synchronous generation completed with at least one state whose
+                        `complianceStatus` is `INDETERMINATE`.
                         This includes `COMPLETED` states containing `UNAVAILABLE` metrics and
                         `FAILED` states containing failed metrics. The response remains successful
                         (`success: true`) and may also contain determinate states.
@@ -2062,8 +2063,7 @@ paths:
                                       threshold: 1
                                       replacedNumericExpression: null
                                       numericExpressionValue: null
-                                      compliant: null
-                                      indeterminate: true
+                                      complianceStatus: INDETERMINATE
                                       window:
                                           anchorDate: '2026-05-14T00:00:00.000Z'
                                           period:
@@ -5231,11 +5231,18 @@ components:
                 | `status` | Meaning |
                 | --- | --- |
                 | `IN_PROGRESS` | Metric computation has not finished. Metrics are normally `PENDING`, `endDate` is null, and evaluation fields are null. |
-                | `COMPLETED` | Processing ended without a failed metric. The state can still be indeterminate when a metric is `UNAVAILABLE` or the numeric expression has no finite result. |
-                | `FAILED` | At least one metric failed, or state generation encountered an execution error. The state is indeterminate. |
+                | `COMPLETED` | Processing ended without a failed metric. `complianceStatus` contains `COMPLIANT`, `NON_COMPLIANT`, or `INDETERMINATE`. |
+                | `FAILED` | At least one metric failed, or state generation encountered an execution error. `complianceStatus` is `INDETERMINATE`. |
 
-                In particular, `COMPLETED` does not imply `compliant` is known. Consumers must
-                inspect `indeterminate` and `compliant` as well as `status`.
+                Execution and compliance are separate dimensions. `status` describes whether the
+                generation ran successfully, while `complianceStatus` describes its business result.
+                The only valid combinations are:
+
+                | `status` | Valid `complianceStatus` values |
+                | --- | --- |
+                | `IN_PROGRESS` | `null` |
+                | `COMPLETED` | `COMPLIANT`, `NON_COMPLIANT`, `INDETERMINATE` |
+                | `FAILED` | `INDETERMINATE` |
             properties:
                 _id:
                     type: string
@@ -5276,8 +5283,8 @@ components:
                     type: string
                     enum: [IN_PROGRESS, COMPLETED, FAILED]
                     description: |
-                        Execution outcome. `COMPLETED` may still have `indeterminate: true`
-                        when data was unavailable.
+                        Generation execution outcome. `COMPLETED` can still have
+                        `complianceStatus: INDETERMINATE` when data was unavailable.
                     example: COMPLETED
                 numericExpression:
                     type: string
@@ -5299,16 +5306,15 @@ components:
                     nullable: true
                     description: Finite result of the numeric expression. Null while pending or when evaluation is indeterminate.
                     example: 2
-                compliant:
-                    type: boolean
+                complianceStatus:
+                    type: string
+                    enum: [COMPLIANT, NON_COMPLIANT, INDETERMINATE]
                     nullable: true
-                    description: Compliance result against `comparator` and `threshold`. Null while pending or when `indeterminate` is true.
-                    example: true
-                indeterminate:
-                    type: boolean
-                    nullable: true
-                    description: Null while processing, false when compliance was evaluated, and true when unavailable/failed metrics or an invalid numeric result prevent evaluation.
-                    example: false
+                    description: |
+                        Compliance evaluation result. Null only while `status` is `IN_PROGRESS`;
+                        `INDETERMINATE` means unavailable or failed metrics, or an invalid numeric
+                        result, prevented a compliance decision.
+                    example: COMPLIANT
                 window:
                     type: object
                     properties:

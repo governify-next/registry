@@ -7,7 +7,7 @@ import * as computerIntegration from '../integrations/computer.integration.js';
 import * as directorIntegration from '../integrations/director.integration.js';
 import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
 import * as agreementCollectionRepository from '../repositories/agreementCollection.repository.js';
-import { IState, StateStatus } from '../models/state.model.js';
+import { ComplianceStatus, IState, StateStatus } from '../models/state.model.js';
 import { IAssembledGuarantee } from '../types/assembledGuarantee.types.js';
 import { IMetric, MetricStatus } from '../types/metric.types.js';
 import { Comparator } from '../types/comparator.types.js';
@@ -84,7 +84,7 @@ export const generateState = async (
                 {
                     endDate: new Date(),
                     status: StateStatus.FAILED,
-                    indeterminate: true,
+                    complianceStatus: ComplianceStatus.INDETERMINATE,
                 },
             );
             throw error;
@@ -130,8 +130,7 @@ export const createInitialState = async (
         threshold: guarantee.threshold,
         replacedNumericExpression: null,
         numericExpressionValue: null,
-        compliant: null,
-        indeterminate: null,
+        complianceStatus: null,
         window: guarantee.window,
         metrics: guarantee.metrics.map((metric) => ({
             metricName: metric.metricName,
@@ -180,24 +179,21 @@ export const evaluateState = async (
     const numericExpressionValue = canEvaluate
         ? evaluatorService.evaluateNumericExpression(numericExpression, processedMetrics)
         : null;
-    const indeterminate = !canEvaluate || numericExpressionValue === null;
+    const isIndeterminate = !canEvaluate || numericExpressionValue === null;
+    const complianceStatus = isIndeterminate
+        ? ComplianceStatus.INDETERMINATE
+        : evaluatorService.evaluateCompliance(numericExpressionValue, comparator, threshold)
+          ? ComplianceStatus.COMPLIANT
+          : ComplianceStatus.NON_COMPLIANT;
 
     const updatedState = await stateRepository.updateStateByIdAndGenerationId(id, generationId, {
         endDate: new Date(),
         status: hasFailedMetric ? StateStatus.FAILED : StateStatus.COMPLETED,
-        replacedNumericExpression: indeterminate
+        replacedNumericExpression: isIndeterminate
             ? null
             : evaluatorService.replaceExpressionWithValues(numericExpression, processedMetrics),
         numericExpressionValue,
-        compliant:
-            numericExpressionValue === null
-                ? null
-                : evaluatorService.evaluateCompliance(
-                      numericExpressionValue,
-                      comparator,
-                      threshold,
-                  ),
-        indeterminate,
+        complianceStatus,
         metrics: processedMetrics,
     });
 
