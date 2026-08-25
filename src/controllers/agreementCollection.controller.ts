@@ -2,7 +2,23 @@ import { Request, Response, NextFunction } from 'express';
 import { sendSuccess } from '../utils/standardResponse.js';
 import * as agreementCollectionService from '../services/agreementCollection.service.js';
 
-export const getAgreementCollectionsByElement = async (
+export const getAgreementCollectionsByOrganization = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const agreementCollections =
+            await agreementCollectionService.getAgreementCollectionsByOrganization(
+                req.params.orgName,
+            );
+        return sendSuccess(res, { data: agreementCollections });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getAgreementCollectionsByScope = async (
     req: Request,
     res: Response,
     next: NextFunction,
@@ -11,9 +27,9 @@ export const getAgreementCollectionsByElement = async (
         const expand = req.query.expand === 'true';
 
         const agreementCollections =
-            await agreementCollectionService.getAgreementCollectionsByElement(
+            await agreementCollectionService.getAgreementCollectionsByScope(
                 req.params.orgName,
-                req.params.elementName,
+                req.params.scopeId,
                 expand,
             );
         return sendSuccess(res, { data: agreementCollections });
@@ -22,7 +38,7 @@ export const getAgreementCollectionsByElement = async (
     }
 };
 
-export const getAgreementCollectionByElement = async (
+export const getAgreementCollectionById = async (
     req: Request,
     res: Response,
     next: NextFunction,
@@ -30,29 +46,26 @@ export const getAgreementCollectionByElement = async (
     try {
         const expand = req.query.expand === 'true';
 
-        const agreementCollection =
-            await agreementCollectionService.getAgreementCollectionByElement(
-                req.params.orgName,
-                req.params.elementName,
-                req.params.agColName,
-                expand,
-            );
+        const agreementCollection = await agreementCollectionService.getAgreementCollectionById(
+            req.params.agColId,
+            expand,
+        );
         return sendSuccess(res, { data: agreementCollection });
     } catch (err) {
         next(err);
     }
 };
 
-export const createAgreementCollectionByElement = async (
+export const createAgreementCollectionByScope = async (
     req: Request,
     res: Response,
     next: NextFunction,
 ) => {
     try {
         const agreementCollection =
-            await agreementCollectionService.createAgreementCollectionByElement(
+            await agreementCollectionService.createAgreementCollectionByScope(
                 req.params.orgName,
-                req.params.elementName,
+                req.params.scopeId,
                 req.body,
             );
         return sendSuccess(res, {
@@ -65,19 +78,16 @@ export const createAgreementCollectionByElement = async (
     }
 };
 
-export const updateAgreementCollectionByElement = async (
+export const updateAgreementCollectionById = async (
     req: Request,
     res: Response,
     next: NextFunction,
 ) => {
     try {
-        const agreementCollection =
-            await agreementCollectionService.updateAgreementCollectionByElement(
-                req.params.orgName,
-                req.params.elementName,
-                req.params.agColName,
-                req.body,
-            );
+        const agreementCollection = await agreementCollectionService.updateAgreementCollectionById(
+            req.params.agColId,
+            req.body,
+        );
         return sendSuccess(res, {
             data: agreementCollection,
             message: 'Agreement collection updated',
@@ -87,17 +97,13 @@ export const updateAgreementCollectionByElement = async (
     }
 };
 
-export const deleteAgreementCollectionByElement = async (
+export const deleteAgreementCollectionById = async (
     req: Request,
     res: Response,
     next: NextFunction,
 ) => {
     try {
-        await agreementCollectionService.deleteAgreementCollectionByElement(
-            req.params.orgName,
-            req.params.elementName,
-            req.params.agColName,
-        );
+        await agreementCollectionService.deleteAgreementCollectionById(req.params.agColId);
         return sendSuccess(res, {
             data: null,
             message: 'Agreement collection deleted',

@@ -8,6 +8,7 @@ import { getGuaranteeByTemplateIds, resolveGuaranteeById } from './guarantee.ser
 import * as signatureRepository from '../repositories/signature.repository.js';
 import { IAgreementVersion } from '../models/agreementCollection.model.js';
 import { resolveAgreementTemplateById } from './agreementTemplate.service.js';
+import { ValidationError } from '../utils/customErrors.js';
 
 export const createSignaturesByVersion = async (
     signatures: IAgreementVersionSignatureInput[],
@@ -15,11 +16,11 @@ export const createSignaturesByVersion = async (
 ) => {
     const createdSignatures = await Promise.all(
         signatures.map(async (sig) => {
-            // Obtenemos el guarantee template id a partir del name
+            // Get the guarantee template id from the name
             const guaranteeTemplate = await getGuaranteeTemplateByName(sig.guaranteeName);
             const guaranteeTemplateId = guaranteeTemplate!._id;
 
-            // Obtenemos la guarantee a partir de la guarantee template y el agreement template
+            // Get the guarantee from the guarantee template and the agreement template
             const guarantee = await getGuaranteeByTemplateIds(templateId, guaranteeTemplateId);
 
             return await signatureRepository.createSignature(guarantee!._id, sig.metrics);
@@ -33,10 +34,43 @@ export const getSignaturesByIds = async (signatureIds: Types.ObjectId[]) => {
     return await signatureRepository.getSignaturesByIds(signatureIds);
 };
 
-export const assembleBySignature = async (agreementVersion: IAgreementVersion) => {
-    // Buscamos las signatures de la version por los ids
-    const signatureIds = agreementVersion.contract.signaturesId;
-    const signatures = await getSignaturesByIds(signatureIds);
+export const assembleBySignature = async (
+    agreementVersion: IAgreementVersion,
+    requestedSignatureIds?: string[],
+) => {
+    const agreementSignatureIds = agreementVersion.contract.signaturesId;
+    let signatureIds = agreementSignatureIds;
+
+    if (requestedSignatureIds !== undefined) {
+        const availableSignatureIds = new Set(
+            agreementSignatureIds.map((signatureId) => signatureId.toString().toLowerCase()),
+        );
+        const unknownSignatureIds = requestedSignatureIds.filter(
+            (signatureId) => !availableSignatureIds.has(signatureId.toLowerCase()),
+        );
+
+        if (unknownSignatureIds.length > 0) {
+            throw new ValidationError(
+                'Some signatureIds do not belong to the selected agreement version',
+                { unknownSignatureIds },
+            );
+        }
+
+        const requestedSignatureIdSet = new Set(
+            requestedSignatureIds.map((signatureId) => signatureId.toLowerCase()),
+        );
+        signatureIds = agreementSignatureIds.filter((signatureId) =>
+            requestedSignatureIdSet.has(signatureId.toString().toLowerCase()),
+        );
+    }
+
+    const unorderedSignatures = await getSignaturesByIds(signatureIds);
+    const signaturesById = new Map(
+        unorderedSignatures.map((signature) => [signature._id.toString(), signature]),
+    );
+    const signatures = signatureIds
+        .map((signatureId) => signaturesById.get(signatureId.toString()))
+        .filter((signature) => signature !== undefined);
 
     const assembledSignatures = await Promise.all(
         signatures.map(async (sig) => {

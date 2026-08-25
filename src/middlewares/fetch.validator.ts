@@ -14,4 +14,4 @@ const dateRequiredValidation = body('date')
     .isISO8601()
     .withMessage('date must be a valid ISO 8601 date');
 
-export const validateFetchAuditableVersionBody = [dateRequiredValidation, collectValidationErrors];
+export const validateFetchAgreementVersionBody = [dateRequiredValidation, collectValidationErrors];

@@ -19,7 +19,7 @@ const guaranteeSchema = new Schema<IGuarantee>({
     window: { type: windowSchema, required: true },
 });
 
-// No se pueden crear diferentes garantías para un guarantee template en un agreement template
+// Different guarantees cannot be created for the same guarantee template within an agreement template
 guaranteeSchema.index({ agreementTemplateId: 1, guaranteeTemplateId: 1 }, { unique: true });
 
 const Guarantee = mongoose.model<IGuarantee>('Guarantee', guaranteeSchema);

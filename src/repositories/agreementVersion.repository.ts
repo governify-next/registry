@@ -27,7 +27,7 @@ export const updateSignaturesId = async (
     );
 };
 
-export const deleteVersionByCollection = async (
+export const deleteAgreementVersionByCollection = async (
     agColId: Types.ObjectId,
     versionNumber: number,
     resetAuditable: boolean,

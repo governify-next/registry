@@ -27,16 +27,16 @@ export const createAgreementTemplateByOrganization = async (
     orgId: Types.ObjectId,
     data: IAgreementTemplatePayload,
 ) => {
-    // 1. Extraemos cada parte del payload
+    // 1. Extract each part of the payload
     const { guarantees, ...agreementData } = data;
 
-    // 2. Creamos la agreementTemplate
+    // 2. Create the agreement template
     const newTemplate = await agreementTemplateRepository.createAgreementTemplate(
         orgId,
         agreementData,
     );
 
-    // 3. Creamos las guarantees asociadas
+    // 3. Create the associated guarantees
     await buildAndSaveGuarantees(newTemplate._id, guarantees);
 
     return await assembleAgreementTemplate(newTemplate);
@@ -62,7 +62,7 @@ export const buildAndSaveGuarantees = async (
             threshold: g.threshold,
             window: {
                 ...g.window,
-                anchorDate: new Date(g.window.anchorDate), // convertimos string enviado a Date
+                anchorDate: new Date(g.window.anchorDate),
             },
         };
     });
@@ -100,7 +100,7 @@ export const getAgreementTemplatesByOrganization = async (orgId: Types.ObjectId)
     return await Promise.all(templates.map((t) => assembleAgreementTemplate(t)));
 };
 
-// TODO: Unificar ambas funciones con un atributo de control
+// TODO: unified both functions with a control attribute
 export const getCleanAgreementTemplatesByOrganization = async (orgId: Types.ObjectId) => {
     const templates = await agreementTemplateRepository.getAgreementTemplatesByOrganization(orgId);
 
@@ -114,20 +114,20 @@ export const updateAgreementTemplateByOrganization = async (
 ) => {
     const { guarantees, name, description, displayName, isPublic } = data;
 
-    // 1. Actualizamos el agreementTemplate
+    // 1. Update the agreement template
     const updatedTemplate = await agreementTemplateRepository.updateAgreementTemplate(
         orgId,
         agreementTemplateName,
         { name, description, displayName, isPublic },
     );
 
-    // 2. Hacemos un wipe and replace de las guarantees asociadas al agreement template
+    // 2. Make a wipe and replace of the associated guarantees to the agreement template
     await guaranteeService.deleteGuaranteesByTemplateId(updatedTemplate!._id);
 
-    // 3. Creamos las nuevas guarantees asociadas
+    // 3. Create the new associated guarantees
     await buildAndSaveGuarantees(updatedTemplate!._id, guarantees);
 
-    // 4. Devolvemos la respuesta construida
+    // 4. Return the built response
     return await assembleAgreementTemplate(updatedTemplate!);
 };
 
@@ -135,14 +135,14 @@ export const deleteAgreementTemplateByOrganization = async (
     orgId: Types.ObjectId,
     agreementTemplateName: string,
 ) => {
-    // 1. Buscamos el agreement template
+    // 1. Get the agreement template
     const template = await agreementTemplateRepository.getAgreementTemplateByOrganization(
         orgId,
         agreementTemplateName,
     );
-    // 2. Borramos las garantías que referencian al agreement template
+    // 2. Delete the associated guarantees
     await guaranteeService.deleteGuaranteesByTemplateId(template!._id);
-    // 3. Borramos el agreement template
+    // 3. Delete the agreement template
     return await agreementTemplateRepository.deleteAgreementTemplate(template!._id);
 };
 

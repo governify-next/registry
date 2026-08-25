@@ -1,43 +1,42 @@
 import { Router } from 'express';
 import * as agreementVersionController from '../controllers/agreementVersion.controller.js';
-import { existingElement } from '../middlewares/element.validator.js';
+import { existingScope } from '../middlewares/scope.validator.js';
 import { existingAgreementCollection } from '../middlewares/agreementCollection.validator.js';
 import {
     validateCreateAgreementVersion,
     validateTerminateVersion,
-    existingAuditableVersion,
-    existingVersionNumber,
+    existingSelectedAgreementVersion,
 } from '../middlewares/agreementVersion.validator.js';
 import { validateComputerHealth } from '../middlewares/computer.validator.js';
 
 export const agreementVersionRoutes = Router();
 
 agreementVersionRoutes.get(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions',
-    existingElement,
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions',
+    existingScope,
     existingAgreementCollection,
     agreementVersionController.getAgreementVersionsByCollection,
 );
 
 agreementVersionRoutes.get(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/auditableVersion',
-    existingElement,
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion',
+    existingScope,
     existingAgreementCollection,
-    existingAuditableVersion,
-    agreementVersionController.getAuditableVersionByCollection,
+    existingSelectedAgreementVersion,
+    agreementVersionController.getAgreementVersionByCollection,
 );
 
 agreementVersionRoutes.delete(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/:versionNumber',
-    existingElement,
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion',
+    existingScope,
     existingAgreementCollection,
-    existingVersionNumber,
+    existingSelectedAgreementVersion,
     agreementVersionController.deleteAgreementVersionByCollection,
 );
 
 agreementVersionRoutes.post(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions',
-    existingElement,
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions',
+    existingScope,
     existingAgreementCollection,
     validateComputerHealth,
     validateCreateAgreementVersion,
@@ -45,8 +44,8 @@ agreementVersionRoutes.post(
 );
 
 agreementVersionRoutes.post(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/activeVersion/terminate',
-    existingElement,
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/activeVersion/terminate',
+    existingScope,
     existingAgreementCollection,
     validateTerminateVersion,
     agreementVersionController.terminateActiveVersion,

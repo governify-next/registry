@@ -8,29 +8,32 @@ import { IWindow } from '../types/window.types.js';
 import * as windowUtil from '../utils/window.util.js';
 import { ConsolidationFetch } from '../types/fetcher.types.js';
 import { fromPeriodToMilliseconds } from '../utils/window.util.js';
+import { TemporalMode } from '../types/temporal.types.js';
 
 type IFetcherConfigWithWindow = {
     fetcherConfig: IFetcherConfig;
     window: IWindow;
 };
 
-export const fetchAuditableVersionFetchResults = async (
+export const fetchAgreementVersionFetchResults = async (
     orgName: string,
-    elementName: string,
-    agColName: string,
+    scopeId: string,
+    agColId: string,
+    agreementVersion: string,
     date: Date,
     expand: boolean,
     isAsync: boolean,
 ) => {
-    const auditableAgreementVersion = await agreementVersionService.getAuditableVersionByCollection(
+    const selectedAgreementVersion = await agreementVersionService.getAgreementVersionBySelector(
         orgName,
-        elementName,
-        agColName,
+        scopeId,
+        agColId,
+        agreementVersion,
         true,
     );
     const signatures =
-        'signatures' in auditableAgreementVersion!.contract
-            ? auditableAgreementVersion!.contract.signatures
+        'signatures' in selectedAgreementVersion!.contract
+            ? selectedAgreementVersion!.contract.signatures
             : [];
 
     const fetcherConfigs = signatures.flatMap((signature) =>
@@ -50,25 +53,27 @@ export const fetchAuditableVersionFetchResults = async (
     };
 };
 
-export const getConsolidationFetchesForAuditableVersion = async (
+export const getConsolidationFetchesForAgreementVersion = async (
     orgName: string,
-    elementName: string,
-    agColName: string,
+    scopeId: string,
+    agColId: string,
+    agreementVersion: string,
 ): Promise<ConsolidationFetch[]> => {
-    const auditableAgreementVersion = await agreementVersionService.getAuditableVersionByCollection(
+    const selectedAgreementVersion = await agreementVersionService.getAgreementVersionBySelector(
         orgName,
-        elementName,
-        agColName,
+        scopeId,
+        agColId,
+        agreementVersion,
         true,
     );
 
     const signatures =
-        'signatures' in auditableAgreementVersion!.contract
-            ? auditableAgreementVersion!.contract.signatures
+        'signatures' in selectedAgreementVersion!.contract
+            ? selectedAgreementVersion!.contract.signatures
             : [];
 
-    const startDate = new Date(auditableAgreementVersion!.contract.validity.initial);
-    const endDate = new Date(auditableAgreementVersion!.contract.validity.end);
+    const startDate = new Date(selectedAgreementVersion!.contract.validity.initial);
+    const endDate = new Date(selectedAgreementVersion!.contract.validity.end);
     const fetches = new Map<string, ConsolidationFetch>();
 
     for (const signature of signatures) {
@@ -136,7 +141,7 @@ const fetchFetchResults = async (
         [...uniqueFetches.values()].map(({ fetcherConfig }) =>
             fetcherIntegration.generateFetchResult(
                 fetcherConfig.fetcherId,
-                date,
+                { effectiveAt: date, mode: TemporalMode.CAPTURE },
                 fetcherConfig.fetcherConfig!,
                 isAsync,
             ),
@@ -151,22 +156,24 @@ const buildFetchKey = (fetcherConfig: IFetcherConfig, window: IWindow) => {
     });
 };
 
-export const createConsolidationFetchTasksForAuditableVersion = async (
+export const createConsolidationFetchTasksForAgreementVersion = async (
     orgName: string,
-    elementName: string,
-    agColName: string,
+    scopeId: string,
+    agColId: string,
+    agreementVersion: string,
     enabled: boolean,
 ) => {
-    const auditableAgreementVersion = await agreementVersionService.getAuditableVersionByCollection(
+    const selectedAgreementVersion = await agreementVersionService.getAgreementVersionBySelector(
         orgName,
-        elementName,
-        agColName,
+        scopeId,
+        agColId,
+        agreementVersion,
         true,
     );
 
     const signatures =
-        'signatures' in auditableAgreementVersion!.contract
-            ? auditableAgreementVersion!.contract.signatures
+        'signatures' in selectedAgreementVersion!.contract
+            ? selectedAgreementVersion!.contract.signatures
             : [];
 
     const fetcherConfigsWithWindow: IFetcherConfigWithWindow[] = [
@@ -190,22 +197,22 @@ export const createConsolidationFetchTasksForAuditableVersion = async (
         ).values(),
     ];
 
-    const [organization, element] = await Promise.all([
+    const [organization, scope] = await Promise.all([
         scopeManagerIntegration.getOrganizationByName(orgName),
-        scopeManagerIntegration.getElementByOrgAndNameAndElementName(orgName, elementName),
+        scopeManagerIntegration.getScopeByOrgAndScopeId(orgName, scopeId),
     ]);
-    const agreementCollection = await agreementCollectionRepository.getAgreementCollectionByElement(
-        element!._id,
-        agColName,
+    const agreementCollection = await agreementCollectionRepository.getAgreementCollectionByScope(
+        scope!._id,
+        agColId,
     );
 
-    const orgId = organization!._id;
-    const elementId = element!._id;
-    const agColId = agreementCollection!._id;
-    const versionNumber = auditableAgreementVersion!.versionNumber;
+    const orgId = organization!._id.toString();
+    const resolvedScopeId = scope!._id.toString();
+    const resolvedAgColId = agreementCollection!._id.toString();
+    const versionNumber = selectedAgreementVersion!.versionNumber;
 
-    const startDate = new Date(auditableAgreementVersion!.contract.validity.initial);
-    const endDate = new Date(auditableAgreementVersion!.contract.validity.end);
+    const startDate = new Date(selectedAgreementVersion!.contract.validity.initial);
+    const endDate = new Date(selectedAgreementVersion!.contract.validity.end);
 
     const fetchTasks = await Promise.all(
         fetcherConfigsWithWindow.map((fetcherConfigWithWindow) => {
@@ -214,8 +221,8 @@ export const createConsolidationFetchTasksForAuditableVersion = async (
                 fetcherId: fetcherConfig.fetcherId,
                 fetcherConfig: fetcherConfig.fetcherConfig!,
                 orgId,
-                elementId,
-                agColId,
+                scopeId: resolvedScopeId,
+                agColId: resolvedAgColId,
                 versionNumber,
             };
             return directorIntegration.createRecurringFetchTask(

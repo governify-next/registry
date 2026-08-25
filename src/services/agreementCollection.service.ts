@@ -5,18 +5,21 @@ import { IAgreementCollection } from '../models/agreementCollection.model.js';
 import { assembleAgreementVersions } from './agreementVersion.service.js';
 import { deleteSignaturesByIds } from './signature.service.js';
 
-export const getAgreementCollectionsByElement = async (
+export const getAgreementCollectionsByOrganization = async (orgName: string) => {
+    const scopeIds = await scopeManagerIntegration.getScopeIdsByOrganization(orgName);
+
+    return await agreementCollectionRepository.getAgreementCollectionsByScopeIds(scopeIds);
+};
+
+export const getAgreementCollectionsByScope = async (
     orgName: string,
-    elementName: string,
+    scopeId: string,
     expand: boolean,
 ) => {
-    const element = await scopeManagerIntegration.getElementByOrgAndNameAndElementName(
-        orgName,
-        elementName,
-    );
+    const scope = await scopeManagerIntegration.getScopeByOrgAndScopeId(orgName, scopeId);
 
-    const collections = await agreementCollectionRepository.getAgreementCollectionsByElement(
-        element._id,
+    const collections = await agreementCollectionRepository.getAgreementCollectionsByScope(
+        scope._id,
     );
 
     if (!expand) return collections;
@@ -29,21 +32,18 @@ export const getAgreementCollectionsByElement = async (
     );
 };
 
-export const getAgreementCollectionByElement = async (
+export const getCleanAgreementCollectionByScope = async (
     orgName: string,
-    elementName: string,
-    agColName: string,
-    expand: boolean = false,
+    scopeId: string,
+    agColId: string,
 ) => {
-    const element = await scopeManagerIntegration.getElementByOrgAndNameAndElementName(
-        orgName,
-        elementName,
-    );
+    const scope = await scopeManagerIntegration.getScopeByOrgAndScopeId(orgName, scopeId);
 
-    const collection = await agreementCollectionRepository.getAgreementCollectionByElement(
-        element._id,
-        agColName,
-    );
+    return await agreementCollectionRepository.getAgreementCollectionByScope(scope._id, agColId);
+};
+
+export const getAgreementCollectionById = async (agColId: string, expand: boolean = false) => {
+    const collection = await agreementCollectionRepository.getAgreementCollectionById(agColId);
 
     if (!expand) return collection;
 
@@ -53,85 +53,51 @@ export const getAgreementCollectionByElement = async (
     };
 };
 
-export const getCleanAgreementCollectionByElement = async (
-    orgName: string,
-    elementName: string,
+export const getAgreementCollectionByScopeIdAndName = async (
+    scopeId: Types.ObjectId,
     agColName: string,
 ) => {
-    const element = await scopeManagerIntegration.getElementByOrgAndNameAndElementName(
-        orgName,
-        elementName,
-    );
-
-    return await agreementCollectionRepository.getAgreementCollectionByElement(
-        element._id,
-        agColName,
-    );
+    return await agreementCollectionRepository.getAgreementCollectionByScope(scopeId, agColName);
 };
 
-export const createAgreementCollectionByElement = async (
+export const createAgreementCollectionByScope = async (
     orgName: string,
-    elementName: string,
+    scopeId: string,
     data: Partial<IAgreementCollection>,
 ) => {
-    // TODO: validar en middleware que no se puedan pasar x campos en post
-    const element = await scopeManagerIntegration.getElementByOrgAndNameAndElementName(
-        orgName,
-        elementName,
-    );
+    // TODO: validate in middleware that cannot pass x fields in post
+    const scope = await scopeManagerIntegration.getScopeByOrgAndScopeId(orgName, scopeId);
 
-    // 3. Creamos el agreement collection
-    return await agreementCollectionRepository.createAgreementCollectionByElement(
-        data,
-        element._id,
-    );
+    // 3. Create the agreement collection
+    return await agreementCollectionRepository.createAgreementCollectionByScope(data, scope._id);
 };
 
-export const updateAgreementCollectionByElement = async (
-    orgName: string,
-    elementName: string,
-    agColName: string,
+export const updateAgreementCollectionById = async (
+    agColId: string,
     data: Partial<IAgreementCollection>,
 ) => {
-    const { name, displayName, auditableVersionNumber, fields, permissions } = data;
+    const { name, displayName, description, auditableVersionNumber, fields, permissions } = data;
 
-    // Obtenemos el agreementCollection
-    const agreementCollection = await getCleanAgreementCollectionByElement(
-        orgName,
-        elementName,
-        agColName,
-    );
-
-    return await agreementCollectionRepository.updateAgreementCollectionByElement(
-        agreementCollection!._id,
-        { name, displayName, auditableVersionNumber, fields, permissions },
-    );
+    return await agreementCollectionRepository.updateAgreementCollectionByScope(agColId, {
+        name,
+        displayName,
+        description,
+        auditableVersionNumber,
+        fields,
+        permissions,
+    });
 };
 
-export const getAgreementCollectionsByElementId = async (elementId: Types.ObjectId) => {
-    return await agreementCollectionRepository.getAgreementCollectionsByElement(elementId);
+export const getAgreementCollectionsByScopeId = async (scopeId: Types.ObjectId) => {
+    return await agreementCollectionRepository.getAgreementCollectionsByScope(scopeId);
 };
 
-export const deleteAgreementCollectionById = async (agColId: Types.ObjectId) => {
-    // Obtenemos la collection para extraer los signatureIds de todas las versions
+export const deleteAgreementCollectionById = async (agColId: string) => {
+    // Get the collection to extract the signatureIds of all versions
     const collection = await agreementCollectionRepository.getAgreementCollectionById(agColId);
     const signatureIds = collection!.agreementVersions.flatMap((v) => v.contract.signaturesId);
     if (signatureIds.length > 0) {
         await deleteSignaturesByIds(signatureIds);
     }
-    return await agreementCollectionRepository.deleteAgreementCollectionByElement(agColId);
-};
-
-export const deleteAgreementCollectionByElement = async (
-    orgName: string,
-    elementName: string,
-    agColName: string,
-) => {
-    const agreementCollection = await getCleanAgreementCollectionByElement(
-        orgName,
-        elementName,
-        agColName,
-    );
-
-    return await deleteAgreementCollectionById(agreementCollection!._id);
+    return await agreementCollectionRepository.deleteAgreementCollectionByScope(agColId);
 };

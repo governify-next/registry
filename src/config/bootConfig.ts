@@ -13,6 +13,7 @@ export const bootEnv = {
     PORT: process.env.PORT || '5902',
 
     // Internal service URLs
+    AUTHENTICATOR_SERVICE_URL: process.env.AUTHENTICATOR_SERVICE_URL || 'http://localhost:5900',
     SCOPE_MANAGER_SERVICE_URL: process.env.SCOPE_MANAGER_SERVICE_URL || 'http://localhost:5901',
     COMPUTER_SERVICE_URL: process.env.COMPUTER_SERVICE_URL || 'http://localhost:5903',
     FETCHER_SERVICE_URL: process.env.FETCHER_SERVICE_URL || 'http://localhost:5904',
@@ -22,6 +23,9 @@ export const bootEnv = {
     MONGO_URI: process.env.MONGO_URI || 'mongodb://localhost:27017/governify-next',
 
     // JWT configuration
-    SERVICE_AUTHENTICATION_ENABLED: process.env.SERVICE_AUTHENTICATION_ENABLED === 'true',
+    CLIENT_ID: process.env.CLIENT_ID || 'registry',
+    CLIENT_SECRET: process.env.CLIENT_SECRET || 'registry_client_secret',
     JWT_SECRET: process.env.JWT_SECRET || 'governify_next_secret_key',
+    JWT_ISSUER: process.env.JWT_ISSUER || 'authenticator',
+    JWT_AUDIENCE: process.env.JWT_AUDIENCE || 'governify-next',
 };

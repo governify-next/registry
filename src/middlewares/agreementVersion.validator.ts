@@ -2,6 +2,7 @@ import { body, checkExact, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
 import { ExternalServiceError, ValidationError, NotFoundError } from '../utils/customErrors.js';
 import * as agreementCollectionService from '../services/agreementCollection.service.js';
+import * as agreementVersionService from '../services/agreementVersion.service.js';
 import {
     existingAgreementTemplate,
     existingGuaranteeTemplates,
@@ -9,7 +10,7 @@ import {
 import { validateEventConfig } from '../integrations/computer.integration.js';
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
 
-// ─── Validaciones de campo ────────────────────────────
+// ─── Field validations ────────────────────────────
 
 const agreementTemplateNameValidation = body('contract.agreementTemplateName')
     .exists({ checkNull: true })
@@ -117,7 +118,7 @@ const collectValidationErrors = (req: Request, res: Response, next: NextFunction
     next();
 };
 
-// ─── Validaciones de lógica de negocio ─────────────────────────────────
+// ─── Business logic validations ─────────────────────────────────
 
 const endAfterInitial = (req: Request, res: Response, next: NextFunction) => {
     const { initial, end } = req.body.contract.validity;
@@ -128,39 +129,37 @@ const endAfterInitial = (req: Request, res: Response, next: NextFunction) => {
     next();
 };
 
-export const existingVersionNumber = async (req: Request, res: Response, next: NextFunction) => {
+export const existingAuditableVersion = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const collection = await agreementCollectionService.getCleanAgreementCollectionByElement(
+        const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
-            req.params.elementName,
-            req.params.agColName,
+            req.params.scopeId,
+            req.params.agColId,
         );
 
-        const versionNumber = Number(req.params.versionNumber);
-        if (!Number.isInteger(versionNumber) || versionNumber < 1)
-            return next(new ValidationError('versionNumber must be a positive integer'));
-
-        const version = collection!.agreementVersions.find(
-            (v) => v.versionNumber === versionNumber,
-        );
-        if (!version)
-            return next(new NotFoundError(`Version ${versionNumber} not found in this collection`));
+        if (collection!.auditableVersionNumber === null)
+            return next(new NotFoundError('No auditable version in this collection'));
         next();
     } catch (err) {
         next(err);
     }
 };
 
-export const existingAuditableVersion = async (req: Request, res: Response, next: NextFunction) => {
+export const existingSelectedAgreementVersion = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
     try {
-        const collection = await agreementCollectionService.getCleanAgreementCollectionByElement(
+        const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
-            req.params.elementName,
-            req.params.agColName,
+            req.params.scopeId,
+            req.params.agColId,
         );
-
-        if (collection!.auditableVersionNumber === null)
-            return next(new NotFoundError('No auditable version in this collection'));
+        agreementVersionService.resolveAgreementVersionSelector(
+            collection!,
+            req.params.agreementVersion,
+        );
         next();
     } catch (err) {
         next(err);
@@ -175,10 +174,10 @@ const earlyTerminationValidation = body('earlyTermination')
 
 const earlyTerminationInRange = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const collection = await agreementCollectionService.getCleanAgreementCollectionByElement(
+        const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
             req.params.orgName,
-            req.params.elementName,
-            req.params.agColName,
+            req.params.scopeId,
+            req.params.agColId,
         );
 
         const version = collection!.agreementVersions.find(
@@ -219,7 +218,7 @@ const validateSignatureConfigsInExternalServices = async (
                     (m) => m.metricName === metric.metricName,
                 );
 
-                // Validar que las métricas especificadas estén en la template
+                // Validate that the given metrics exist in the template
                 if (!templateMetric) {
                     errors.push(
                         `${sig.guaranteeName}: metricName '${metric.metricName}' not found in template`,

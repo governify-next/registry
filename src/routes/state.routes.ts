@@ -1,30 +1,73 @@
 import { Router } from 'express';
 import * as stateController from '../controllers/state.controller.js';
 import { validateComputerHealth } from '../middlewares/computer.validator.js';
-import { existingElement } from '../middlewares/element.validator.js';
+import { existingScope } from '../middlewares/scope.validator.js';
 import { existingAgreementCollection } from '../middlewares/agreementCollection.validator.js';
-import { existingAuditableVersion } from '../middlewares/agreementVersion.validator.js';
-import { validateGenerateConsolidatedStatesBody } from '../middlewares/state.validator.js';
+import { existingSelectedAgreementVersion } from '../middlewares/agreementVersion.validator.js';
+import {
+    validateCreateConsolidationStateTasksRequest,
+    validateGenerateConsolidatedStatesBody,
+    validateGenerateStatesBody,
+} from '../middlewares/state.validator.js';
+import { validateDirectorHealth } from '../middlewares/director.validator.js';
 
 export const stateRoutes = Router();
 
+const consolidationStateTasksPath =
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/tasks/states/consolidated';
+
 stateRoutes.post(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/auditableVersion/states/generate',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states/generate',
     validateComputerHealth,
-    stateController.generateStatesForAuditableVersion,
+    existingScope,
+    existingAgreementCollection,
+    existingSelectedAgreementVersion,
+    validateGenerateStatesBody,
+    stateController.generateStatesForAgreementVersion,
 );
 
 stateRoutes.post(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/auditableVersion/states/consolidated/generate',
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states/consolidated/generate',
     validateComputerHealth,
-    existingElement,
+    existingScope,
     existingAgreementCollection,
-    existingAuditableVersion,
+    existingSelectedAgreementVersion,
     validateGenerateConsolidatedStatesBody,
-    stateController.generateConsolidatedStatesForAuditableVersion,
+    stateController.generateConsolidatedStatesForAgreementVersion,
 );
 
 stateRoutes.get(
-    '/organizations/:orgName/elements/:elementName/agreementCollections/:agColName/agreementVersions/auditableVersion/states',
-    stateController.getStatesForAuditableVersion,
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states',
+    existingScope,
+    existingAgreementCollection,
+    existingSelectedAgreementVersion,
+    stateController.getStatesForAgreementVersion,
+);
+
+stateRoutes.post(
+    consolidationStateTasksPath,
+    validateDirectorHealth,
+    existingScope,
+    existingAgreementCollection,
+    existingSelectedAgreementVersion,
+    validateCreateConsolidationStateTasksRequest,
+    stateController.createConsolidationStateTasksForAgreementVersion,
+);
+
+stateRoutes.get(
+    consolidationStateTasksPath,
+    validateDirectorHealth,
+    existingScope,
+    existingAgreementCollection,
+    existingSelectedAgreementVersion,
+    stateController.getConsolidationStateTasksForAgreementVersion,
+);
+
+stateRoutes.delete(
+    consolidationStateTasksPath,
+    validateDirectorHealth,
+    existingScope,
+    existingAgreementCollection,
+    existingSelectedAgreementVersion,
+    stateController.deleteConsolidationStateTasksForAgreementVersion,
 );
