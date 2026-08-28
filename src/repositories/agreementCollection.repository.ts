@@ -24,6 +24,13 @@ export const getAgreementCollectionByScope = async (scopeId: Types.ObjectId, agC
     return await AgreementCollection.findOne({ _id: agColId, scopeId: scopeId });
 };
 
+export const getAgreementCollectionByScopeAndName = async (
+    scopeId: Types.ObjectId,
+    agColName: string,
+) => {
+    return await AgreementCollection.findOne({ scopeId: scopeId, name: agColName });
+};
+
 export const updateAgreementCollectionByScope = async (
     agColId: string,
     data: Partial<IAgreementCollection>,

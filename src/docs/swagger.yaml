@@ -1222,6 +1222,10 @@ paths:
                                               - signatureId: 69cbea571d5009a043619276
                                                 guarantee:
                                                     name: CORRELATION_INPROGRESSISSUES_NEWBRANCH
+                                                    info:
+                                                        title: Correlation In Progress Issues with New Branch
+                                                        description: When an issue moves to In Progress, an associated branch must be created.
+                                                        example: If 4 of 5 issues have a branch, the result is 80%.
                                                     numericExpression: '(COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES/COUNT_INPROGRESS_ISSUES*100)'
                                                     comparator: '>='
                                                     threshold: 75
@@ -1388,6 +1392,10 @@ paths:
                                             - signatureId: 69cbea571d5009a043619276
                                               guarantee:
                                                   name: CORRELATION_INPROGRESSISSUES_NEWBRANCH
+                                                  info:
+                                                      title: Correlation In Progress Issues with New Branch
+                                                      description: When an issue moves to In Progress, an associated branch must be created.
+                                                      example: If 4 of 5 issues have a branch, the result is 80%.
                                                   numericExpression: '(COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES/COUNT_INPROGRESS_ISSUES*100)'
                                                   comparator: '>='
                                                   threshold: 75
@@ -5815,6 +5823,20 @@ components:
                             type: string
                             description: Guarantee template name
                             example: CORRELATION_INPROGRESSISSUES_NEWBRANCH
+                        info:
+                            type: object
+                            description: Human-readable information copied from the guarantee template
+                            required: [title, description, example]
+                            properties:
+                                title:
+                                    type: string
+                                    example: Correlation In Progress Issues with New Branch
+                                description:
+                                    type: string
+                                    example: When an issue moves to In Progress, an associated branch must be created.
+                                example:
+                                    type: string
+                                    example: If 4 of 5 issues have a branch, the result is 80%.
                         numericExpression:
                             type: string
                             description: Numeric expression from the guarantee template

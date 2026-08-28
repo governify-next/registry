@@ -79,7 +79,7 @@ const uniqueAgreementCollectionInScope = async (
     next: NextFunction,
 ) => {
     try {
-        const existing = await agreementCollectionService.getCleanAgreementCollectionByScope(
+        const existing = await agreementCollectionService.getAgreementCollectionByScopeAndName(
             req.params.orgName,
             req.params.scopeId,
             req.body.name,
