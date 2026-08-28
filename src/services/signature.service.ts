@@ -101,6 +101,7 @@ export const assembleBySignature = async (
                 signatureId: sig._id,
                 guarantee: {
                     name: guaranteeTemplate!.name,
+                    info: guaranteeTemplate!.info,
                     numericExpression: guaranteeTemplate!.numericExpression,
                     comparator: guarantee!.comparator,
                     threshold: guarantee!.threshold,

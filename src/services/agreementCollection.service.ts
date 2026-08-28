@@ -42,6 +42,19 @@ export const getCleanAgreementCollectionByScope = async (
     return await agreementCollectionRepository.getAgreementCollectionByScope(scope._id, agColId);
 };
 
+export const getAgreementCollectionByScopeAndName = async (
+    orgName: string,
+    scopeId: string,
+    agColName: string,
+) => {
+    const scope = await scopeManagerIntegration.getScopeByOrgAndScopeId(orgName, scopeId);
+
+    return await agreementCollectionRepository.getAgreementCollectionByScopeAndName(
+        scope._id,
+        agColName,
+    );
+};
+
 export const getAgreementCollectionById = async (agColId: string, expand: boolean = false) => {
     const collection = await agreementCollectionRepository.getAgreementCollectionById(agColId);
 
@@ -57,7 +70,10 @@ export const getAgreementCollectionByScopeIdAndName = async (
     scopeId: Types.ObjectId,
     agColName: string,
 ) => {
-    return await agreementCollectionRepository.getAgreementCollectionByScope(scopeId, agColName);
+    return await agreementCollectionRepository.getAgreementCollectionByScopeAndName(
+        scopeId,
+        agColName,
+    );
 };
 
 export const createAgreementCollectionByScope = async (
