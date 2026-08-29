@@ -57,7 +57,10 @@ export const getAgreementCollectionByScopeIdAndName = async (
     scopeId: Types.ObjectId,
     agColName: string,
 ) => {
-    return await agreementCollectionRepository.getAgreementCollectionByScope(scopeId, agColName);
+    return await agreementCollectionRepository.getAgreementCollectionByNameAndScope(
+        scopeId,
+        agColName,
+    );
 };
 
 export const createAgreementCollectionByScope = async (
