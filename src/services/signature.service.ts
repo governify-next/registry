@@ -8,26 +8,38 @@ import { getGuaranteeByTemplateIds, resolveGuaranteeById } from './guarantee.ser
 import * as signatureRepository from '../repositories/signature.repository.js';
 import { IAgreementVersion } from '../models/agreementCollection.model.js';
 import { resolveAgreementTemplateById } from './agreementTemplate.service.js';
-import { ValidationError } from '../utils/customErrors.js';
+import { NotFoundError, ValidationError } from '../utils/customErrors.js';
 
 export const createSignaturesByVersion = async (
     signatures: IAgreementVersionSignatureInput[],
     templateId: Types.ObjectId,
 ) => {
-    const createdSignatures = await Promise.all(
+    const resolvedSignatures = await Promise.all(
         signatures.map(async (sig) => {
             // Get the guarantee template id from the name
             const guaranteeTemplate = await getGuaranteeTemplateByName(sig.guaranteeName);
-            const guaranteeTemplateId = guaranteeTemplate!._id;
+            if (!guaranteeTemplate) {
+                throw new NotFoundError(`GuaranteeTemplate '${sig.guaranteeName}' not found`);
+            }
 
             // Get the guarantee from the guarantee template and the agreement template
-            const guarantee = await getGuaranteeByTemplateIds(templateId, guaranteeTemplateId);
+            const guarantee = await getGuaranteeByTemplateIds(templateId, guaranteeTemplate._id);
+            if (!guarantee) {
+                throw new ValidationError(
+                    `GuaranteeTemplate '${sig.guaranteeName}' is not configured in the selected AgreementTemplate`,
+                    { guaranteeName: sig.guaranteeName },
+                );
+            }
 
-            return await signatureRepository.createSignature(guarantee!._id, sig.metrics);
+            return { signature: sig, guarantee };
         }),
     );
 
-    return createdSignatures;
+    return await Promise.all(
+        resolvedSignatures.map(({ signature, guarantee }) =>
+            signatureRepository.createSignature(guarantee._id, signature.metrics),
+        ),
+    );
 };
 
 export const getSignaturesByIds = async (signatureIds: Types.ObjectId[]) => {

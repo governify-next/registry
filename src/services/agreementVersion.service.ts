@@ -11,6 +11,26 @@ import {
 } from './signature.service.js';
 import { NotFoundError, ValidationError } from '../utils/customErrors.js';
 
+const getAuditableAgreementVersion = (
+    agreementCollection: Pick<IAgreementCollection, 'agreementVersions' | 'auditableVersionNumber'>,
+) =>
+    agreementCollection.auditableVersionNumber === null
+        ? undefined
+        : agreementCollection.agreementVersions.find(
+              (version) => version.versionNumber === agreementCollection.auditableVersionNumber,
+          );
+
+const getPreviousVersionEarlyTermination = (
+    validity: IAgreementVersionPayload['contract']['validity'],
+    currentDate: Date = new Date(),
+): Date | null => {
+    const startDate = new Date(validity.initial);
+    const endDate = new Date(validity.end);
+
+    if (currentDate >= endDate) return null;
+    return currentDate < startDate ? startDate : currentDate;
+};
+
 export const resolveAgreementVersionSelector = (
     agreementCollection: Pick<IAgreementCollection, 'agreementVersions' | 'auditableVersionNumber'>,
     agreementVersion: string,
@@ -82,6 +102,13 @@ export const createAgreementVersionByCollection = async (
     // 1. Get the agreement collection
     const agreementCollection = await getCleanAgreementCollectionByScope(orgName, scopeId, agColId);
 
+    // 1.1 Get the previous version and its early termination if it exists
+    const previousAgreementVersion = getAuditableAgreementVersion(agreementCollection!);
+    const previousVersionEarlyTermination =
+        previousAgreementVersion && !previousAgreementVersion.contract.validity.earlyTermination
+            ? getPreviousVersionEarlyTermination(previousAgreementVersion.contract.validity)
+            : null;
+
     // 2. Get the new version number, the highest one plus one, or 1 if there are no versions
     const versionNumbers = agreementCollection!.agreementVersions.map((v) => v.versionNumber);
     const newVersionNumber = Math.max(0, ...versionNumbers) + 1;
@@ -116,6 +143,15 @@ export const createAgreementVersionByCollection = async (
     const createdVersion = updatedCollection!.agreementVersions.find(
         (v) => v.versionNumber === newVersionNumber,
     );
+
+    // 6. If there was a previous version, modify its earlyTermination date
+    if (previousAgreementVersion && previousVersionEarlyTermination) {
+        await agreementVersionRepository.updateAgreementVersionEarlyTermination(
+            agreementCollection!._id,
+            previousAgreementVersion.versionNumber,
+            previousVersionEarlyTermination,
+        );
+    }
 
     return createdVersion;
 };

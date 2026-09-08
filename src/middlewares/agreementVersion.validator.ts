@@ -3,12 +3,11 @@ import { type Request, type Response, type NextFunction } from 'express';
 import { ExternalServiceError, ValidationError, NotFoundError } from '../utils/customErrors.js';
 import * as agreementCollectionService from '../services/agreementCollection.service.js';
 import * as agreementVersionService from '../services/agreementVersion.service.js';
-import {
-    existingAgreementTemplate,
-    existingGuaranteeTemplates,
-} from './agreementTemplate.validator.js';
 import { validateEventConfig } from '../integrations/computer.integration.js';
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
+import * as agreementTemplateService from '../services/agreementTemplate.service.js';
+import * as guaranteeService from '../services/guarantee.service.js';
+import { getOrganizationOrFail } from './organization.validator.js';
 
 // ─── Field validations ────────────────────────────
 
@@ -129,6 +128,82 @@ const endAfterInitial = (req: Request, res: Response, next: NextFunction) => {
     next();
 };
 
+export const validateSignaturesAgainstAgreementTemplate = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const agreementTemplateName = req.body.contract.agreementTemplateName;
+        const requestedGuaranteeNames = [
+            ...new Set<string>(
+                req.body.signatures.map(
+                    (signature: { guaranteeName: string }) => signature.guaranteeName,
+                ),
+            ),
+        ];
+        const organization = await getOrganizationOrFail(req.params.orgName);
+        const agreementTemplate =
+            await agreementTemplateService.getCleanAgreementTemplateByOrganization(
+                organization._id,
+                agreementTemplateName,
+            );
+
+        if (!agreementTemplate) {
+            return next(
+                new NotFoundError(`AgreementTemplate '${agreementTemplateName}' not found`),
+            );
+        }
+
+        const guaranteeTemplates =
+            await guaranteeTemplateService.findGuaranteeTemplatesByName(requestedGuaranteeNames);
+        const guaranteeTemplatesByName = new Map(
+            guaranteeTemplates.map((guaranteeTemplate) => [
+                guaranteeTemplate.name,
+                guaranteeTemplate,
+            ]),
+        );
+        const missingGuaranteeNames = requestedGuaranteeNames.filter(
+            (guaranteeName) => !guaranteeTemplatesByName.has(guaranteeName),
+        );
+
+        if (missingGuaranteeNames.length > 0) {
+            return next(
+                new NotFoundError(
+                    `GuaranteeTemplates not found: ${missingGuaranteeNames.join(', ')}`,
+                ),
+            );
+        }
+
+        const configuredGuarantees = await guaranteeService.getGuaranteesByAgreementTemplateId(
+            agreementTemplate._id,
+        );
+        const configuredGuaranteeTemplateIds = new Set(
+            configuredGuarantees.map((guarantee) => guarantee.guaranteeTemplateId.toString()),
+        );
+        const unconfiguredGuaranteeNames = requestedGuaranteeNames.filter((guaranteeName) => {
+            const guaranteeTemplate = guaranteeTemplatesByName.get(guaranteeName)!;
+            return !configuredGuaranteeTemplateIds.has(guaranteeTemplate._id.toString());
+        });
+
+        if (unconfiguredGuaranteeNames.length > 0) {
+            return next(
+                new ValidationError(
+                    `GuaranteeTemplates are not configured in AgreementTemplate '${agreementTemplateName}': ${unconfiguredGuaranteeNames.join(', ')}`,
+                    {
+                        agreementTemplateName,
+                        guaranteeNames: unconfiguredGuaranteeNames,
+                    },
+                ),
+            );
+        }
+
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const existingAuditableVersion = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const collection = await agreementCollectionService.getCleanAgreementCollectionByScope(
@@ -206,37 +281,112 @@ const validateSignatureConfigsInExternalServices = async (
     next: NextFunction,
 ) => {
     try {
-        const errors: string[] = [];
+        const signatureErrors: {
+            signatureIndex: number;
+            metricIndex?: number;
+            guaranteeName: string;
+            metricName?: string;
+            reason: string;
+            eventId?: string;
+            issues?: unknown[];
+        }[] = [];
+        const guaranteeNames = [
+            ...new Set<string>(
+                req.body.signatures.map(
+                    (signature: { guaranteeName: string }) => signature.guaranteeName,
+                ),
+            ),
+        ];
+        const guaranteeTemplates =
+            await guaranteeTemplateService.findGuaranteeTemplatesByName(guaranteeNames);
+        const guaranteeTemplatesByName = new Map(
+            guaranteeTemplates.map((guaranteeTemplate) => [
+                guaranteeTemplate.name,
+                guaranteeTemplate,
+            ]),
+        );
+        const validationJobs: {
+            signatureIndex: number;
+            metricIndex: number;
+            guaranteeName: string;
+            metricName: string;
+            eventId: string;
+            fetcherConfigs: {
+                fetcherId: string;
+                fetcherConfig: Record<string, unknown>;
+            }[];
+            processConfig: Record<string, unknown>;
+        }[] = [];
 
-        for (const sig of req.body.signatures) {
-            const guaranteeTemplate = await guaranteeTemplateService.getGuaranteeTemplateByName(
-                sig.guaranteeName,
-            );
+        for (const [signatureIndex, sig] of req.body.signatures.entries()) {
+            const guaranteeTemplate = guaranteeTemplatesByName.get(sig.guaranteeName);
+            if (!guaranteeTemplate) {
+                signatureErrors.push({
+                    signatureIndex,
+                    guaranteeName: sig.guaranteeName,
+                    reason: 'GuaranteeTemplate not found',
+                });
+                continue;
+            }
 
-            for (const metric of sig.metrics) {
-                const templateMetric = guaranteeTemplate!.metrics.find(
+            for (const [metricIndex, metric] of sig.metrics.entries()) {
+                const templateMetric = guaranteeTemplate.metrics.find(
                     (m) => m.metricName === metric.metricName,
                 );
 
                 // Validate that the given metrics exist in the template
                 if (!templateMetric) {
-                    errors.push(
-                        `${sig.guaranteeName}: metricName '${metric.metricName}' not found in template`,
-                    );
+                    signatureErrors.push({
+                        signatureIndex,
+                        metricIndex,
+                        guaranteeName: sig.guaranteeName,
+                        metricName: metric.metricName,
+                        reason: 'Metric not found in GuaranteeTemplate',
+                    });
                     continue;
                 }
 
-                const eventError = await validateEventConfig(
-                    templateMetric.metricConfig.event.eventId,
-                    metric.fetcherConfigs,
-                    metric.processConfig,
-                );
-                if (eventError) errors.push(`${sig.guaranteeName}: ${eventError}`);
+                validationJobs.push({
+                    signatureIndex,
+                    metricIndex,
+                    guaranteeName: sig.guaranteeName,
+                    metricName: metric.metricName,
+                    eventId: templateMetric.metricConfig.event.eventId,
+                    fetcherConfigs: metric.fetcherConfigs,
+                    processConfig: metric.processConfig,
+                });
             }
         }
 
-        if (errors.length > 0)
-            return next(new ValidationError(`Signature validation failed: ${errors.join('; ')}`));
+        const computerValidationErrors = await Promise.all(
+            validationJobs.map(async (job) => {
+                const eventError = await validateEventConfig(
+                    job.eventId,
+                    job.fetcherConfigs,
+                    job.processConfig,
+                );
+                return eventError
+                    ? {
+                          signatureIndex: job.signatureIndex,
+                          metricIndex: job.metricIndex,
+                          guaranteeName: job.guaranteeName,
+                          metricName: job.metricName,
+                          eventId: job.eventId,
+                          reason: eventError.error,
+                          ...(eventError.issues && { issues: eventError.issues }),
+                      }
+                    : null;
+            }),
+        );
+        signatureErrors.push(...computerValidationErrors.filter((error) => error !== null));
+
+        if (signatureErrors.length > 0) {
+            return next(
+                new ValidationError('Signature validation failed', {
+                    signatureErrors,
+                }),
+            );
+        }
         next();
     } catch (error) {
         return next(
@@ -261,9 +411,6 @@ export const validateCreateAgreementVersion = [
     checkExact(fieldValidations, { locations: ['body'] }),
     collectValidationErrors,
     endAfterInitial,
-    existingAgreementTemplate((req) => req.body.contract.agreementTemplateName),
-    existingGuaranteeTemplates((req) =>
-        req.body.signatures.map((s: { guaranteeName: string }) => s.guaranteeName),
-    ),
+    validateSignaturesAgainstAgreementTemplate,
     validateSignatureConfigsInExternalServices,
 ];

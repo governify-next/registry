@@ -42,7 +42,7 @@ export const validateEventConfig = async (
     eventId: string,
     fetcherConfigs: { fetcherId: string; fetcherConfig: Record<string, unknown> }[],
     processConfig: Record<string, unknown>,
-): Promise<string | null> => {
+): Promise<{ error: string; issues?: unknown[] } | null> => {
     const response = await fetch(`${COMPUTER_SERVICE_URL}/api/v1/events/${eventId}/validate`, {
         method: 'POST',
         headers: getServiceHeaders(),
@@ -58,7 +58,10 @@ export const validateEventConfig = async (
     }
     if (result.data?.valid) return null;
 
-    return result.data?.error;
+    return {
+        error: result.data?.error ?? `Computer could not validate event '${eventId}' config`,
+        ...(Array.isArray(result.data?.issues) && { issues: result.data.issues }),
+    };
 };
 
 export const validateAggregator = async (

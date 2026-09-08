@@ -1296,8 +1296,14 @@ paths:
             description: |
                 Creates a new agreement version within the specified collection.
                 The version number is auto-incremented. The new version becomes the
-                auditable version automatically. Each signature must reference an existing
-                guarantee template by name and include its audit configuration.
+                auditable version automatically. Each signature must reference by name a
+                GuaranteeTemplate configured in the selected AgreementTemplate and include its
+                audit configuration. Validation occurs before any signatures are created.
+                When the collection has an auditable version without an early termination, that
+                version's validity determines the automatic termination date. If it has not
+                started yet, it is terminated at its own validity start; if it is currently valid,
+                it is terminated at the current time; and if its validity has already ended, it is
+                not modified. An existing early termination is never overwritten.
             requestBody:
                 $ref: '#/components/requestBodies/AgreementVersionBody'
             responses:
