@@ -284,21 +284,17 @@ export const generateConsolidatedStatesForAgreementVersion = async (
                 signature.guarantee.window.anchorDate,
                 signature.guarantee.window.period,
             );
-            const states: IState[] = [];
-
-            for (const date of consolidationDates) {
-                states.push(
-                    await generateState(
+            return await Promise.all(
+                consolidationDates.map((date) =>
+                    generateState(
                         isAsync,
                         { effectiveAt: date, mode: temporalMode },
                         signature.signatureId.toString(),
                         signature.guarantee,
                         existingStatePolicy,
                     ),
-                );
-            }
-
-            return states;
+                ),
+            );
         }),
     );
 

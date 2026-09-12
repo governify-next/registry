@@ -52,6 +52,75 @@ afterEach(() => {
 });
 
 describe('state temporal generation', () => {
+    it.each([false, true])(
+        'starts all dates concurrently and keeps their response order with isAsync=%s',
+        async (isAsync) => {
+            const signatureId = new Types.ObjectId();
+            const dates = [1, 2, 3].map((day) => new Date(`2026-08-0${day}T00:00:00.000Z`));
+            vi.spyOn(agreementVersionService, 'getAgreementVersionBySelector').mockResolvedValue({
+                versionNumber: 1,
+                contract: { signatures: [{ signatureId, guarantee }] },
+            } as never);
+            const gates = dates.map(() => Promise.withResolvers<void>());
+            const claimState = stateRepository.claimState;
+            const claimSpy = vi
+                .spyOn(stateRepository, 'claimState')
+                .mockImplementation(async (data) => {
+                    const index = dates.findIndex(
+                        (date) => date.getTime() === data.date!.getTime(),
+                    );
+                    await gates[index].promise;
+                    return claimState(data);
+                });
+            vi.spyOn(computerIntegration, 'computeMetric').mockResolvedValue({
+                status: MetricStatus.COMPUTED,
+                value: 1,
+                evidences: [],
+                metricConfig: guarantee.metrics[0].metricConfig,
+            });
+            const generation = stateService.generateConsolidatedStatesForAgreementVersion(
+                isAsync,
+                'organization',
+                'scope',
+                'agreement-collection-id',
+                '1',
+                dates[0],
+                dates[2],
+                TemporalMode.REPLAY,
+                ExistingStatePolicy.KEEP,
+            );
+            try {
+                // No date can finish creating its initial state until every date has started.
+                await vi.waitFor(() => expect(claimSpy).toHaveBeenCalledTimes(3));
+                gates[2].resolve();
+                await vi.waitFor(async () => {
+                    const stored = await stateRepository.getStatesBySignatureId(
+                        signatureId.toString(),
+                    );
+                    expect(stored).toHaveLength(1);
+                    expect(stored[0].date).toEqual(dates[2]);
+                    expect(stored[0].status).toBe(StateStatus.COMPLETED);
+                });
+            } finally {
+                gates.forEach((gate) => gate.resolve());
+                await generation;
+                // Async calculations must finish before the test database is cleared.
+                await vi.waitFor(async () => {
+                    const stored = await stateRepository.getStatesBySignatureId(
+                        signatureId.toString(),
+                    );
+                    expect(stored).toHaveLength(3);
+                    expect(stored.every((state) => state.status === StateStatus.COMPLETED)).toBe(
+                        true,
+                    );
+                });
+            }
+            const states = await generation;
+            expect(states.map((state) => state.date)).toEqual(dates);
+            expect(states.every((state) => state.signatureId.equals(signatureId))).toBe(true);
+        },
+    );
+
     it('completes an indeterminate state and keeps every metric', async () => {
         const computeSpy = vi
             .spyOn(computerIntegration, 'computeMetric')
