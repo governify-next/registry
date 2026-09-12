@@ -37,7 +37,11 @@ export const createSignaturesByVersion = async (
 
     return await Promise.all(
         resolvedSignatures.map(({ signature, guarantee }) =>
-            signatureRepository.createSignature(guarantee._id, signature.metrics),
+            signatureRepository.createSignature(
+                guarantee._id,
+                signature.metrics,
+                signature.visualizationConfig,
+            ),
         ),
     );
 };
@@ -111,6 +115,7 @@ export const assembleBySignature = async (
 
             return {
                 signatureId: sig._id,
+                visualizationConfig: sig.visualizationConfig,
                 guarantee: {
                     name: guaranteeTemplate!.name,
                     info: guaranteeTemplate!.info,

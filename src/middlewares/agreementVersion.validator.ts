@@ -62,6 +62,25 @@ const guaranteeNameValidation = body('signatures.*.guaranteeName')
     .isLength({ min: 3, max: 100 })
     .withMessage('name must be between 3 and 100 characters');
 
+const signatureVisualizationConfigValidation = [
+    body('signatures.*.visualizationConfig')
+        .exists({ checkNull: true })
+        .withMessage('Each signature must have a visualizationConfig')
+        .bail()
+        .isObject({ strict: true })
+        .withMessage('visualizationConfig must be an object'),
+    body('signatures.*.visualizationConfig.label')
+        .exists({ checkNull: true })
+        .withMessage('visualizationConfig.label is required')
+        .bail()
+        .isString()
+        .withMessage('visualizationConfig.label must be a string')
+        .bail()
+        .trim()
+        .notEmpty()
+        .withMessage('visualizationConfig.label must not be empty'),
+];
+
 const signatureMetricsValidation = [
     body('signatures.*.metrics')
         .exists({ checkNull: true })
@@ -106,6 +125,7 @@ const fieldValidations = [
     endValidation,
     signaturesValidation,
     guaranteeNameValidation,
+    ...signatureVisualizationConfigValidation,
     ...signatureMetricsValidation,
 ];
 

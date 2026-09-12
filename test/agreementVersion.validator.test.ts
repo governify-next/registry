@@ -25,6 +25,7 @@ const requestBody = {
     signatures: [
         {
             guaranteeName,
+            visualizationConfig: { label: 'Member Alice' },
             metrics: [
                 {
                     metricName,
@@ -276,6 +277,45 @@ describe('agreement version signature guarantees', () => {
                 issues: [expect.objectContaining({ source: 'processConfig', path: ['username'] })],
             }),
         ]);
+        expect(handler).not.toHaveBeenCalled();
+    });
+});
+
+describe('signature visualization configuration validation', () => {
+    it.each([
+        undefined,
+        null,
+        [],
+        'Alice',
+        {},
+        { label: null },
+        { label: 42 },
+        { label: false },
+        { label: [] },
+        { label: {} },
+        { label: '' },
+        { label: '   ' },
+    ])('rejects invalid visualizationConfig %j before external validation', async (config) => {
+        const { app, handler } = createValidationApp();
+        const validateEventConfig = vi.spyOn(computerIntegration, 'validateEventConfig');
+        const response = await request(app)
+            .post('/organization')
+            .send({
+                ...requestBody,
+                signatures: [
+                    requestBody.signatures[0],
+                    { ...requestBody.signatures[0], visualizationConfig: config },
+                ],
+            });
+        expect(response.status).toBe(400);
+        expect(response.body.error.details).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    path: expect.stringMatching(/^signatures\[1\]\.visualizationConfig/),
+                }),
+            ]),
+        );
+        expect(validateEventConfig).not.toHaveBeenCalled();
         expect(handler).not.toHaveBeenCalled();
     });
 });

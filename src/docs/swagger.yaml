@@ -1220,6 +1220,8 @@ paths:
                                               earlyTermination: null
                                           signatures:
                                               - signatureId: 69cbea571d5009a043619276
+                                                visualizationConfig:
+                                                    label: Team A
                                                 guarantee:
                                                     name: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                                                     info:
@@ -1396,6 +1398,8 @@ paths:
                                             earlyTermination: null
                                         signatures:
                                             - signatureId: 69cbea571d5009a043619276
+                                              visualizationConfig:
+                                                  label: Team A
                                               guarantee:
                                                   name: CORRELATION_INPROGRESSISSUES_NEWBRANCH
                                                   info:
@@ -1618,6 +1622,8 @@ paths:
                                             agreementTemplateName: tpa-US-PSG2-2526
                                             signatures:
                                                 - signatureId: 69cbea571d5009a043619276
+                                                  visualizationConfig:
+                                                      label: Team A
                                                   states:
                                                       - _id: 665e5f6a7b8c9d0e1f2a3b4c
                                                         status: COMPLETED
@@ -2971,6 +2977,8 @@ components:
                                 end: '2024-12-31T23:59:59.000Z'
                         signatures:
                             - guaranteeName: CORRELATION_INPROGRESSISSUES_NEWBRANCH
+                              visualizationConfig:
+                                  label: Signature 1
                               metrics:
                                   - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                     fetcherConfigs:
@@ -2996,6 +3004,8 @@ components:
                                         columns:
                                             - In Progress
                             - guaranteeName: CORRELATION_BRANCHESASSOCIATED_INPROGRESSISSUES
+                              visualizationConfig:
+                                  label: Signature 2
                               metrics:
                                   - metricName: COUNT_BRANCHES_ASSOCIATED_TO_INPROGRESS_ISSUES
                                     fetcherConfigs:
@@ -3021,6 +3031,8 @@ components:
                                         columns:
                                             - In Progress
                             - guaranteeName: CORRELATION_INREVIEWISSUES_OPENPR
+                              visualizationConfig:
+                                  label: Signature 3
                               metrics:
                                   - metricName: COUNT_INREVIEW_ISSUES_WITH_ASSOCIATED_OPEN_PR
                                     fetcherConfigs:
@@ -3047,6 +3059,8 @@ components:
                                         columns:
                                             - In Review
                             - guaranteeName: CORRELATION_DONEISSUES_MERGEDPR
+                              visualizationConfig:
+                                  label: Signature 4
                               metrics:
                                   - metricName: COUNT_DONE_ISSUES_WITH_ASSOCIATED_CLOSED_PR
                                     fetcherConfigs:
@@ -3075,6 +3089,8 @@ components:
                                             - Closed
                                             - Done
                             - guaranteeName: CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_TEAM
+                              visualizationConfig:
+                                  label: Signature 5
                               metrics:
                                   - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_TEAM
                                     fetcherConfigs:
@@ -3094,6 +3110,8 @@ components:
                                               token: YOUR_GITHUB_TOKEN
                                     processConfig: {}
                             - guaranteeName: NUMBER_INPROGRESSISSUES_HOURLY_UNDER_1
+                              visualizationConfig:
+                                  label: Signature 6
                               metrics:
                                   - metricName: COUNT_INPROGRESSISSUES_MEMBER
                                     fetcherConfigs:
@@ -3106,6 +3124,8 @@ components:
                                             - In Progress
                                         username: member1
                             - guaranteeName: NUMBER_INPROGRESSISSUES_HOURLY_UNDER_1
+                              visualizationConfig:
+                                  label: Signature 7
                               metrics:
                                   - metricName: COUNT_INPROGRESSISSUES_MEMBER
                                     fetcherConfigs:
@@ -3118,6 +3138,8 @@ components:
                                             - In Progress
                                         username: member2
                             - guaranteeName: NUMBER_DONEISSUES_WEEKLY_OVER_1
+                              visualizationConfig:
+                                  label: Signature 8
                               metrics:
                                   - metricName: COUNT_DONEISSUES_MEMBER
                                     fetcherConfigs:
@@ -3131,6 +3153,8 @@ components:
                                             - Done
                                         username: member1
                             - guaranteeName: NUMBER_DONEISSUES_WEEKLY_OVER_1
+                              visualizationConfig:
+                                  label: Signature 9
                               metrics:
                                   - metricName: COUNT_DONEISSUES_MEMBER
                                     fetcherConfigs:
@@ -3144,6 +3168,8 @@ components:
                                             - Done
                                         username: member2
                             - guaranteeName: CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_MEMBER
+                              visualizationConfig:
+                                  label: Signature 10
                               metrics:
                                   - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
                                     fetcherConfigs:
@@ -3165,6 +3191,8 @@ components:
                                     processConfig:
                                         username: member1
                             - guaranteeName: CORRELATION_APPROVEDMERGEDPULLREQUEST_TOTALMERGEDPULLREQUEST_MEMBER
+                              visualizationConfig:
+                                  label: Signature 11
                               metrics:
                                   - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
                                     fetcherConfigs:
@@ -3186,6 +3214,8 @@ components:
                                     processConfig:
                                         username: member2
                             - guaranteeName: NUMBER_APPROVEDMERGEDPULLREQUEST_MEMBER
+                              visualizationConfig:
+                                  label: Signature 12
                               metrics:
                                   - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
                                     fetcherConfigs:
@@ -3198,6 +3228,8 @@ components:
                                         reviewState: APPROVED
                                         username: member1
                             - guaranteeName: NUMBER_APPROVEDMERGEDPULLREQUEST_MEMBER
+                              visualizationConfig:
+                                  label: Signature 13
                               metrics:
                                   - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
                                     fetcherConfigs:
@@ -3210,6 +3242,8 @@ components:
                                         reviewState: APPROVED
                                         username: member2
                             - guaranteeName: CORRELATION_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER_AND_COUNTPR
+                              visualizationConfig:
+                                  label: Signature 14
                               metrics:
                                   - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
                                     fetcherConfigs:
@@ -3230,6 +3264,8 @@ components:
                                     processConfig:
                                         username: member1
                             - guaranteeName: CORRELATION_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER_AND_COUNTPR
+                              visualizationConfig:
+                                  label: Signature 15
                               metrics:
                                   - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
                                     fetcherConfigs:
@@ -3250,6 +3286,8 @@ components:
                                     processConfig:
                                         username: member2
                             - guaranteeName: NUMBER_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER
+                              visualizationConfig:
+                                  label: Signature 16
                               metrics:
                                   - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
                                     fetcherConfigs:
@@ -3261,6 +3299,8 @@ components:
                                     processConfig:
                                         username: member1
                             - guaranteeName: NUMBER_COUNTPRSWITHATLEASTONECOMMENTORONEREVIEWCOMMENTBYMEMBER
+                              visualizationConfig:
+                                  label: Signature 17
                               metrics:
                                   - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
                                     fetcherConfigs:
@@ -5814,14 +5854,29 @@ components:
                             items:
                                 $ref: '#/components/schemas/ExpandedSignature'
 
+        SignatureVisualizationConfig:
+            type: object
+            description: Display settings supplied when creating the agreement version.
+            required: [label]
+            properties:
+                label:
+                    type: string
+                    minLength: 1
+                    pattern: '\S'
+                    description: Non-blank signature label used in Reporter charts by default.
+                    example: Team A
+
         ExpandedSignature:
             type: object
             description: A fully assembled signature with guarantee and metric data
+            required: [signatureId, visualizationConfig, guarantee]
             properties:
                 signatureId:
                     type: string
                     description: ObjectId of the signature
                     example: 69cbea571d5009a043619276
+                visualizationConfig:
+                    $ref: '#/components/schemas/SignatureVisualizationConfig'
                 guarantee:
                     type: object
                     properties:
@@ -5888,7 +5943,8 @@ components:
             type: object
             description: |
                 Payload for creating an agreement version.
-                Each signature references an existing guarantee template by name.
+                Each signature references an existing guarantee template by name and must include
+                visualizationConfig with a non-blank string label.
             required:
                 - contract
                 - signatures
@@ -5934,6 +5990,7 @@ components:
                         type: object
                         required:
                             - guaranteeName
+                            - visualizationConfig
                             - metrics
                         properties:
                             guaranteeName:
@@ -5942,6 +5999,8 @@ components:
                                 minLength: 3
                                 maxLength: 100
                                 example: CORRELATION_INPROGRESSISSUES_NEWBRANCH
+                            visualizationConfig:
+                                $ref: '#/components/schemas/SignatureVisualizationConfig'
                             metrics:
                                 type: array
                                 description: Metrics with full fetcher and process configuration

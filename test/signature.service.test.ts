@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import Signature from '../src/models/signature.model.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as agreementTemplateService from '../src/services/agreementTemplate.service.js';
 import * as guaranteeService from '../src/services/guarantee.service.js';
@@ -20,8 +21,8 @@ describe('signature creation preflight', () => {
         const unconfiguredGuaranteeTemplateId = new Types.ObjectId();
         const configuredGuaranteeId = new Types.ObjectId();
         const signatures = [
-            { guaranteeName: 'CONFIGURED', metrics: [] },
-            { guaranteeName: 'UNCONFIGURED', metrics: [] },
+            { guaranteeName: 'CONFIGURED', visualizationConfig: { label: 'Alice' }, metrics: [] },
+            { guaranteeName: 'UNCONFIGURED', visualizationConfig: { label: 'Bob' }, metrics: [] },
         ];
         vi.spyOn(guaranteeTemplateService, 'getGuaranteeTemplateByName').mockImplementation(
             async (name) =>
@@ -60,6 +61,7 @@ describe('selective signature assembly', () => {
         const guaranteeTemplateId = new Types.ObjectId();
         const selectedSignature = {
             _id: secondSignatureId,
+            visualizationConfig: { label: 'Member Bob' },
             guaranteeId,
             metrics: [],
         };
@@ -112,6 +114,9 @@ describe('selective signature assembly', () => {
         expect(assembledAgreementVersion.contract.signatures[0].signatureId).toBe(
             secondSignatureId,
         );
+        expect(assembledAgreementVersion.contract.signatures[0].visualizationConfig).toEqual({
+            label: 'Member Bob',
+        });
         expect(assembledAgreementVersion.contract.signatures[0].guarantee.info).toEqual({
             title: 'Human-readable guarantee title',
             description: 'Guarantee description',
@@ -142,4 +147,41 @@ describe('selective signature assembly', () => {
         expect(getSignaturesSpy).not.toHaveBeenCalled();
         expect(resolveGuaranteeSpy).not.toHaveBeenCalled();
     });
+});
+
+describe('signature visualization persistence', () => {
+    it('persists the configured label when creating a version signature', async () => {
+        const guaranteeId = new Types.ObjectId();
+        vi.spyOn(guaranteeTemplateService, 'getGuaranteeTemplateByName').mockResolvedValue({
+            _id: new Types.ObjectId(),
+        } as never);
+        vi.spyOn(guaranteeService, 'getGuaranteeByTemplateIds').mockResolvedValue({
+            _id: guaranteeId,
+        } as never);
+        const [created] = await createSignaturesByVersion(
+            [
+                {
+                    guaranteeName: 'Guarantee',
+                    visualizationConfig: { label: 'Álvaro / Team A' },
+                    metrics: [],
+                },
+            ],
+            new Types.ObjectId(),
+        );
+        const stored = await Signature.findById(created._id).lean();
+        expect(stored?.guaranteeId).toEqual(guaranteeId);
+        expect(stored?.visualizationConfig).toEqual({ label: 'Álvaro / Team A' });
+    });
+
+    it.each([undefined, null, {}, { label: '' }, { label: ' ' }, { label: 5 }])(
+        'rejects invalid persisted visualizationConfig %j',
+        (visualizationConfig) => {
+            const signature = new Signature({
+                guaranteeId: new Types.ObjectId(),
+                metrics: [],
+                visualizationConfig,
+            });
+            expect(signature.validateSync()).toBeDefined();
+        },
+    );
 });

@@ -12,6 +12,9 @@ export interface IAgreementVersionData {
 
 export interface IAgreementVersionSignatureInput {
     guaranteeName: string;
+    visualizationConfig: {
+        label: string;
+    };
     metrics: {
         metricName: string;
         fetcherConfigs: {
