@@ -4,8 +4,10 @@ import * as agreementTemplateService from '../services/agreementTemplate.service
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
 import { getOrganizationOrFail } from './organization.validator.js';
 import { DuplicateKeyError, ValidationError, NotFoundError } from '../utils/customErrors.js';
+import { windowUnits } from '../types/window.types.js';
+import { comparators } from '../types/comparator.types.js';
 
-// ─── Validaciones de campo ────────────────────────────
+// ─── Field validations ────────────────────────────
 
 const nameValidation = body('name')
     .exists({ checkNull: true })
@@ -61,7 +63,7 @@ const guaranteesStructureValidation = [
         .withMessage('Each guarantee entry must have a comparator')
         .isString()
         .withMessage('comparator must be a string')
-        .isIn(['<', '>', '<=', '>=', '==', '!='])
+        .isIn(comparators)
         .withMessage('comparator must be one of: <, >, <=, >=, ==, !='),
     body('guarantees.*.threshold')
         .exists({ checkNull: true })
@@ -77,7 +79,7 @@ const guaranteesStructureValidation = [
     body('guarantees.*.window.anchorDate')
         .exists({ checkNull: true })
         .withMessage('Each window must have an anchorDate')
-        .isISO8601() // aseguramos formato válido de fecha
+        .isISO8601() // make sure the date format is valid
         .withMessage('anchorDate must be a valid ISO8601 string')
         .isAfter('2000-01-01T00:00:00.000Z')
         .isBefore('2100-01-01T00:00:00.000Z')
@@ -92,7 +94,7 @@ const guaranteesStructureValidation = [
     body('guarantees.*.window.period.*.unit')
         .exists({ checkNull: true })
         .withMessage('Each period entry must have a unit')
-        .isIn(['millisecond', 'second', 'minute', 'hour', 'day', 'week'])
+        .isIn(windowUnits)
         .withMessage('Period unit must be one of: millisecond, second, minute, hour, day, week'),
 
     body('guarantees.*.window.period.*.value')
@@ -110,7 +112,7 @@ const collectValidationErrors = (req: Request, res: Response, next: NextFunction
     next();
 };
 
-// ─── Validaciones de lógica de negocio ─────────────────────────────────
+// ─── Business logic validations ─────────────────────────────────
 
 export const existingGuaranteeTemplates = (getNames: (req: Request) => string[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
@@ -141,7 +143,7 @@ const uniqueAgreementTemplateInOrganization = async (
     try {
         const organization = await getOrganizationOrFail(req.params.orgName);
 
-        // Si hay param, actualización -> no hay conflicto si el nombre de param es igual al del body
+        // If there is a param it is an update -> no conflict if the param name equals the body one
         if (req.params.agreementTemplateName && req.params.agreementTemplateName === req.body.name)
             return next();
 
@@ -206,14 +208,14 @@ export const existingAgreementTemplate = (getTemplateName: (req: Request) => str
 // ─── Middleware ────────────────────────────────────────────────────
 
 export const validateCreateAgreementTemplate = [
-    // Validación de campos
+    // Field validation
     nameValidation,
     descriptionValidation,
     displayNameValidation,
     isPublicValidation,
     ...guaranteesStructureValidation,
     collectValidationErrors,
-    // Validación de lógica
+    // Logic validation
     uniqueAgreementTemplateInOrganization,
     existingGuaranteeTemplates((req) =>
         req.body.guarantees.map((g: { guaranteeTemplateName: string }) => g.guaranteeTemplateName),
@@ -222,14 +224,14 @@ export const validateCreateAgreementTemplate = [
 ];
 
 export const validateUpdateAgreementTemplate = [
-    // Validación de campos
+    // Field validation
     nameValidation,
     descriptionValidation,
     displayNameValidation,
     isPublicValidation,
     ...guaranteesStructureValidation,
     collectValidationErrors,
-    // Validación de lógica
+    // Logic validation
     existingAgreementTemplate((req) => req.params.agreementTemplateName),
     uniqueAgreementTemplateInOrganization,
     existingGuaranteeTemplates((req) =>

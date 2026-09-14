@@ -1,80 +1,110 @@
 import { bootEnv } from '../config/bootConfig.js';
-import { IWindow } from '../types/window.js';
-import { serviceHeaders } from '../utils/serviceAuth.js';
+import { IWindow } from '../types/window.types.js';
+import { IMetricConfig } from '../types/metric.types.js';
+import { ExternalServiceError } from '../utils/customErrors.js';
+import { getServiceHeaders } from '../utils/serviceAuthentication.js';
+import { ITemporalContext } from '../types/temporal.types.js';
+import { IMetric } from '../types/metric.types.js';
 
 const COMPUTER_SERVICE_URL = bootEnv.COMPUTER_SERVICE_URL;
 
-export const validateEventExists = async (eventId: string): Promise<string | null> => {
+// Function to check health of computer service
+export const checkHealth = async (): Promise<boolean> => {
     try {
-        const response = await fetch(`${COMPUTER_SERVICE_URL}/api/v1/events/${eventId}`, {
+        const response = await fetch(`${COMPUTER_SERVICE_URL}/health`, {
             method: 'GET',
-            headers: serviceHeaders,
         });
-        const result = await response.json();
-        if (result.success) return null;
-        return result.error?.message || `eventId '${eventId}' not found in computer`;
+        return response.ok;
     } catch {
-        return `Could not connect to computer to validate eventId '${eventId}'`;
+        return false;
     }
+};
+
+export const validateEventExists = async (eventId: string): Promise<string | null> => {
+    const response = await fetch(`${COMPUTER_SERVICE_URL}/api/v1/events/${eventId}`, {
+        method: 'GET',
+        headers: getServiceHeaders(),
+    });
+    const result = await response.json();
+
+    if (response.status >= 500) {
+        throw new Error(
+            result.error?.message || `Computer failed to validate eventId '${eventId}'`,
+        );
+    }
+
+    if (result.success) return null;
+
+    return result.error?.message;
 };
 
 export const validateEventConfig = async (
     eventId: string,
     fetcherConfigs: { fetcherId: string; fetcherConfig: Record<string, unknown> }[],
     processConfig: Record<string, unknown>,
-): Promise<string | null> => {
-    try {
-        const response = await fetch(`${COMPUTER_SERVICE_URL}/api/v1/events/${eventId}/validate`, {
-            method: 'POST',
-            headers: serviceHeaders,
-            body: JSON.stringify({ fetcherConfigs, processConfig }),
-        });
-        const result = await response.json();
-        if (result.success && result.data?.valid) return null;
-        return result.data?.error || `event '${eventId}' config validation failed in computer`;
-    } catch {
-        return `Could not connect to computer to validate event '${eventId}' config`;
+): Promise<{ error: string; issues?: unknown[] } | null> => {
+    const response = await fetch(`${COMPUTER_SERVICE_URL}/api/v1/events/${eventId}/validate`, {
+        method: 'POST',
+        headers: getServiceHeaders(),
+        body: JSON.stringify({ fetcherConfigs, processConfig }),
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+        throw new Error(
+            result.error?.message || `Computer failed to validate event '${eventId}' config`,
+        );
     }
+    if (result.data?.valid) return null;
+
+    return {
+        error: result.data?.error ?? `Computer could not validate event '${eventId}' config`,
+        ...(Array.isArray(result.data?.issues) && { issues: result.data.issues }),
+    };
 };
 
 export const validateAggregator = async (
     aggregatorType: string,
     aggregatorConfig: Record<string, unknown>,
 ): Promise<string | null> => {
-    try {
-        const response = await fetch(
-            `${COMPUTER_SERVICE_URL}/api/v1/aggregators/${aggregatorType}/validate`,
-            {
-                method: 'POST',
-                headers: serviceHeaders,
-                body: JSON.stringify({ aggregatorConfig }),
-            },
+    const response = await fetch(
+        `${COMPUTER_SERVICE_URL}/api/v1/aggregators/${aggregatorType}/validate`,
+        {
+            method: 'POST',
+            headers: getServiceHeaders(),
+            body: JSON.stringify({ aggregatorConfig }),
+        },
+    );
+    const result = await response.json();
+    if (!result.success) {
+        throw new Error(
+            result.error?.message || `Computer failed to validate aggregator '${aggregatorType}'`,
         );
-        const result = await response.json();
-        if (result.success && result.data?.valid) return null;
-        return result.data?.error || `aggregator '${aggregatorType}' validation failed in computer`;
-    } catch {
-        return `Could not connect to computer to validate aggregator '${aggregatorType}'`;
     }
+    if (result.data?.valid) return null;
+    return result.data?.error;
 };
 
 export const computeMetric = async (
-    date: Date,
+    temporalContext: ITemporalContext,
     window: IWindow,
-    event: Record<string, unknown>,
-    aggregation: Record<string, unknown>,
+    event: IMetricConfig['event'],
+    aggregation: IMetricConfig['aggregation'],
 ) => {
-    try {
-        const response = await fetch(`${COMPUTER_SERVICE_URL}/api/v1/metric/compute`, {
-            method: 'POST',
-            headers: serviceHeaders,
-            body: JSON.stringify({ event: { ...event, date, window }, aggregation }),
-        });
-        const result = await response.json();
-        return result.data;
-    } catch (error) {
-        throw new Error(
-            `Could not connect to computer to compute metric for event '${event.eventId}' and aggregation '${aggregation.aggregatorType}'`,
+    const response = await fetch(`${COMPUTER_SERVICE_URL}/api/v1/metric/compute`, {
+        method: 'POST',
+        headers: getServiceHeaders(),
+        body: JSON.stringify({ temporalContext, event: { ...event, window }, aggregation }),
+    });
+    const result = await response.json();
+
+    if (!result.success) {
+        throw new ExternalServiceError(
+            `Failed to compute metric for event '${event.eventId}' and aggregation '${aggregation.aggregatorType}'`,
+            result.error,
         );
     }
+
+    return result.data as Omit<IMetric, 'metricName' | 'errorMessage'>;
 };

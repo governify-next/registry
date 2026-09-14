@@ -15,6 +15,30 @@ export const createAgreementVersion = async (
     );
 };
 
+export const updateAgreementVersionEarlyTermination = async (
+    agColId: Types.ObjectId,
+    versionNumber: number,
+    earlyTermination: Date,
+) => {
+    return await AgreementCollection.findOneAndUpdate(
+        {
+            _id: agColId,
+            agreementVersions: {
+                $elemMatch: {
+                    versionNumber,
+                    'contract.validity.earlyTermination': null,
+                },
+            },
+        },
+        {
+            $set: {
+                'agreementVersions.$.contract.validity.earlyTermination': earlyTermination,
+            },
+        },
+        { new: true },
+    );
+};
+
 export const updateSignaturesId = async (
     agColId: Types.ObjectId,
     versionNumber: number,
@@ -27,7 +51,7 @@ export const updateSignaturesId = async (
     );
 };
 
-export const deleteVersionByCollection = async (
+export const deleteAgreementVersionByCollection = async (
     agColId: Types.ObjectId,
     versionNumber: number,
     resetAuditable: boolean,

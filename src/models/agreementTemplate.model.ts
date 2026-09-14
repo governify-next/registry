@@ -1,7 +1,4 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-
-// Interfaz para TypeScript
-
 export interface IAgreementTemplate extends Document {
     name: string;
     displayName: string;
@@ -9,8 +6,6 @@ export interface IAgreementTemplate extends Document {
     orgId: Types.ObjectId;
     isPublic: boolean;
 }
-
-// Esquema principal
 
 const agreementTemplateSchema = new Schema<IAgreementTemplate>({
     name: { type: String, required: true },

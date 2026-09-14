@@ -12,8 +12,8 @@ export const getAgreementVersionsByCollection = async (
 
         const agreementVersions = await agreementVersionService.getAgreementVersionsByCollection(
             req.params.orgName,
-            req.params.elementName,
-            req.params.agColName,
+            req.params.scopeId,
+            req.params.agColId,
             expand,
         );
         return sendSuccess(res, { data: agreementVersions });
@@ -30,8 +30,8 @@ export const createAgreementVersionByCollection = async (
     try {
         const agreementVersion = await agreementVersionService.createAgreementVersionByCollection(
             req.params.orgName,
-            req.params.elementName,
-            req.params.agColName,
+            req.params.scopeId,
+            req.params.agColId,
             req.body,
         );
         return sendSuccess(res, {
@@ -44,7 +44,7 @@ export const createAgreementVersionByCollection = async (
     }
 };
 
-export const getAuditableVersionByCollection = async (
+export const getAgreementVersionByCollection = async (
     req: Request,
     res: Response,
     next: NextFunction,
@@ -52,13 +52,14 @@ export const getAuditableVersionByCollection = async (
     try {
         const expand = req.query.expand === 'true';
 
-        const auditableVersion = await agreementVersionService.getAuditableVersionByCollection(
+        const agreementVersion = await agreementVersionService.getAgreementVersionBySelector(
             req.params.orgName,
-            req.params.elementName,
-            req.params.agColName,
+            req.params.scopeId,
+            req.params.agColId,
+            req.params.agreementVersion,
             expand,
         );
-        return sendSuccess(res, { data: auditableVersion });
+        return sendSuccess(res, { data: agreementVersion });
     } catch (err) {
         next(err);
     }
@@ -70,11 +71,11 @@ export const deleteAgreementVersionByCollection = async (
     next: NextFunction,
 ) => {
     try {
-        await agreementVersionService.deleteVersionByCollection(
+        await agreementVersionService.deleteAgreementVersionBySelector(
             req.params.orgName,
-            req.params.elementName,
-            req.params.agColName,
-            Number(req.params.versionNumber),
+            req.params.scopeId,
+            req.params.agColId,
+            req.params.agreementVersion,
         );
         return sendSuccess(res, {
             data: null,
@@ -89,8 +90,8 @@ export const terminateActiveVersion = async (req: Request, res: Response, next: 
     try {
         const result = await agreementVersionService.terminateActiveVersion(
             req.params.orgName,
-            req.params.elementName,
-            req.params.agColName,
+            req.params.scopeId,
+            req.params.agColId,
             req.body.earlyTermination,
         );
         return sendSuccess(res, {

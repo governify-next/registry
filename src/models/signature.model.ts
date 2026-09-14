@@ -2,6 +2,9 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 
 export interface ISignature extends Document {
     guaranteeId: Types.ObjectId;
+    visualizationConfig: {
+        label: string;
+    };
     metrics: {
         metricName: string;
         fetcherConfigs: {
@@ -15,6 +18,13 @@ export interface ISignature extends Document {
 const signatureSchema = new Schema<ISignature>(
     {
         guaranteeId: { type: Schema.Types.ObjectId, required: true },
+        visualizationConfig: {
+            type: new Schema<ISignature['visualizationConfig']>(
+                { label: { type: String, required: true, trim: true, cast: false } },
+                { _id: false },
+            ),
+            required: true,
+        },
         metrics: [
             {
                 metricName: { type: String, required: true },

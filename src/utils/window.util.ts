@@ -1,4 +1,4 @@
-import { IWindowPeriod, WindowUnit } from '../types/window.js';
+import { IWindowPeriod, WindowUnit } from '../types/window.types.js';
 
 export const getPeriodStartDateFromAnchorDateAndPeriod = (
     date: Date,
@@ -11,7 +11,7 @@ export const getPeriodStartDateFromAnchorDateAndPeriod = (
     return new Date(new Date(anchorDate).getTime() + periodInMilliseconds * currentPeriodIndex);
 };
 
-const fromPeriodToMilliseconds = (period: IWindowPeriod[]): number => {
+export const fromPeriodToMilliseconds = (period: IWindowPeriod[]): number => {
     const unitToMilliseconds: Record<WindowUnit, number> = {
         millisecond: 1,
         milisecond: 1,
@@ -26,6 +26,36 @@ const fromPeriodToMilliseconds = (period: IWindowPeriod[]): number => {
         const milliseconds = unitToMilliseconds[unit] ?? 0;
         return totalMilliseconds + milliseconds * value;
     }, 0);
+};
+
+export const getConsolidationDatesInRange = (
+    startDate: Date,
+    endDate: Date,
+    anchorDate: Date,
+    period: IWindowPeriod[],
+): Date[] => {
+    const periodMilliseconds = fromPeriodToMilliseconds(period);
+    const startTime = new Date(startDate).getTime();
+    const endTime = new Date(endDate).getTime();
+    const anchorTime = new Date(anchorDate).getTime();
+
+    const firstConsolidationIndex = Math.max(
+        1,
+        Math.ceil((startTime - anchorTime) / periodMilliseconds),
+    );
+    const firstConsolidationTime = anchorTime + periodMilliseconds * firstConsolidationIndex;
+
+    const dates: Date[] = [];
+
+    for (
+        let consolidationTime = firstConsolidationTime;
+        consolidationTime <= endTime;
+        consolidationTime += periodMilliseconds
+    ) {
+        dates.push(new Date(consolidationTime));
+    }
+
+    return dates;
 };
 
 export const isConsolidated = (date: Date, anchorDate: Date, period: IWindowPeriod[]): boolean => {

@@ -4,8 +4,9 @@ import Signature, { ISignature } from '../models/signature.model.js';
 export const createSignature = async (
     guaranteeId: Types.ObjectId,
     metrics: ISignature['metrics'],
+    visualizationConfig: ISignature['visualizationConfig'],
 ) => {
-    return await Signature.create({ guaranteeId, metrics });
+    return await Signature.create({ guaranteeId, metrics, visualizationConfig });
 };
 
 export const getSignaturesByIds = async (signatureIds: Types.ObjectId[]) => {

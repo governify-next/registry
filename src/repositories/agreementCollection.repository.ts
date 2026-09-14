@@ -1,35 +1,43 @@
 import { Types } from 'mongoose';
 import AgreementCollection, { IAgreementCollection } from '../models/agreementCollection.model.js';
 
-export const getAgreementCollectionById = async (agColId: Types.ObjectId) => {
+export const getAgreementCollectionById = async (agColId: string) => {
     return await AgreementCollection.findById(agColId);
 };
 
-export const getAgreementCollectionsByElement = async (elementId: Types.ObjectId) => {
-    return await AgreementCollection.find({ elementId: elementId });
+export const getAgreementCollectionsByScope = async (scopeId: Types.ObjectId) => {
+    return await AgreementCollection.find({ scopeId: scopeId });
 };
 
-export const createAgreementCollectionByElement = async (
+export const getAgreementCollectionsByScopeIds = async (scopeIds: string[]) => {
+    return await AgreementCollection.find({ scopeId: { $in: scopeIds } });
+};
+
+export const createAgreementCollectionByScope = async (
     data: Partial<IAgreementCollection>,
-    elementId: Types.ObjectId,
+    scopeId: Types.ObjectId,
 ) => {
-    return await AgreementCollection.create({ ...data, elementId: elementId });
+    return await AgreementCollection.create({ ...data, scopeId: scopeId });
 };
 
-export const getAgreementCollectionByElement = async (
-    elementId: Types.ObjectId,
+export const getAgreementCollectionByScope = async (scopeId: Types.ObjectId, agColId: string) => {
+    return await AgreementCollection.findOne({ _id: agColId, scopeId: scopeId });
+};
+
+export const getAgreementCollectionByScopeAndName = async (
+    scopeId: Types.ObjectId,
     agColName: string,
 ) => {
-    return await AgreementCollection.findOne({ name: agColName, elementId: elementId });
+    return await AgreementCollection.findOne({ scopeId: scopeId, name: agColName });
 };
 
-export const updateAgreementCollectionByElement = async (
-    agColId: Types.ObjectId,
+export const updateAgreementCollectionByScope = async (
+    agColId: string,
     data: Partial<IAgreementCollection>,
 ) => {
     return await AgreementCollection.findOneAndUpdate({ _id: agColId }, data, { new: true });
 };
 
-export const deleteAgreementCollectionByElement = async (agColId: Types.ObjectId) => {
+export const deleteAgreementCollectionByScope = async (agColId: string) => {
     return await AgreementCollection.findOneAndDelete({ _id: agColId });
 };

@@ -10,8 +10,11 @@ export interface IAgreementVersionData {
     };
 }
 
-export interface ISignatureEntry {
+export interface IAgreementVersionSignatureInput {
     guaranteeName: string;
+    visualizationConfig: {
+        label: string;
+    };
     metrics: {
         metricName: string;
         fetcherConfigs: {
@@ -22,6 +25,6 @@ export interface ISignatureEntry {
     }[];
 }
 
-export interface AgreementVersionPayload extends IAgreementVersionData {
-    signatures: ISignatureEntry[];
+export interface IAgreementVersionPayload extends IAgreementVersionData {
+    signatures: IAgreementVersionSignatureInput[];
 }
