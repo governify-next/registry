@@ -1,5 +1,48 @@
 # Changelog
 
+## [1.1.0](https://github.com/governify-next/registry/compare/v1.0.0...v1.1.0) (2026-09-14)
+
+### Features
+
+- add description field to agreement collection and update validations ([744d9a4](https://github.com/governify-next/registry/commit/744d9a4b558f20676b9e59ec3dcaf4019533e472))
+- add endpoint to get fetchers of an agreement with consolidation dates ([86d94a1](https://github.com/governify-next/registry/commit/86d94a1212b0654928638ab5cc943c7252028a6b))
+- add endpoint to retrieve agreement collections by organization ([48e57b2](https://github.com/governify-next/registry/commit/48e57b2a76176f7c75c2f9280a6cdb491249bae9))
+- add integration and unit tests ([b7fe4a5](https://github.com/governify-next/registry/commit/b7fe4a5f24e9550f622241f8cf953b9954c0e381))
+- add the generation of consolidated states for auditable versions ([f1987fb](https://github.com/governify-next/registry/commit/f1987fb974c456ae036611ca66b484d60df02617))
+- add visualization configuration to signatures ([d668255](https://github.com/governify-next/registry/commit/d6682550be79b3adf5645e16dd0395f4f482b79b))
+- agregar endpoint para el fetch directo de las versiones auditables ([ee7b9b7](https://github.com/governify-next/registry/commit/ee7b9b7fd876f6bb677c4cdff04ef049ca0a15c9))
+- agregar soporte de expansión en el fetch de versiones auditables ([225782b](https://github.com/governify-next/registry/commit/225782b94f3e594689312e96afc45f720e835691))
+- añadir health a validadores en middleware ([6083724](https://github.com/governify-next/registry/commit/6083724c85421c2065aa4e190eb4ab8e498d30ef))
+- enhance signature filtering in agreement version processing and validation ([98e761b](https://github.com/governify-next/registry/commit/98e761be368b2b96d5e4dde8fcded8d3c959e2eb))
+- implement service authentication ([b6bf5cb](https://github.com/governify-next/registry/commit/b6bf5cb3abd4d9d5609b07ac1378f5ba690866f6))
+- manejo de errores ([55bb22d](https://github.com/governify-next/registry/commit/55bb22d413c1ef3b540b8fd823077df539a35588))
+- optimize state generation by using Promise.all for concurrent processing ([09f1482](https://github.com/governify-next/registry/commit/09f14826dcceef6ec90c13e67343fe3994018abf))
+- refactor fetcher and director integrations, routes for consolid… ([3e497ae](https://github.com/governify-next/registry/commit/3e497ae8bb862973873e6d3a31daec93cc2c8c82))
+- refactor fetcher and director integrations, routes for consolidated tasks ([5fe2493](https://github.com/governify-next/registry/commit/5fe2493ffdfe87b3d21a77ca4ed273792cd48698))
+- refactor states resolution and tasks integration ([644dded](https://github.com/governify-next/registry/commit/644dded6724ef5ac5f3590736acada9d3ba910de))
+
+### Bug Fixes
+
+- actualizar integración con el collector ([a59362c](https://github.com/governify-next/registry/commit/a59362ce81cc5da44e61062045c632c13f5c9c3b))
+- actualizar validaciones de métricas y corregir tipos en IAssembledGuarantee ([5b8d35d](https://github.com/governify-next/registry/commit/5b8d35de863cf9099933f59bfd125282415fa5bf))
+- add type extension to type files ([36d3053](https://github.com/governify-next/registry/commit/36d3053f33a1459e5cc177a9ee7055d8cd67e308))
+- ajustar el manejo de métricas en el servicio de estados ([7b18db5](https://github.com/governify-next/registry/commit/7b18db54d19b04b6e5ca3b08950c48ccb1d7c4a9))
+- cambiar error en el health hacia computer y registros de errores como error en log ([fd8db22](https://github.com/governify-next/registry/commit/fd8db22ced3c5f987a26200d29326faa47263631))
+- catch de async y error de build ([e2fd612](https://github.com/governify-next/registry/commit/e2fd612ba412ce8afdeafb6fd398031be703b42d))
+- corregir referencias y agregar metricConfig en assembleBySignature ([1c7b1d9](https://github.com/governify-next/registry/commit/1c7b1d956f779ef479def741fd6041efa1fe3251))
+- improve logic for determining new version number in agreement version creation ([04e1830](https://github.com/governify-next/registry/commit/04e1830038edea28d6562c5c7cd696897022e2f4))
+- integrar interfaces y adaptar metricSchema ([b357f0f](https://github.com/governify-next/registry/commit/b357f0f506d0242abd41bfb5b47421cce92ff4c4))
+- make async fetching and update state management ([77ac05e](https://github.com/governify-next/registry/commit/77ac05ecc2afc1673b4b28731ba7b6e7d88a4f43))
+- reutilización de window schema para states ([464dc9b](https://github.com/governify-next/registry/commit/464dc9bfe74ac673d3cdba71b2c50b66168d1f89))
+- unificar datos de window de entrada y de interfaz de persistencia ([8186d56](https://github.com/governify-next/registry/commit/8186d5662d7b3991ea804b49439e54d172b4cfed))
+- unificar schemas de métricas en states y guaranteeTemplate ([3614e81](https://github.com/governify-next/registry/commit/3614e819ec3afed34bb5e4a2366f446670c68595))
+- update environment configuration for service authentication ([bd5910d](https://github.com/governify-next/registry/commit/bd5910d56ad098b9f8a8380710e1348fd2aa96fc))
+
+### Miscellaneous Chores
+
+- prepare v1.1.0 release ([2b4f56a](https://github.com/governify-next/registry/commit/2b4f56ac96ea4c553f98df6eb7da539d4a2c1d4e))
+- release 1.1.0 ([93d63e6](https://github.com/governify-next/registry/commit/93d63e690c50945c7f84eed2f58fdf8aa93af947))
+
 ## 1.0.0 (2026-05-15)
 
 ### Features
