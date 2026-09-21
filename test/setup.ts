@@ -2,6 +2,8 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import { afterAll, afterEach, beforeAll } from 'vitest';
 
+process.env.SERVICE_AUTHENTICATION_ENABLED = 'false';
+
 let mongo: MongoMemoryServer;
 
 beforeAll(async () => {
