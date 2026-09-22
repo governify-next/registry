@@ -1595,6 +1595,28 @@ paths:
             description: |
                 Returns the fully assembled selected agreement version and groups every stored
                 state under the signature that produced it.
+                Optional bounds filter `updatedAt`, not the State's evaluation `date`:
+                `updatedFrom` is inclusive and `updatedTo` is exclusive. Either bound may be
+                omitted independently; omitting both returns all States. When both are supplied,
+                `updatedTo` must be after or equal to `updatedFrom`; equal bounds return no States.
+                Signatures without matching States retain an empty `states` array.
+            parameters:
+                - name: updatedFrom
+                  in: query
+                  required: false
+                  description: Inclusive lower bound for updatedAt (ISO 8601).
+                  schema:
+                      type: string
+                      format: date-time
+                  example: '2026-09-22T10:00:00.000Z'
+                - name: updatedTo
+                  in: query
+                  required: false
+                  description: Exclusive upper bound for updatedAt (ISO 8601).
+                  schema:
+                      type: string
+                      format: date-time
+                  example: '2026-09-22T11:00:00.000Z'
             responses:
                 '200':
                     description: States retrieved successfully

@@ -95,11 +95,17 @@ export const getStatesForAgreementVersion = async (
 ) => {
     try {
         const { orgName, scopeId, agColId, agreementVersion } = req.params;
+        const { updatedFrom, updatedTo } = req.query;
         const states = await stateService.getStatesForAgreementVersion(
             orgName,
             scopeId,
             agColId,
             agreementVersion,
+            {
+                updatedFrom:
+                    updatedFrom === undefined ? undefined : new Date(updatedFrom as string),
+                updatedTo: updatedTo === undefined ? undefined : new Date(updatedTo as string),
+            },
         );
         return sendSuccess(res, {
             data: states,

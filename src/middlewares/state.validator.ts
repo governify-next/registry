@@ -128,3 +128,27 @@ export const validateCreateConsolidationStateTasksRequest = [
     ...signatureIdsValidation,
     collectValidationErrors,
 ];
+
+export const validateGetStatesQuery = [
+    ...['updatedFrom', 'updatedTo'].map((field) =>
+        query(field)
+            .optional()
+            .isString()
+            .bail()
+            .isISO8601({ strict: true })
+            .withMessage(`${field} must be a valid ISO 8601 date`)
+            .bail()
+            .custom((value: string) => Number.isFinite(Date.parse(value)))
+            .withMessage(`${field} must be a valid date`),
+    ),
+    query('updatedTo')
+        .optional()
+        .custom((value: string, { req }) => {
+            const from = req.query?.updatedFrom;
+            if (typeof from === 'string' && Date.parse(value) < Date.parse(from)) {
+                throw new Error('updatedTo must be after or equal to updatedFrom');
+            }
+            return true;
+        }),
+    collectValidationErrors,
+];

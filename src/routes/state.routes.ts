@@ -8,6 +8,7 @@ import {
     validateCreateConsolidationStateTasksRequest,
     validateGenerateConsolidatedStatesBody,
     validateGenerateStatesBody,
+    validateGetStatesQuery,
 } from '../middlewares/state.validator.js';
 import { validateDirectorHealth } from '../middlewares/director.validator.js';
 
@@ -38,6 +39,7 @@ stateRoutes.post(
 
 stateRoutes.get(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states',
+    validateGetStatesQuery,
     existingScope,
     existingAgreementCollection,
     existingSelectedAgreementVersion,
