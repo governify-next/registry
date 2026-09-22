@@ -3,26 +3,27 @@ import request from 'supertest';
 import { Types } from 'mongoose';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import State, { StateStatus } from '../src/models/state.model.js';
-import { getStatesForAgreementVersion } from '../src/controllers/state.controller.js';
-import { validateGetStatesQuery } from '../src/middlewares/state.validator.js';
+import { searchStatesForAgreementVersion } from '../src/controllers/state.controller.js';
+import { validateSearchStatesBody } from '../src/middlewares/state.validator.js';
 import { errorHandler } from '../src/middlewares/errorHandler.js';
 import * as agreementVersionService from '../src/services/agreementVersion.service.js';
 
 const from = '2026-09-22T10:00:00.000Z';
 const to = '2026-09-22T11:00:00.000Z';
 const path =
-    '/organizations/org/scopes/scope/agreementCollections/collection/agreementVersions/1/states';
+    '/organizations/org/scopes/scope/agreementCollections/collection/agreementVersions/1/states/search';
 const app = express();
-app.get(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states',
-    validateGetStatesQuery,
-    getStatesForAgreementVersion,
+app.use(express.json());
+app.post(
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states/search',
+    validateSearchStatesBody,
+    searchStatesForAgreementVersion,
 );
 app.use(errorHandler);
 
 afterEach(() => vi.restoreAllMocks());
 
-describe('State updatedAt range retrieval', () => {
+describe('State search by updatedAt range', () => {
     beforeEach(async () => {
         const signatureId = new Types.ObjectId();
         vi.spyOn(agreementVersionService, 'getAgreementVersionBySelector').mockResolvedValue({
@@ -58,17 +59,19 @@ describe('State updatedAt range retrieval', () => {
     });
 
     it.each([
-        { query: {}, expected: [0, 1, 2, 3] },
-        { query: { updatedFrom: from }, expected: [1, 2, 3] },
-        { query: { updatedTo: to }, expected: [0, 1, 2] },
-        { query: { updatedFrom: from, updatedTo: to }, expected: [1, 2] },
-        { query: { updatedFrom: from, updatedTo: from }, expected: [] },
-        { query: { updatedFrom: '2027-01-01T00:00:00Z' }, expected: [] },
-        { query: { updatedFrom: '2026-09-22T12:00:00+02:00', updatedTo: to }, expected: [1, 2] },
+        { filters: undefined, expected: [0, 1, 2, 3] },
+        { filters: {}, expected: [0, 1, 2, 3] },
+        { filters: { updatedFrom: from }, expected: [1, 2, 3] },
+        { filters: { updatedTo: to }, expected: [0, 1, 2] },
+        { filters: { updatedFrom: from, updatedTo: to }, expected: [1, 2] },
+        { filters: { updatedFrom: from, updatedTo: from }, expected: [] },
+        { filters: { updatedFrom: '2027-01-01T00:00:00Z' }, expected: [] },
+        { filters: { updatedFrom: '2026-09-22T12:00:00+02:00', updatedTo: to }, expected: [1, 2] },
     ])(
-        'filters by updatedAt and preserves the response structure: $query',
-        async ({ query, expected }) => {
-            const response = await request(app).get(path).query(query);
+        'filters by updatedAt and preserves the response structure: $filters',
+        async ({ filters, expected }) => {
+            const req = request(app).post(path);
+            const response = await (filters === undefined ? req : req.send(filters));
             expect(response.status).toBe(200);
             const version = response.body.data.agreementVersion;
             expect(version.versionNumber).toBe(1);
@@ -89,9 +92,16 @@ describe('State updatedAt range retrieval', () => {
         { updatedFrom: to, updatedTo: from },
         { updatedFrom: [from, to] },
         { updatedTo: 'null' },
-    ])('rejects an invalid range before querying States: %j', async (query) => {
-        const response = await request(app).get(path).query(query);
+        { updatedFrom: null },
+        { status: 'COMPLETED' },
+    ])('rejects an invalid range before querying States: %j', async (filters) => {
+        const response = await request(app).post(path).send(filters);
         expect(response.status).toBe(400);
         expect(agreementVersionService.getAgreementVersionBySelector).not.toHaveBeenCalled();
+    });
+
+    it('does not serve the previous GET route', async () => {
+        const response = await request(app).get(path.replace('/search', ''));
+        expect(response.status).toBe(404);
     });
 });

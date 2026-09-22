@@ -88,15 +88,15 @@ export const generateConsolidatedStatesForAgreementVersion = async (
     }
 };
 
-export const getStatesForAgreementVersion = async (
+export const searchStatesForAgreementVersion = async (
     req: Request,
     res: Response,
     next: NextFunction,
 ) => {
     try {
         const { orgName, scopeId, agColId, agreementVersion } = req.params;
-        const { updatedFrom, updatedTo } = req.query;
-        const states = await stateService.getStatesForAgreementVersion(
+        const { updatedFrom, updatedTo } = req.body ?? {};
+        const states = await stateService.searchStatesForAgreementVersion(
             orgName,
             scopeId,
             agColId,

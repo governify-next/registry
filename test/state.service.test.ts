@@ -420,7 +420,7 @@ describe('state temporal generation', () => {
         vi.spyOn(stateRepository, 'getStatesBySignatureId').mockResolvedValue([
             { status: StateStatus.COMPLETED },
         ] as never);
-        const result = await stateService.getStatesForAgreementVersion(
+        const result = await stateService.searchStatesForAgreementVersion(
             'organization',
             'scope',
             agColId.toString(),

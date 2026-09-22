@@ -463,7 +463,7 @@ export const deleteConsolidationStateTasksForAgreementVersion = async (
     return await directorIntegration.deleteTasksByFilters(filters);
 };
 
-export const getStatesForAgreementVersion = async (
+export const searchStatesForAgreementVersion = async (
     orgName: string,
     scopeId: string,
     agColId: string,
