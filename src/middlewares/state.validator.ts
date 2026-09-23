@@ -128,3 +128,40 @@ export const validateCreateConsolidationStateTasksRequest = [
     ...signatureIdsValidation,
     collectValidationErrors,
 ];
+
+export const validateSearchStatesBody = [
+    body().custom((value: unknown) => {
+        if (value === undefined) return true;
+        if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+            throw new Error('Search filters must be a JSON object');
+        }
+        const unknownFields = Object.keys(value).filter(
+            (field) => !['updatedFrom', 'updatedTo'].includes(field),
+        );
+        if (unknownFields.length > 0) {
+            throw new Error(`Unknown State search filters: ${unknownFields.join(', ')}`);
+        }
+        return true;
+    }),
+    ...['updatedFrom', 'updatedTo'].map((field) =>
+        body(field)
+            .optional()
+            .isString()
+            .bail()
+            .isISO8601({ strict: true })
+            .withMessage(`${field} must be a valid ISO 8601 date`)
+            .bail()
+            .custom((value: string) => Number.isFinite(Date.parse(value)))
+            .withMessage(`${field} must be a valid date`),
+    ),
+    body('updatedTo')
+        .optional()
+        .custom((value: string, { req }) => {
+            const from = req.body?.updatedFrom;
+            if (typeof from === 'string' && Date.parse(value) < Date.parse(from)) {
+                throw new Error('updatedTo must be after or equal to updatedFrom');
+            }
+            return true;
+        }),
+    collectValidationErrors,
+];

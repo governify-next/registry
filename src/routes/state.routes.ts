@@ -8,6 +8,7 @@ import {
     validateCreateConsolidationStateTasksRequest,
     validateGenerateConsolidatedStatesBody,
     validateGenerateStatesBody,
+    validateSearchStatesBody,
 } from '../middlewares/state.validator.js';
 import { validateDirectorHealth } from '../middlewares/director.validator.js';
 
@@ -36,12 +37,13 @@ stateRoutes.post(
     stateController.generateConsolidatedStatesForAgreementVersion,
 );
 
-stateRoutes.get(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states',
+stateRoutes.post(
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states/search',
+    validateSearchStatesBody,
     existingScope,
     existingAgreementCollection,
     existingSelectedAgreementVersion,
-    stateController.getStatesForAgreementVersion,
+    stateController.searchStatesForAgreementVersion,
 );
 
 stateRoutes.post(

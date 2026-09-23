@@ -14,6 +14,7 @@ import { Comparator } from '../types/comparator.types.js';
 import { getLogger } from '../utils/logger.js';
 import { ExistingStatePolicy, ITemporalContext, TemporalMode } from '../types/temporal.types.js';
 import { NotFoundError, ValidationError } from '../utils/customErrors.js';
+import { StateUpdatedRange } from '../types/state.types.js';
 
 const logger = getLogger().setTag('state.service.ts');
 
@@ -462,11 +463,12 @@ export const deleteConsolidationStateTasksForAgreementVersion = async (
     return await directorIntegration.deleteTasksByFilters(filters);
 };
 
-export const getStatesForAgreementVersion = async (
+export const searchStatesForAgreementVersion = async (
     orgName: string,
     scopeId: string,
     agColId: string,
     agreementVersion: string,
+    range: StateUpdatedRange = {},
 ) => {
     const selectedAgreementVersion = await agreementVersionService.getAgreementVersionBySelector(
         orgName,
@@ -483,6 +485,7 @@ export const getStatesForAgreementVersion = async (
     for (const signature of signatures) {
         const states = await stateRepository.getStatesBySignatureId(
             signature.signatureId.toString(),
+            range,
         );
         signatureStates.push({
             ...signature,
