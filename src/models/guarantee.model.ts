@@ -6,6 +6,7 @@ import { windowSchema } from './shared/window.schema.js';
 export interface IGuarantee extends Document {
     guaranteeTemplateId: Types.ObjectId;
     agreementTemplateId: Types.ObjectId;
+    position: number;
     comparator: Comparator;
     threshold: number;
     window: IWindow;
@@ -14,6 +15,7 @@ export interface IGuarantee extends Document {
 const guaranteeSchema = new Schema<IGuarantee>({
     guaranteeTemplateId: { type: Schema.ObjectId, required: true },
     agreementTemplateId: { type: Schema.ObjectId, required: true },
+    position: { type: Number, required: true, min: 0, validate: Number.isInteger },
     comparator: { type: String, required: true, enum: comparators },
     threshold: { type: Number, required: true },
     window: { type: windowSchema, required: true },
