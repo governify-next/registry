@@ -123,6 +123,7 @@ export const assembleBySignature = async (
                     comparator: guarantee!.comparator,
                     threshold: guarantee!.threshold,
                     window: guarantee!.window,
+                    evolutiveWindow: guarantee!.evolutiveWindow,
                     metrics: mergedMetrics,
                 },
             };

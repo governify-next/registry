@@ -4,7 +4,9 @@ import * as agreementTemplateService from '../services/agreementTemplate.service
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
 import { getOrganizationOrFail } from './organization.validator.js';
 import { DuplicateKeyError, ValidationError, NotFoundError } from '../utils/customErrors.js';
-import { windowUnits } from '../types/window.types.js';
+import { validateGuaranteeWindow } from './window.validator.js';
+import { fromPeriodToMilliseconds } from '../utils/window.util.js';
+import type { IAgreementTemplateGuaranteeInput } from '../types/agreementTemplate.types.js';
 import { comparators } from '../types/comparator.types.js';
 
 // ─── Field validations ────────────────────────────
@@ -70,38 +72,8 @@ const guaranteesStructureValidation = [
         .withMessage('Each guarantee entry must have a threshold')
         .isNumeric()
         .withMessage('threshold must be a number'),
-    body('guarantees.*.window')
-        .exists({ checkNull: true })
-        .withMessage('Each guarantee entry must have a window object')
-        .isObject()
-        .withMessage('window must be an object'),
-
-    body('guarantees.*.window.anchorDate')
-        .exists({ checkNull: true })
-        .withMessage('Each window must have an anchorDate')
-        .isISO8601() // make sure the date format is valid
-        .withMessage('anchorDate must be a valid ISO8601 string')
-        .isAfter('2000-01-01T00:00:00.000Z')
-        .isBefore('2100-01-01T00:00:00.000Z')
-        .withMessage('anchorDate must be a realistic Date (between year 2000 and 2100)'),
-
-    body('guarantees.*.window.period')
-        .exists({ checkNull: true })
-        .withMessage('Each window must have a period array')
-        .isArray({ min: 1 })
-        .withMessage('period must be an array with at least one entry'),
-
-    body('guarantees.*.window.period.*.unit')
-        .exists({ checkNull: true })
-        .withMessage('Each period entry must have a unit')
-        .isIn(windowUnits)
-        .withMessage('Period unit must be one of: millisecond, second, minute, hour, day, week'),
-
-    body('guarantees.*.window.period.*.value')
-        .exists({ checkNull: true })
-        .withMessage('Each period entry must have a value')
-        .isInt({ min: 1 })
-        .withMessage('Period value must be a positive integer strictly greater than 0'),
+    ...validateGuaranteeWindow('window'),
+    ...validateGuaranteeWindow('evolutiveWindow', true),
 ];
 
 // ─── Express-validator ─────────────────────────────
@@ -111,6 +83,23 @@ const collectValidationErrors = (req: Request, res: Response, next: NextFunction
     if (!errors.isEmpty()) return next(new ValidationError('Validation failed', errors.array()));
     next();
 };
+
+// Run only after structure validation so malformed periods produce field errors, not exceptions.
+const evolutivePeriodValidation = body('guarantees.*').custom(
+    (guarantee: IAgreementTemplateGuaranteeInput) => {
+        if (guarantee.evolutiveWindow === null) return true;
+        const period = fromPeriodToMilliseconds(guarantee.window.period);
+        const evolutivePeriod = fromPeriodToMilliseconds(guarantee.evolutiveWindow.period);
+        if (
+            !Number.isFinite(period) ||
+            !Number.isFinite(evolutivePeriod) ||
+            evolutivePeriod >= period
+        ) {
+            throw new Error('evolutiveWindow.period must be strictly shorter than window.period');
+        }
+        return true;
+    },
+);
 
 // ─── Business logic validations ─────────────────────────────────
 
@@ -215,6 +204,8 @@ export const validateCreateAgreementTemplate = [
     isPublicValidation,
     ...guaranteesStructureValidation,
     collectValidationErrors,
+    evolutivePeriodValidation,
+    collectValidationErrors,
     // Logic validation
     uniqueAgreementTemplateInOrganization,
     existingGuaranteeTemplates((req) =>
@@ -230,6 +221,8 @@ export const validateUpdateAgreementTemplate = [
     displayNameValidation,
     isPublicValidation,
     ...guaranteesStructureValidation,
+    collectValidationErrors,
+    evolutivePeriodValidation,
     collectValidationErrors,
     // Logic validation
     existingAgreementTemplate((req) => req.params.agreementTemplateName),

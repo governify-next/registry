@@ -65,6 +65,13 @@ export const buildAndSaveGuarantees = async (
                 ...g.window,
                 anchorDate: new Date(g.window.anchorDate),
             },
+            evolutiveWindow:
+                g.evolutiveWindow === null
+                    ? null
+                    : {
+                          ...g.evolutiveWindow,
+                          anchorDate: new Date(g.evolutiveWindow.anchorDate),
+                      },
         };
     });
 

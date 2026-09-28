@@ -10,6 +10,7 @@ export interface IGuarantee extends Document {
     comparator: Comparator;
     threshold: number;
     window: IWindow;
+    evolutiveWindow: IWindow | null;
 }
 
 const guaranteeSchema = new Schema<IGuarantee>({
@@ -19,6 +20,13 @@ const guaranteeSchema = new Schema<IGuarantee>({
     comparator: { type: String, required: true, enum: comparators },
     threshold: { type: Number, required: true },
     window: { type: windowSchema, required: true },
+    evolutiveWindow: {
+        type: windowSchema,
+        // An explicit null disables this window; omission is not valid for new guarantees.
+        required: function () {
+            return this.evolutiveWindow !== null;
+        },
+    },
 });
 
 // Different guarantees cannot be created for the same guarantee template within an agreement template

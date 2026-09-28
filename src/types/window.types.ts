@@ -19,3 +19,7 @@ export interface IWindow {
     period: IWindowPeriod[];
     anchorDate: Date;
 }
+
+export interface IWindowInput extends Omit<IWindow, 'anchorDate'> {
+    anchorDate: string;
+}

@@ -17,6 +17,7 @@ export const assembleGuarantee = async (guarantee: IGuarantee) => {
         comparator: guarantee.comparator,
         threshold: guarantee.threshold,
         window: guarantee.window,
+        evolutiveWindow: guarantee.evolutiveWindow,
     };
 };
 export const createGuarantees = async (configs: Partial<IGuarantee>[]) => {

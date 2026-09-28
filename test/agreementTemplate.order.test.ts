@@ -28,6 +28,10 @@ const fixture = async () => {
                 period: [{ unit: 'day', value: 1 }],
                 anchorDate: '2026-01-01T00:00:00Z',
             },
+            evolutiveWindow: {
+                period: [{ unit: 'hour', value: 1 }],
+                anchorDate: '2026-01-01T00:00:00Z',
+            },
         })),
     };
     const template = await templates.createAgreementTemplateByOrganization(orgId, input);

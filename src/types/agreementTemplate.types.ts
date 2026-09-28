@@ -1,4 +1,4 @@
-import { IWindowPeriod } from './window.types.js';
+import { IWindowInput } from './window.types.js';
 import { Comparator } from './comparator.types.js';
 
 export interface IAgreementTemplateData {
@@ -12,10 +12,8 @@ export interface IAgreementTemplateGuaranteeInput {
     guaranteeTemplateName: string;
     comparator: Comparator;
     threshold: number;
-    window: {
-        period: IWindowPeriod[];
-        anchorDate: string;
-    };
+    window: IWindowInput;
+    evolutiveWindow: IWindowInput | null;
 }
 
 export interface IAgreementTemplatePayload extends IAgreementTemplateData {
