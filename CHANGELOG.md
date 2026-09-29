@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.2.0](https://github.com/governify-next/registry/compare/v1.1.1...v1.2.0) (2026-09-29)
+
+
+### Features
+
+* add @oas-tools/oas-telemetry for enhanced telemetry support ([94bbdf4](https://github.com/governify-next/registry/commit/94bbdf4cdf5299bb1f7fc2a52948a382e66a1ea5))
+* add evolutive state functionality ([8b0961b](https://github.com/governify-next/registry/commit/8b0961b569ec808a390075e2c3e874b5e6bf6a54))
+* add evolutiveWindow support to guarantees ([db498f7](https://github.com/governify-next/registry/commit/db498f7791e66320e78871f9e69d931838bfd963))
+* add position field to guarantee model and update retrieval logic for ordering ([5145e17](https://github.com/governify-next/registry/commit/5145e1798d86e887db5fa40232c8634e16bcceed))
+* add updatedAt range filtering to states retrieval and validation ([902f868](https://github.com/governify-next/registry/commit/902f868684196263f7e86ea8c1cd6891470d9afd))
+* handle service authentication flag ([29868b4](https://github.com/governify-next/registry/commit/29868b41bcefd064c1bf7ccee64892216704efa4))
+* new version ([35fd3f2](https://github.com/governify-next/registry/commit/35fd3f200594c2253ddf5fe0ceb68c602eb40ba4))
+* rename and update states retrieval to support search functionality with request body ([5067c73](https://github.com/governify-next/registry/commit/5067c739fe4d39f8abd44117c2f7f5d06fff3ad8))
+
+
+### Bug Fixes
+
+* update OTEL_SERVICE_NAME to 'registry' for correct service identification ([2d7952f](https://github.com/governify-next/registry/commit/2d7952f5f03171c79a142a18758d215682dfdf69))
+
 ## [1.1.1](https://github.com/governify-next/registry/compare/v1.1.0...v1.1.1) (2026-09-19)
 
 
