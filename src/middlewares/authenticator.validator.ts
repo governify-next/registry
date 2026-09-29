@@ -58,6 +58,8 @@ const verifyToken = (token: string) => {
 };
 
 export const checkUserAuthentication = (req: Request, res: Response, next: NextFunction) => {
+    if (!bootEnv.SERVICE_AUTHENTICATION_ENABLED) return next();
+
     try {
         const decoded = verifyToken(getBearerToken(req));
 
@@ -78,6 +80,8 @@ export const checkUserAuthentication = (req: Request, res: Response, next: NextF
 };
 
 export const checkServiceAuthentication = (req: Request, res: Response, next: NextFunction) => {
+    if (!bootEnv.SERVICE_AUTHENTICATION_ENABLED) return next();
+
     try {
         const decoded = verifyToken(getBearerToken(req));
 

@@ -50,7 +50,7 @@ export const buildAndSaveGuarantees = async (
     const guaranteeTemplatesFromDb =
         await guaranteeTemplateService.findGuaranteeTemplatesByName(guaranteeTemplatesNames);
 
-    const configToSave = guarantees.map((g) => {
+    const configToSave = guarantees.map((g, position) => {
         const dbGuaranteeTemplate = guaranteeTemplatesFromDb.find(
             (dbTemplate) => dbTemplate.name === g.guaranteeTemplateName,
         );
@@ -58,12 +58,20 @@ export const buildAndSaveGuarantees = async (
         return {
             agreementTemplateId: templateId,
             guaranteeTemplateId: dbGuaranteeTemplate!._id,
+            position,
             comparator: g.comparator,
             threshold: g.threshold,
             window: {
                 ...g.window,
                 anchorDate: new Date(g.window.anchorDate),
             },
+            evolutiveWindow:
+                g.evolutiveWindow === null
+                    ? null
+                    : {
+                          ...g.evolutiveWindow,
+                          anchorDate: new Date(g.evolutiveWindow.anchorDate),
+                      },
         };
     });
 

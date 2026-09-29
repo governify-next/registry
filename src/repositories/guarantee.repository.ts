@@ -6,7 +6,7 @@ export const createGuarantees = async (configs: Partial<IGuarantee>[]) => {
 };
 
 export const getGuaranteesByAgreementTemplateId = async (agreementTemplateId: Types.ObjectId) => {
-    return await Guarantee.find({ agreementTemplateId });
+    return await Guarantee.find({ agreementTemplateId }).sort({ position: 1 });
 };
 
 export const getGuaranteeByTemplateIds = async (

@@ -8,5 +8,6 @@ export interface IAssembledGuarantee {
     comparator: Comparator;
     threshold: number;
     window: IWindow;
+    evolutiveWindow: IWindow | null;
     metrics: IMetricDefinition[];
 }

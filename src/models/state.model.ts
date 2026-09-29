@@ -114,6 +114,7 @@ stateSchema.pre('findOneAndUpdate', function () {
 });
 
 stateSchema.index({ signatureId: 1, date: 1 }, { unique: true });
+stateSchema.index({ signatureId: 1, updatedAt: 1 });
 
 const State = mongoose.model<IState>('State', stateSchema);
 

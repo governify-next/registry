@@ -1,4 +1,4 @@
-import { IWindowPeriod, WindowUnit } from '../types/window.types.js';
+import { IWindow, IWindowPeriod, WindowUnit } from '../types/window.types.js';
 
 export const getPeriodStartDateFromAnchorDateAndPeriod = (
     date: Date,
@@ -63,4 +63,19 @@ export const isConsolidated = (date: Date, anchorDate: Date, period: IWindowPeri
     const periodMilliseconds = fromPeriodToMilliseconds(period);
     const periodStartDate = getPeriodStartDateFromAnchorDateAndPeriod(date, anchorDate, period);
     return parsedDate.getTime() - periodStartDate.getTime() - periodMilliseconds === 0;
+};
+
+export const getEvolutiveDatesInRange = (
+    startDate: Date,
+    endDate: Date,
+    window: IWindow,
+    evolutiveWindow: IWindow | null,
+): Date[] => {
+    if (!evolutiveWindow) return [];
+    return getConsolidationDatesInRange(
+        startDate,
+        endDate,
+        evolutiveWindow.anchorDate,
+        evolutiveWindow.period,
+    ).filter((date) => !isConsolidated(date, window.anchorDate, window.period));
 };

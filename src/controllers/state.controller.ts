@@ -88,18 +88,73 @@ export const generateConsolidatedStatesForAgreementVersion = async (
     }
 };
 
-export const getStatesForAgreementVersion = async (
+export const generateEvolutiveStatesForAgreementVersion = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const isAsync = req.query.isAsync === 'true';
+        const { orgName, scopeId, agColId, agreementVersion } = req.params;
+        const { date, startDate, endDate, temporalMode, ifExists, signatureIds } = req.body;
+        const requestedStartDate = new Date(date ?? startDate);
+        const requestedEndDate = new Date(date ?? endDate);
+
+        const states = await stateService.generateEvolutiveStatesForAgreementVersion(
+            isAsync,
+            orgName,
+            scopeId,
+            agColId,
+            agreementVersion,
+            requestedStartDate,
+            requestedEndDate,
+            temporalMode as TemporalMode,
+            ifExists as ExistingStatePolicy,
+            signatureIds as string[] | undefined,
+        );
+
+        if (states.length === 0) {
+            return sendSuccess(res, {
+                data: states,
+                message: 'No guarantees have evolutive points in the requested date or range',
+                httpStatus: 200,
+            });
+        }
+
+        const hasIndeterminateComplianceResults =
+            !isAsync &&
+            states.some((state) => state.complianceStatus === ComplianceStatus.INDETERMINATE);
+
+        return sendSuccess(res, {
+            data: states,
+            message: isAsync
+                ? 'Evolutive states created'
+                : 'Evolutive states created and generated',
+            httpStatus: hasIndeterminateComplianceResults ? 207 : 200,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const searchStatesForAgreementVersion = async (
     req: Request,
     res: Response,
     next: NextFunction,
 ) => {
     try {
         const { orgName, scopeId, agColId, agreementVersion } = req.params;
-        const states = await stateService.getStatesForAgreementVersion(
+        const { updatedFrom, updatedTo } = req.body ?? {};
+        const states = await stateService.searchStatesForAgreementVersion(
             orgName,
             scopeId,
             agColId,
             agreementVersion,
+            {
+                updatedFrom:
+                    updatedFrom === undefined ? undefined : new Date(updatedFrom as string),
+                updatedTo: updatedTo === undefined ? undefined : new Date(updatedTo as string),
+            },
         );
         return sendSuccess(res, {
             data: states,
@@ -178,6 +233,80 @@ export const deleteConsolidationStateTasksForAgreementVersion = async (
         return sendSuccess(res, {
             data: result,
             message: 'Consolidation state tasks deleted',
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const createEvolutiveStateTasksForAgreementVersion = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const { orgName, scopeId, agColId, agreementVersion } = req.params;
+        const { signatureIds } = req.body ?? {};
+        const enabled = req.query.enabled === undefined || req.query.enabled === 'true';
+        const stateTasks = await stateService.createEvolutiveStateTasksForAgreementVersion(
+            orgName,
+            scopeId,
+            agColId,
+            agreementVersion,
+            enabled,
+            signatureIds as string[] | undefined,
+        );
+
+        return sendSuccess(res, {
+            data: stateTasks,
+            message: 'Evolutive state tasks created',
+            httpStatus: 201,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getEvolutiveStateTasksForAgreementVersion = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const { orgName, scopeId, agColId, agreementVersion } = req.params;
+        const stateTasks = await stateService.getEvolutiveStateTasksForAgreementVersion(
+            orgName,
+            scopeId,
+            agColId,
+            agreementVersion,
+        );
+
+        return sendSuccess(res, {
+            data: stateTasks,
+            message: 'Evolutive state tasks retrieved',
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const deleteEvolutiveStateTasksForAgreementVersion = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const { orgName, scopeId, agColId, agreementVersion } = req.params;
+        const result = await stateService.deleteEvolutiveStateTasksForAgreementVersion(
+            orgName,
+            scopeId,
+            agColId,
+            agreementVersion,
+        );
+
+        return sendSuccess(res, {
+            data: result,
+            message: 'Evolutive state tasks deleted',
         });
     } catch (err) {
         next(err);

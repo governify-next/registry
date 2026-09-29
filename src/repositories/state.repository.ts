@@ -1,4 +1,5 @@
 import State, { IState } from '../models/state.model.js';
+import { StateUpdatedRange } from '../types/state.types.js';
 
 export const createState = async (data: Partial<IState>) => {
     const state = new State(data);
@@ -66,8 +67,14 @@ export const getStateById = async (id: string) => {
     return await State.findById(id);
 };
 
-export const getStatesBySignatureId = async (id: string) => {
-    return await State.find({ signatureId: id });
+export const getStatesBySignatureId = async (id: string, range: StateUpdatedRange = {}) => {
+    const updatedAt: { $gte?: Date; $lt?: Date } = {};
+    if (range.updatedFrom !== undefined) updatedAt.$gte = range.updatedFrom;
+    if (range.updatedTo !== undefined) updatedAt.$lt = range.updatedTo;
+    return await State.find({
+        signatureId: id,
+        ...(Object.keys(updatedAt).length > 0 ? { updatedAt } : {}),
+    });
 };
 
 export const getStatesBySignatureIds = async (signatureIds: string[]) => {

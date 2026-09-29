@@ -5,9 +5,12 @@ import { existingScope } from '../middlewares/scope.validator.js';
 import { existingAgreementCollection } from '../middlewares/agreementCollection.validator.js';
 import { existingSelectedAgreementVersion } from '../middlewares/agreementVersion.validator.js';
 import {
+    validateCreateEvolutiveStateTasksRequest,
+    validateGenerateEvolutiveStatesBody,
     validateCreateConsolidationStateTasksRequest,
     validateGenerateConsolidatedStatesBody,
     validateGenerateStatesBody,
+    validateSearchStatesBody,
 } from '../middlewares/state.validator.js';
 import { validateDirectorHealth } from '../middlewares/director.validator.js';
 
@@ -15,6 +18,9 @@ export const stateRoutes = Router();
 
 const consolidationStateTasksPath =
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/tasks/states/consolidated';
+
+const evolutiveStateTasksPath =
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/tasks/states/evolutive';
 
 stateRoutes.post(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states/generate',
@@ -36,12 +42,23 @@ stateRoutes.post(
     stateController.generateConsolidatedStatesForAgreementVersion,
 );
 
-stateRoutes.get(
-    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states',
+stateRoutes.post(
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states/evolutive/generate',
+    validateComputerHealth,
     existingScope,
     existingAgreementCollection,
     existingSelectedAgreementVersion,
-    stateController.getStatesForAgreementVersion,
+    validateGenerateEvolutiveStatesBody,
+    stateController.generateEvolutiveStatesForAgreementVersion,
+);
+
+stateRoutes.post(
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states/search',
+    validateSearchStatesBody,
+    existingScope,
+    existingAgreementCollection,
+    existingSelectedAgreementVersion,
+    stateController.searchStatesForAgreementVersion,
 );
 
 stateRoutes.post(
@@ -70,4 +87,32 @@ stateRoutes.delete(
     existingAgreementCollection,
     existingSelectedAgreementVersion,
     stateController.deleteConsolidationStateTasksForAgreementVersion,
+);
+
+stateRoutes.post(
+    evolutiveStateTasksPath,
+    validateDirectorHealth,
+    existingScope,
+    existingAgreementCollection,
+    existingSelectedAgreementVersion,
+    validateCreateEvolutiveStateTasksRequest,
+    stateController.createEvolutiveStateTasksForAgreementVersion,
+);
+
+stateRoutes.get(
+    evolutiveStateTasksPath,
+    validateDirectorHealth,
+    existingScope,
+    existingAgreementCollection,
+    existingSelectedAgreementVersion,
+    stateController.getEvolutiveStateTasksForAgreementVersion,
+);
+
+stateRoutes.delete(
+    evolutiveStateTasksPath,
+    validateDirectorHealth,
+    existingScope,
+    existingAgreementCollection,
+    existingSelectedAgreementVersion,
+    stateController.deleteEvolutiveStateTasksForAgreementVersion,
 );

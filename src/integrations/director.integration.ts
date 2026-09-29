@@ -72,37 +72,45 @@ export const createRecurringFetchTask = async (
     return result.data;
 };
 
-export const createRecurringStateTask = async (
-    inputArgs: IRecurringStateTaskInputArgs,
-    enabled: boolean,
-    startDate: Date,
-    endDate: Date,
-    anchorDate: Date,
-    interval: number,
-) => {
-    const response = await fetch(`${DIRECTOR_SERVICE_URL}/api/v1/tasks`, {
-        method: 'POST',
-        headers: getServiceHeaders(),
-        body: JSON.stringify({
-            script: 'generateConsolidatedStates',
-            inputArgs,
-            type: 'RECURRING',
-            enabled,
-            startDate,
-            endDate,
-            anchorDate,
-            interval,
-        }),
-    });
+const createRecurringStateTaskForScript =
+    (script: 'generateConsolidatedStates' | 'generateEvolutiveStates') =>
+    async (
+        inputArgs: IRecurringStateTaskInputArgs,
+        enabled: boolean,
+        startDate: Date,
+        endDate: Date,
+        anchorDate: Date,
+        interval: number,
+    ) => {
+        const response = await fetch(`${DIRECTOR_SERVICE_URL}/api/v1/tasks`, {
+            method: 'POST',
+            headers: getServiceHeaders(),
+            body: JSON.stringify({
+                script,
+                inputArgs,
+                type: 'RECURRING',
+                enabled,
+                startDate,
+                endDate,
+                anchorDate,
+                interval,
+            }),
+        });
 
-    const result = await response.json();
+        const result = await response.json();
 
-    if (!result.success) {
-        throw new ExternalServiceError('Failed to create recurring state task', result.error);
-    }
+        if (!result.success) {
+            throw new ExternalServiceError('Failed to create recurring state task', result.error);
+        }
 
-    return result.data;
-};
+        return result.data;
+    };
+
+export const createRecurringStateTask = createRecurringStateTaskForScript(
+    'generateConsolidatedStates',
+);
+export const createRecurringEvolutiveStateTask =
+    createRecurringStateTaskForScript('generateEvolutiveStates');
 
 export const getTasksByFilters = async (filters: IDirectorTaskFilters) => {
     const response = await fetch(`${DIRECTOR_SERVICE_URL}/api/v1/tasks/search`, {
