@@ -5,6 +5,8 @@ import { existingScope } from '../middlewares/scope.validator.js';
 import { existingAgreementCollection } from '../middlewares/agreementCollection.validator.js';
 import { existingSelectedAgreementVersion } from '../middlewares/agreementVersion.validator.js';
 import {
+    validateCreateEvolutiveStateTasksRequest,
+    validateGenerateEvolutiveStatesBody,
     validateCreateConsolidationStateTasksRequest,
     validateGenerateConsolidatedStatesBody,
     validateGenerateStatesBody,
@@ -16,6 +18,9 @@ export const stateRoutes = Router();
 
 const consolidationStateTasksPath =
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/tasks/states/consolidated';
+
+const evolutiveStateTasksPath =
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/tasks/states/evolutive';
 
 stateRoutes.post(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states/generate',
@@ -35,6 +40,16 @@ stateRoutes.post(
     existingSelectedAgreementVersion,
     validateGenerateConsolidatedStatesBody,
     stateController.generateConsolidatedStatesForAgreementVersion,
+);
+
+stateRoutes.post(
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states/evolutive/generate',
+    validateComputerHealth,
+    existingScope,
+    existingAgreementCollection,
+    existingSelectedAgreementVersion,
+    validateGenerateEvolutiveStatesBody,
+    stateController.generateEvolutiveStatesForAgreementVersion,
 );
 
 stateRoutes.post(
@@ -72,4 +87,32 @@ stateRoutes.delete(
     existingAgreementCollection,
     existingSelectedAgreementVersion,
     stateController.deleteConsolidationStateTasksForAgreementVersion,
+);
+
+stateRoutes.post(
+    evolutiveStateTasksPath,
+    validateDirectorHealth,
+    existingScope,
+    existingAgreementCollection,
+    existingSelectedAgreementVersion,
+    validateCreateEvolutiveStateTasksRequest,
+    stateController.createEvolutiveStateTasksForAgreementVersion,
+);
+
+stateRoutes.get(
+    evolutiveStateTasksPath,
+    validateDirectorHealth,
+    existingScope,
+    existingAgreementCollection,
+    existingSelectedAgreementVersion,
+    stateController.getEvolutiveStateTasksForAgreementVersion,
+);
+
+stateRoutes.delete(
+    evolutiveStateTasksPath,
+    validateDirectorHealth,
+    existingScope,
+    existingAgreementCollection,
+    existingSelectedAgreementVersion,
+    stateController.deleteEvolutiveStateTasksForAgreementVersion,
 );

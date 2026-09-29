@@ -17,6 +17,7 @@ const guarantee: IAssembledGuarantee = {
     numericExpression: 'available + missing',
     comparator: '>=',
     threshold: 1,
+    evolutiveWindow: null,
     window: {
         anchorDate: new Date('2026-01-01T00:00:00.000Z'),
         period: [{ unit: 'day', value: 1 }],

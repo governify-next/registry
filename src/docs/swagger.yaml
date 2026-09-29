@@ -2397,6 +2397,223 @@ paths:
                     $ref: '#/components/responses/ExternalServiceError'
                 '500':
                     $ref: '#/components/responses/InternalError'
+
+    '/api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColId}/agreementVersions/{agreementVersion}/states/evolutive/generate':
+        post:
+            tags:
+                - States
+            summary: 'Generate evolutive states for a selected agreement version'
+            operationId: generateEvolutiveStatesForAgreementVersion
+            description: 'Generates non-consolidated states at evolutiveWindow ticks from anchorDate + period, within an inclusive range or at one exact date. Null windows and ticks coinciding with consolidated points are skipped. Metrics and stored states retain the original window. Uses the same signature selection, CAPTURE/REPLAY, KEEP/REPLACE and isAsync behavior as consolidated generation. Returns 200 with [] when no ticks qualify, or 207 for synchronous indeterminate results.'
+            parameters:
+                - $ref: '#/components/parameters/orgName'
+                - $ref: '#/components/parameters/scopeId'
+                - $ref: '#/components/parameters/agColId'
+                - $ref: '#/components/parameters/agreementVersionSelector'
+                - in: query
+                  name: isAsync
+                  required: false
+                  schema:
+                      type: boolean
+                      default: false
+                  description: 'If true, states are created and metric computation continues asynchronously.'
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - temporalMode
+                                - ifExists
+                            oneOf:
+                                - required:
+                                      - date
+                                - required:
+                                      - startDate
+                                      - endDate
+                            properties:
+                                date:
+                                    type: string
+                                    format: date-time
+                                    description: 'Exact evolutive date. Cannot be combined with `startDate` or `endDate`.'
+                                startDate:
+                                    type: string
+                                    format: date-time
+                                    description: 'Inclusive lower bound for evolutive dates.'
+                                endDate:
+                                    type: string
+                                    format: date-time
+                                    description: 'Inclusive upper bound for evolutive dates. Must be after or equal to `startDate`.'
+                                temporalMode:
+                                    type: string
+                                    enum:
+                                        - CAPTURE
+                                        - REPLAY
+                                    description: "Temporal acquisition policy used independently for every generated\nevolutive date. In `REPLAY`, snapshot fetchers are cache-only,\nwhile historical fetchers may query their source.\n"
+                                ifExists:
+                                    type: string
+                                    enum:
+                                        - KEEP
+                                        - REPLACE
+                                    description: "Existing-state policy applied independently to every generated state.\n`KEEP` skips recomputation for existing keys; `REPLACE` recomputes them.\n"
+                                signatureIds:
+                                    type: array
+                                    minItems: 1
+                                    uniqueItems: true
+                                    description: 'Optional subset of agreement signature ObjectIds. Omit to process every signature.'
+                                    items:
+                                        type: string
+                                        pattern: '^[a-fA-F0-9]{24}$'
+                        example:
+                            date: '2026-09-20T23:00:00.000Z'
+                            temporalMode: CAPTURE
+                            ifExists: KEEP
+            responses:
+                '200':
+                    description: "All synchronously returned states are determinate, or generation is\nasynchronous. If no selected guarantee has a evolutive point in the\nrequested date or range, `data` is an empty array and the response message\nexplains that no points were found.\n"
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/State'
+                '207':
+                    description: "Synchronous generation completed with at least one state whose\n`complianceStatus` is `INDETERMINATE`.\nThis includes `COMPLETED` states containing `UNAVAILABLE` metrics and\n`FAILED` states containing failed metrics. The response remains successful\n(`success: true`) and may also contain determinate states.\n"
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/State'
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+    '/api/v1/organizations/{orgName}/scopes/{scopeId}/agreementCollections/{agColId}/agreementVersions/{agreementVersion}/tasks/states/evolutive':
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/scopeId'
+            - $ref: '#/components/parameters/agColId'
+            - $ref: '#/components/parameters/agreementVersionSelector'
+        get:
+            tags:
+                - States
+            summary: 'Get recurring evolutive-state tasks for an agreement version'
+            operationId: getEvolutiveStateTasksForAgreementVersion
+            description: 'Lists only generateEvolutiveStates tasks for the selected collection and resolved version. Consolidated tasks are not affected.'
+            responses:
+                '200':
+                    description: 'Evolutive state tasks retrieved successfully'
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/RecurringStateTask'
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/ExternalServiceError'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        post:
+            tags:
+                - States
+            summary: 'Create recurring evolutive-state tasks per signature'
+            operationId: createEvolutiveStateTasksForAgreementVersion
+            description: 'Creates a recurring generateEvolutiveStates task for each selected signature with a non-null evolutiveWindow. Uses its period as interval and its anchorDate + period as the first tick. Agreement validity and earlyTermination bound the schedule. Resolves auditableVersion to the current numeric selector. Director sends scheduledAt with CAPTURE, KEEP and isAsync=true for that signature. Consolidated instants succeed without generating evolutive states. Null-only selections return []; invalid selections fail before creating tasks. Equivalent definitions are deduplicated. Parallel creation failures do not roll back tasks already accepted. enabled defaults to true.'
+            parameters:
+                - in: query
+                  name: enabled
+                  required: false
+                  schema:
+                      type: boolean
+                      default: true
+                  description: 'Whether the newly created recurring tasks are enabled immediately.'
+            requestBody:
+                required: false
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                signatureIds:
+                                    type: array
+                                    minItems: 1
+                                    uniqueItems: true
+                                    description: 'Signatures for which tasks are created. Omit to use all signatures.'
+                                    items:
+                                        type: string
+                                        pattern: '^[a-fA-F0-9]{24}$'
+            responses:
+                '201':
+                    description: 'Evolutive state tasks created successfully'
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  $ref: '#/components/schemas/RecurringStateTask'
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/ExternalServiceError'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        delete:
+            tags:
+                - States
+            summary: 'Delete recurring evolutive-state tasks for an agreement version'
+            operationId: deleteEvolutiveStateTasksForAgreementVersion
+            description: 'Deletes only generateEvolutiveStates tasks for the selected collection and resolved version. Consolidated tasks are not affected.'
+            responses:
+                '200':
+                    description: 'Evolutive state tasks deleted successfully'
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/ConsolidationStateTaskDeletionResult'
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/ExternalServiceError'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
     # ──────────────────────────────────────────────
     # Fetchers
     # ──────────────────────────────────────────────
@@ -5772,7 +5989,7 @@ components:
 
         RecurringStateTask:
             type: object
-            description: Recurring per-signature consolidated-state task returned by Director
+            description: Recurring per-signature consolidated or evolutive state task returned by Director
             additionalProperties: true
             properties:
                 _id:
@@ -5780,7 +5997,7 @@ components:
                     example: 665e5f6a7b8c9d0e1f2a3b5b
                 script:
                     type: string
-                    enum: [generateConsolidatedStates]
+                    enum: [generateConsolidatedStates, generateEvolutiveStates]
                 inputArgs:
                     $ref: '#/components/schemas/RecurringStateTaskInputArgs'
                 type:
@@ -5798,16 +6015,16 @@ components:
                 anchorDate:
                     type: string
                     format: date-time
-                    description: First consolidation instant for this signature.
+                    description: First scheduled tick (selected window anchorDate plus period).
                 interval:
                     type: integer
                     minimum: 1
-                    description: Signature window period in milliseconds.
+                    description: Period in milliseconds from window for consolidated tasks or evolutiveWindow for evolutive tasks.
 
         RecurringStateTaskInputArgs:
             type: object
             additionalProperties: false
-            description: Input for Director's per-signature `generateConsolidatedStates` script.
+            description: Input for Director's per-signature consolidated or evolutive state scripts.
             required:
                 - orgName
                 - scopeId

@@ -16,6 +16,8 @@ import { ExistingStatePolicy, ITemporalContext, TemporalMode } from '../types/te
 import { NotFoundError, ValidationError } from '../utils/customErrors.js';
 import { StateUpdatedRange } from '../types/state.types.js';
 
+type StatePointKind = 'consolidated' | 'evolutive';
+
 const logger = getLogger().setTag('state.service.ts');
 
 export const generateState = async (
@@ -250,57 +252,73 @@ export const generateStatesForAgreementVersion = async (
     );
 };
 
-export const generateConsolidatedStatesForAgreementVersion = async (
-    isAsync: boolean,
-    orgName: string,
-    scopeId: string,
-    agColId: string,
-    agreementVersion: string,
-    startDate: Date,
-    endDate: Date,
-    temporalMode: TemporalMode,
-    existingStatePolicy: ExistingStatePolicy,
-    signatureIds?: string[],
-) => {
-    const selectedAgreementVersion = await agreementVersionService.getAgreementVersionBySelector(
-        orgName,
-        scopeId,
-        agColId,
-        agreementVersion,
-        true,
-        signatureIds,
-    );
-
-    const agreementSignatures =
-        'signatures' in selectedAgreementVersion!.contract
-            ? selectedAgreementVersion!.contract.signatures
-            : [];
-    const signatures = selectSignatures(agreementSignatures, signatureIds);
-
-    const statesBySignature = await Promise.all(
-        signatures.map(async (signature) => {
-            const consolidationDates = windowUtil.getConsolidationDatesInRange(
-                startDate,
-                endDate,
-                signature.guarantee.window.anchorDate,
-                signature.guarantee.window.period,
+const generateWindowStatesForAgreementVersion =
+    (kind: StatePointKind) =>
+    async (
+        isAsync: boolean,
+        orgName: string,
+        scopeId: string,
+        agColId: string,
+        agreementVersion: string,
+        startDate: Date,
+        endDate: Date,
+        temporalMode: TemporalMode,
+        existingStatePolicy: ExistingStatePolicy,
+        signatureIds?: string[],
+    ) => {
+        const selectedAgreementVersion =
+            await agreementVersionService.getAgreementVersionBySelector(
+                orgName,
+                scopeId,
+                agColId,
+                agreementVersion,
+                true,
+                signatureIds,
             );
-            return await Promise.all(
-                consolidationDates.map((date) =>
-                    generateState(
-                        isAsync,
-                        { effectiveAt: date, mode: temporalMode },
-                        signature.signatureId.toString(),
-                        signature.guarantee,
-                        existingStatePolicy,
+
+        const agreementSignatures =
+            'signatures' in selectedAgreementVersion!.contract
+                ? selectedAgreementVersion!.contract.signatures
+                : [];
+        const signatures = selectSignatures(agreementSignatures, signatureIds);
+
+        const statesBySignature = await Promise.all(
+            signatures.map(async (signature) => {
+                const dates =
+                    kind === 'consolidated'
+                        ? windowUtil.getConsolidationDatesInRange(
+                              startDate,
+                              endDate,
+                              signature.guarantee.window.anchorDate,
+                              signature.guarantee.window.period,
+                          )
+                        : windowUtil.getEvolutiveDatesInRange(
+                              startDate,
+                              endDate,
+                              signature.guarantee.window,
+                              signature.guarantee.evolutiveWindow,
+                          );
+                return await Promise.all(
+                    dates.map((date) =>
+                        generateState(
+                            isAsync,
+                            { effectiveAt: date, mode: temporalMode },
+                            signature.signatureId.toString(),
+                            signature.guarantee,
+                            existingStatePolicy,
+                        ),
                     ),
-                ),
-            );
-        }),
-    );
+                );
+            }),
+        );
 
-    return statesBySignature.flat();
-};
+        return statesBySignature.flat();
+    };
+
+export const generateConsolidatedStatesForAgreementVersion =
+    generateWindowStatesForAgreementVersion('consolidated');
+export const generateEvolutiveStatesForAgreementVersion =
+    generateWindowStatesForAgreementVersion('evolutive');
 
 const selectSignatures = <TSignature extends { signatureId: { toString(): string } }>(
     signatures: TSignature[],
@@ -330,80 +348,93 @@ const selectSignatures = <TSignature extends { signatureId: { toString(): string
     );
 };
 
-export const createConsolidationStateTasksForAgreementVersion = async (
-    orgName: string,
-    scopeId: string,
-    agColId: string,
-    agreementVersion: string,
-    enabled: boolean,
-    signatureIds?: string[],
-) => {
-    const selectedAgreementVersion = await agreementVersionService.getAgreementVersionBySelector(
-        orgName,
-        scopeId,
-        agColId,
-        agreementVersion,
-        true,
-        signatureIds,
-    );
-    const agreementSignatures =
-        'signatures' in selectedAgreementVersion.contract
-            ? selectedAgreementVersion.contract.signatures
-            : [];
-    const selectedSignatures = selectSignatures(agreementSignatures, signatureIds);
-
-    const [organization, scope] = await Promise.all([
-        scopeManagerIntegration.getOrganizationByName(orgName),
-        scopeManagerIntegration.getScopeByOrgAndScopeId(orgName, scopeId),
-    ]);
-    const agreementCollection = await agreementCollectionRepository.getAgreementCollectionByScope(
-        scope!._id,
-        agColId,
-    );
-    const agreementVersionIndex = agreementCollection!.agreementVersions.findIndex(
-        (candidateAgreementVersion) =>
-            candidateAgreementVersion.versionNumber === selectedAgreementVersion.versionNumber,
-    );
-    if (agreementVersionIndex === -1) {
-        throw new NotFoundError('Selected agreement version not found in this collection');
-    }
-
-    const resolvedAgreementVersion = agreementVersionIndex + 1;
-    const orgId = organization!._id.toString();
-    const resolvedScopeId = scope!._id.toString();
-    const startDate = new Date(selectedAgreementVersion.contract.validity.initial);
-    const validityEndDate = new Date(selectedAgreementVersion.contract.validity.end);
-    const earlyTermination = selectedAgreementVersion.contract.validity.earlyTermination;
-    const earlyTerminationDate = earlyTermination ? new Date(earlyTermination) : validityEndDate;
-    const endDate = earlyTerminationDate < validityEndDate ? earlyTerminationDate : validityEndDate;
-
-    return await Promise.all(
-        selectedSignatures.map((signature) => {
-            const interval = windowUtil.fromPeriodToMilliseconds(signature.guarantee.window.period);
-            const windowAnchorDate = new Date(signature.guarantee.window.anchorDate);
-            const firstConsolidationDate = new Date(windowAnchorDate.getTime() + interval);
-            const inputArgs = {
+const createWindowStateTasksForAgreementVersion =
+    (kind: StatePointKind) =>
+    async (
+        orgName: string,
+        scopeId: string,
+        agColId: string,
+        agreementVersion: string,
+        enabled: boolean,
+        signatureIds?: string[],
+    ) => {
+        const selectedAgreementVersion =
+            await agreementVersionService.getAgreementVersionBySelector(
                 orgName,
-                scopeId: resolvedScopeId,
-                orgId,
-                agColId: agreementCollection!._id.toString(),
-                agreementVersion: resolvedAgreementVersion,
-                signatureId: signature.signatureId.toString(),
-            };
-
-            return directorIntegration.createRecurringStateTask(
-                inputArgs,
-                enabled,
-                startDate,
-                endDate,
-                firstConsolidationDate,
-                interval,
+                scopeId,
+                agColId,
+                agreementVersion,
+                true,
+                signatureIds,
             );
-        }),
-    );
-};
+        const agreementSignatures =
+            'signatures' in selectedAgreementVersion.contract
+                ? selectedAgreementVersion.contract.signatures
+                : [];
+        const selectedSignatures = selectSignatures(agreementSignatures, signatureIds).filter(
+            (signature) => kind === 'consolidated' || signature.guarantee.evolutiveWindow != null,
+        );
+        if (selectedSignatures.length === 0) return [];
 
-const getConsolidationStateTaskFiltersForAgreementVersion = async (
+        const [organization, scope] = await Promise.all([
+            scopeManagerIntegration.getOrganizationByName(orgName),
+            scopeManagerIntegration.getScopeByOrgAndScopeId(orgName, scopeId),
+        ]);
+        const agreementCollection =
+            await agreementCollectionRepository.getAgreementCollectionByScope(scope!._id, agColId);
+        const agreementVersionIndex = agreementCollection!.agreementVersions.findIndex(
+            (candidateAgreementVersion) =>
+                candidateAgreementVersion.versionNumber === selectedAgreementVersion.versionNumber,
+        );
+        if (agreementVersionIndex === -1) {
+            throw new NotFoundError('Selected agreement version not found in this collection');
+        }
+
+        const resolvedAgreementVersion = agreementVersionIndex + 1;
+        const orgId = organization!._id.toString();
+        const resolvedScopeId = scope!._id.toString();
+        const startDate = new Date(selectedAgreementVersion.contract.validity.initial);
+        const validityEndDate = new Date(selectedAgreementVersion.contract.validity.end);
+        const earlyTermination = selectedAgreementVersion.contract.validity.earlyTermination;
+        const earlyTerminationDate = earlyTermination
+            ? new Date(earlyTermination)
+            : validityEndDate;
+        const endDate =
+            earlyTerminationDate < validityEndDate ? earlyTerminationDate : validityEndDate;
+
+        return await Promise.all(
+            selectedSignatures.map((signature) => {
+                const window =
+                    kind === 'consolidated'
+                        ? signature.guarantee.window
+                        : signature.guarantee.evolutiveWindow!;
+                const interval = windowUtil.fromPeriodToMilliseconds(window.period);
+                const firstPointDate = new Date(new Date(window.anchorDate).getTime() + interval);
+                const inputArgs = {
+                    orgName,
+                    scopeId: resolvedScopeId,
+                    orgId,
+                    agColId: agreementCollection!._id.toString(),
+                    agreementVersion: resolvedAgreementVersion,
+                    signatureId: signature.signatureId.toString(),
+                };
+
+                const createTask =
+                    kind === 'consolidated'
+                        ? directorIntegration.createRecurringStateTask
+                        : directorIntegration.createRecurringEvolutiveStateTask;
+                return createTask(inputArgs, enabled, startDate, endDate, firstPointDate, interval);
+            }),
+        );
+    };
+
+export const createConsolidationStateTasksForAgreementVersion =
+    createWindowStateTasksForAgreementVersion('consolidated');
+export const createEvolutiveStateTasksForAgreementVersion =
+    createWindowStateTasksForAgreementVersion('evolutive');
+
+const getWindowStateTaskFiltersForAgreementVersion = async (
+    kind: StatePointKind,
     orgName: string,
     scopeId: string,
     agColId: string,
@@ -425,7 +456,7 @@ const getConsolidationStateTaskFiltersForAgreementVersion = async (
     }
 
     return {
-        script: 'generateConsolidatedStates',
+        script: kind === 'consolidated' ? 'generateConsolidatedStates' : 'generateEvolutiveStates',
         inputArgs: {
             agColId: agreementCollection!._id.toString(),
             agreementVersion: agreementVersionIndex + 1,
@@ -433,35 +464,40 @@ const getConsolidationStateTaskFiltersForAgreementVersion = async (
     };
 };
 
-export const getConsolidationStateTasksForAgreementVersion = async (
-    orgName: string,
-    scopeId: string,
-    agColId: string,
-    agreementVersion: string,
-) => {
-    const filters = await getConsolidationStateTaskFiltersForAgreementVersion(
-        orgName,
-        scopeId,
-        agColId,
-        agreementVersion,
-    );
-    return await directorIntegration.getTasksByFilters(filters);
-};
+const getWindowStateTasksForAgreementVersion =
+    (kind: StatePointKind) =>
+    async (orgName: string, scopeId: string, agColId: string, agreementVersion: string) => {
+        const filters = await getWindowStateTaskFiltersForAgreementVersion(
+            kind,
+            orgName,
+            scopeId,
+            agColId,
+            agreementVersion,
+        );
+        return await directorIntegration.getTasksByFilters(filters);
+    };
 
-export const deleteConsolidationStateTasksForAgreementVersion = async (
-    orgName: string,
-    scopeId: string,
-    agColId: string,
-    agreementVersion: string,
-) => {
-    const filters = await getConsolidationStateTaskFiltersForAgreementVersion(
-        orgName,
-        scopeId,
-        agColId,
-        agreementVersion,
-    );
-    return await directorIntegration.deleteTasksByFilters(filters);
-};
+const deleteWindowStateTasksForAgreementVersion =
+    (kind: StatePointKind) =>
+    async (orgName: string, scopeId: string, agColId: string, agreementVersion: string) => {
+        const filters = await getWindowStateTaskFiltersForAgreementVersion(
+            kind,
+            orgName,
+            scopeId,
+            agColId,
+            agreementVersion,
+        );
+        return await directorIntegration.deleteTasksByFilters(filters);
+    };
+
+export const getConsolidationStateTasksForAgreementVersion =
+    getWindowStateTasksForAgreementVersion('consolidated');
+export const getEvolutiveStateTasksForAgreementVersion =
+    getWindowStateTasksForAgreementVersion('evolutive');
+export const deleteConsolidationStateTasksForAgreementVersion =
+    deleteWindowStateTasksForAgreementVersion('consolidated');
+export const deleteEvolutiveStateTasksForAgreementVersion =
+    deleteWindowStateTasksForAgreementVersion('evolutive');
 
 export const searchStatesForAgreementVersion = async (
     orgName: string,

@@ -165,3 +165,8 @@ export const validateSearchStatesBody = [
         }),
     collectValidationErrors,
 ];
+
+// Evolutive endpoints share the consolidated date/range, policy and task contracts.
+export const validateGenerateEvolutiveStatesBody = validateGenerateConsolidatedStatesBody;
+export const validateCreateEvolutiveStateTasksRequest =
+    validateCreateConsolidationStateTasksRequest;

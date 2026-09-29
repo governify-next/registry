@@ -6,47 +6,50 @@ afterEach(() => {
 });
 
 describe('Director state task integration', () => {
-    it('creates a recurring generateConsolidatedStates task', async () => {
-        const fetchMock = vi.fn().mockResolvedValue({
-            json: async () => ({ success: true, data: { _id: 'task-id' } }),
-        });
-        vi.stubGlobal('fetch', fetchMock);
+    it.each(['consolidated', 'evolutive'] as const)(
+        'creates a recurring %s state task',
+        async (kind) => {
+            const fetchMock = vi.fn().mockResolvedValue({
+                json: async () => ({ success: true, data: { _id: 'task-id' } }),
+            });
+            vi.stubGlobal('fetch', fetchMock);
 
-        const startDate = new Date('2026-08-01T00:00:00.000Z');
-        const endDate = new Date('2026-09-01T00:00:00.000Z');
-        const anchorDate = new Date('2026-08-02T00:00:00.000Z');
-        const inputArgs = {
-            orgName: 'organization',
-            scopeId: '69cbea571d5009a043619271',
-            orgId: '69cbea571d5009a043619272',
-            agColId: '69cbea571d5009a043619273',
-            agreementVersion: 2,
-            signatureId: '69cbea571d5009a043619276',
-        };
+            const startDate = new Date('2026-08-01T00:00:00.000Z');
+            const endDate = new Date('2026-09-01T00:00:00.000Z');
+            const anchorDate = new Date('2026-08-02T00:00:00.000Z');
+            const inputArgs = {
+                orgName: 'organization',
+                scopeId: '69cbea571d5009a043619271',
+                orgId: '69cbea571d5009a043619272',
+                agColId: '69cbea571d5009a043619273',
+                agreementVersion: 2,
+                signatureId: '69cbea571d5009a043619276',
+            };
 
-        await directorIntegration.createRecurringStateTask(
-            inputArgs,
-            true,
-            startDate,
-            endDate,
-            anchorDate,
-            86_400_000,
-        );
+            const createTask =
+                kind === 'consolidated'
+                    ? directorIntegration.createRecurringStateTask
+                    : directorIntegration.createRecurringEvolutiveStateTask;
+            await createTask(inputArgs, true, startDate, endDate, anchorDate, 86_400_000);
 
-        expect(fetchMock).toHaveBeenCalledOnce();
-        const [url, request] = fetchMock.mock.calls[0];
-        expect(url).toBe('http://localhost:5906/api/v1/tasks');
-        expect(JSON.parse(request.body)).toEqual({
-            script: 'generateConsolidatedStates',
-            inputArgs,
-            type: 'RECURRING',
-            enabled: true,
-            startDate: startDate.toISOString(),
-            endDate: endDate.toISOString(),
-            anchorDate: anchorDate.toISOString(),
-            interval: 86_400_000,
-        });
-    });
+            expect(fetchMock).toHaveBeenCalledOnce();
+            const [url, request] = fetchMock.mock.calls[0];
+            expect(url).toBe('http://localhost:5906/api/v1/tasks');
+            expect(JSON.parse(request.body)).toEqual({
+                script:
+                    kind === 'consolidated'
+                        ? 'generateConsolidatedStates'
+                        : 'generateEvolutiveStates',
+                inputArgs,
+                type: 'RECURRING',
+                enabled: true,
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString(),
+                anchorDate: anchorDate.toISOString(),
+                interval: 86_400_000,
+            });
+        },
+    );
 
     it('gets consolidated-state tasks using Director filters', async () => {
         const tasks = [{ _id: 'task-id' }];
