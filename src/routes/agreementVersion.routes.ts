@@ -8,11 +8,17 @@ import {
     existingSelectedAgreementVersion,
 } from '../middlewares/agreementVersion.validator.js';
 import { validateComputerHealth } from '../middlewares/computer.validator.js';
+import {
+    checkServiceAuthentication,
+    checkUserAuthentication,
+} from '../middlewares/authenticator.validator.js';
+import { anyOf } from '../middlewares/anyof.validator.js';
 
 export const agreementVersionRoutes = Router();
 
 agreementVersionRoutes.get(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions',
+    anyOf(checkUserAuthentication, checkServiceAuthentication),
     existingScope,
     existingAgreementCollection,
     agreementVersionController.getAgreementVersionsByCollection,
@@ -20,6 +26,7 @@ agreementVersionRoutes.get(
 
 agreementVersionRoutes.get(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion',
+    anyOf(checkUserAuthentication, checkServiceAuthentication),
     existingScope,
     existingAgreementCollection,
     existingSelectedAgreementVersion,
@@ -28,6 +35,7 @@ agreementVersionRoutes.get(
 
 agreementVersionRoutes.delete(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion',
+    checkServiceAuthentication,
     existingScope,
     existingAgreementCollection,
     existingSelectedAgreementVersion,
@@ -36,6 +44,7 @@ agreementVersionRoutes.delete(
 
 agreementVersionRoutes.post(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions',
+    checkServiceAuthentication,
     existingScope,
     existingAgreementCollection,
     validateComputerHealth,
@@ -45,6 +54,7 @@ agreementVersionRoutes.post(
 
 agreementVersionRoutes.post(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/activeVersion/terminate',
+    checkUserAuthentication,
     existingScope,
     existingAgreementCollection,
     validateTerminateVersion,

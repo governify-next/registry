@@ -6,12 +6,14 @@ import { existingSelectedAgreementVersion } from '../middlewares/agreementVersio
 import { validateFetcherHealth } from '../middlewares/fetcher.validator.js';
 import { validateFetchAgreementVersionBody } from '../middlewares/fetch.validator.js';
 import { validateDirectorHealth } from '../middlewares/director.validator.js';
+import { checkServiceAuthentication } from '../middlewares/authenticator.validator.js';
 
 export const fetcherRoutes = Router();
 
 // This is not used for now
 fetcherRoutes.post(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/fetchers/fetch',
+    checkServiceAuthentication,
     validateFetcherHealth,
     existingScope,
     existingAgreementCollection,
@@ -23,6 +25,7 @@ fetcherRoutes.post(
 // This is not used for now
 fetcherRoutes.get(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/fetchers/consolidated',
+    checkServiceAuthentication,
     existingScope,
     existingAgreementCollection,
     existingSelectedAgreementVersion,
@@ -31,6 +34,7 @@ fetcherRoutes.get(
 
 fetcherRoutes.post(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/tasks/fetchers/consolidated',
+    checkServiceAuthentication,
     validateDirectorHealth,
     existingScope,
     existingAgreementCollection,
