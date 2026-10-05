@@ -13,6 +13,13 @@ import {
     validateSearchStatesBody,
 } from '../middlewares/state.validator.js';
 import { validateDirectorHealth } from '../middlewares/director.validator.js';
+import {
+    checkServiceAuthentication,
+    checkUserAuthentication,
+    hasSystemRole,
+} from '../middlewares/authenticator.validator.js';
+import { anyOf } from '../middlewares/anyof.validator.js';
+import { SystemRole } from '../types/systemRole.js';
 
 export const stateRoutes = Router();
 
@@ -24,6 +31,8 @@ const evolutiveStateTasksPath =
 
 stateRoutes.post(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states/generate',
+    checkUserAuthentication,
+    hasSystemRole(SystemRole.SUPERADMIN),
     validateComputerHealth,
     existingScope,
     existingAgreementCollection,
@@ -34,6 +43,7 @@ stateRoutes.post(
 
 stateRoutes.post(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states/consolidated/generate',
+    anyOf(checkUserAuthentication, checkServiceAuthentication),
     validateComputerHealth,
     existingScope,
     existingAgreementCollection,
@@ -44,6 +54,7 @@ stateRoutes.post(
 
 stateRoutes.post(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states/evolutive/generate',
+    checkServiceAuthentication,
     validateComputerHealth,
     existingScope,
     existingAgreementCollection,
@@ -54,6 +65,7 @@ stateRoutes.post(
 
 stateRoutes.post(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states/search',
+    checkServiceAuthentication,
     validateSearchStatesBody,
     existingScope,
     existingAgreementCollection,
@@ -63,6 +75,7 @@ stateRoutes.post(
 
 stateRoutes.post(
     consolidationStateTasksPath,
+    anyOf(checkUserAuthentication, checkServiceAuthentication),
     validateDirectorHealth,
     existingScope,
     existingAgreementCollection,
@@ -73,6 +86,7 @@ stateRoutes.post(
 
 stateRoutes.get(
     consolidationStateTasksPath,
+    anyOf(checkUserAuthentication, checkServiceAuthentication),
     validateDirectorHealth,
     existingScope,
     existingAgreementCollection,
@@ -82,6 +96,7 @@ stateRoutes.get(
 
 stateRoutes.delete(
     consolidationStateTasksPath,
+    checkServiceAuthentication,
     validateDirectorHealth,
     existingScope,
     existingAgreementCollection,
@@ -91,6 +106,7 @@ stateRoutes.delete(
 
 stateRoutes.post(
     evolutiveStateTasksPath,
+    anyOf(checkUserAuthentication, checkServiceAuthentication),
     validateDirectorHealth,
     existingScope,
     existingAgreementCollection,
@@ -101,6 +117,7 @@ stateRoutes.post(
 
 stateRoutes.get(
     evolutiveStateTasksPath,
+    anyOf(checkUserAuthentication, checkServiceAuthentication),
     validateDirectorHealth,
     existingScope,
     existingAgreementCollection,
@@ -110,6 +127,7 @@ stateRoutes.get(
 
 stateRoutes.delete(
     evolutiveStateTasksPath,
+    checkServiceAuthentication,
     validateDirectorHealth,
     existingScope,
     existingAgreementCollection,

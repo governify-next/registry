@@ -8,22 +8,26 @@ import {
 } from '../middlewares/guaranteeTemplate.validator.js';
 import { validateComputerHealth } from '../middlewares/computer.validator.js';
 import { validateFetcherHealth } from '../middlewares/fetcher.validator.js';
+import { checkServiceAuthentication } from '../middlewares/authenticator.validator.js';
 
 export const guaranteeTemplateRoutes = Router();
 
 guaranteeTemplateRoutes.get(
     '/guaranteeTemplates',
+    checkServiceAuthentication,
     guaranteeTemplateController.getGuaranteeTemplates,
 );
 
 guaranteeTemplateRoutes.get(
     '/guaranteeTemplates/:guaranteeName',
+    checkServiceAuthentication,
     existingGuaranteeTemplate,
     guaranteeTemplateController.getGuaranteeTemplate,
 );
 
 guaranteeTemplateRoutes.post(
     '/guaranteeTemplates',
+    checkServiceAuthentication,
     validateComputerHealth,
     validateFetcherHealth,
     validateCreateGuaranteeTemplate,
@@ -32,6 +36,7 @@ guaranteeTemplateRoutes.post(
 
 guaranteeTemplateRoutes.put(
     '/guaranteeTemplates/:guaranteeName',
+    checkServiceAuthentication,
     validateComputerHealth,
     validateFetcherHealth,
     validateUpdateGuaranteeTemplate,
@@ -40,6 +45,7 @@ guaranteeTemplateRoutes.put(
 
 guaranteeTemplateRoutes.delete(
     '/guaranteeTemplates/:guaranteeName',
+    checkServiceAuthentication,
     validateDeleteGuaranteeTemplate,
     guaranteeTemplateController.deleteGuaranteeTemplate,
 );
