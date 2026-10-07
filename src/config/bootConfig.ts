@@ -22,6 +22,12 @@ export const bootEnv = {
     // Database URIs
     MONGO_URI: process.env.MONGO_URI || 'mongodb://localhost:27017/governify-next',
 
+    // Optional, best-effort publication of terminal State generations.
+    STATE_EVENTS_PUBLISH_ENABLED: process.env.STATE_EVENTS_PUBLISH_ENABLED === 'true',
+    KAFKA_BOOTSTRAP_SERVERS: process.env.KAFKA_BOOTSTRAP_SERVERS || 'localhost:9092',
+    STATE_EVENTS_TOPIC: process.env.STATE_EVENTS_TOPIC || 'governify.states.finalized.v1',
+    STATE_EVENTS_DELIVERY_TIMEOUT_MS: Number(process.env.STATE_EVENTS_DELIVERY_TIMEOUT_MS || 30000),
+
     // JWT configuration
     SERVICE_AUTHENTICATION_ENABLED: process.env.SERVICE_AUTHENTICATION_ENABLED !== 'false',
     CLIENT_ID: process.env.CLIENT_ID || 'registry',
