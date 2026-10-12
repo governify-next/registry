@@ -541,3 +541,7 @@ export const searchStatesForAgreementVersion = async (
         },
     };
 };
+
+export const getStateById = async (stateId: string) => {
+    return await stateRepository.getStateById(stateId);
+};

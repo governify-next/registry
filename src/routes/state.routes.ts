@@ -11,6 +11,7 @@ import {
     validateGenerateConsolidatedStatesBody,
     validateGenerateStatesBody,
     validateSearchStatesBody,
+    validateGetStateForAgreementVersion,
 } from '../middlewares/state.validator.js';
 import { validateDirectorHealth } from '../middlewares/director.validator.js';
 import {
@@ -71,6 +72,16 @@ stateRoutes.post(
     existingAgreementCollection,
     existingSelectedAgreementVersion,
     stateController.searchStatesForAgreementVersion,
+);
+
+stateRoutes.get(
+    '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/:agreementVersion/states/:stateId',
+    anyOf(checkUserAuthentication, checkServiceAuthentication),
+    existingScope,
+    existingAgreementCollection,
+    existingSelectedAgreementVersion,
+    validateGetStateForAgreementVersion,
+    stateController.getStateForAgreementVersion,
 );
 
 stateRoutes.post(
