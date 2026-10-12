@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.3.0](https://github.com/governify-next/registry/compare/v1.2.0...v1.3.0) (2026-10-05)
+
+
+### Features
+
+* new version ([e1b6e8a](https://github.com/governify-next/registry/commit/e1b6e8ae41189e31586d9ba43da9807a6d144fbf))
+* secure registry endpoints ([d1d2f4a](https://github.com/governify-next/registry/commit/d1d2f4aa7fcc69e30a4626007b17a50df4815282))
+* secure registry endpoints ([229f538](https://github.com/governify-next/registry/commit/229f5386ea108f3ceca773b8e0d5f44323980308))
+
 ## [1.2.0](https://github.com/governify-next/registry/compare/v1.1.1...v1.2.0) (2026-09-29)
 
 
