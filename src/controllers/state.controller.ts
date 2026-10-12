@@ -312,3 +312,19 @@ export const deleteEvolutiveStateTasksForAgreementVersion = async (
         next(err);
     }
 };
+
+export const getStateForAgreementVersion = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const state = await stateService.getStateById(req.params.stateId);
+        return sendSuccess(res, {
+            data: state,
+            message: 'State retrieved',
+        });
+    } catch (err) {
+        next(err);
+    }
+};

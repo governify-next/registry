@@ -1,6 +1,9 @@
-import { body, query, validationResult } from 'express-validator';
+import { body, param, query, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
-import { ValidationError } from '../utils/customErrors.js';
+import { NotFoundError, ValidationError } from '../utils/customErrors.js';
+import * as agreementCollectionService from '../services/agreementCollection.service.js';
+import * as agreementVersionService from '../services/agreementVersion.service.js';
+import * as stateService from '../services/state.service.js';
 
 const collectValidationErrors = (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
@@ -164,6 +167,42 @@ export const validateSearchStatesBody = [
             return true;
         }),
     collectValidationErrors,
+];
+
+const stateIdValidation = param('stateId')
+    .isMongoId()
+    .withMessage('stateId must be a valid MongoDB ObjectId');
+
+const stateInAgreementVersion = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { orgName, scopeId, agColId, agreementVersion, stateId } = req.params;
+        const [collection, state] = await Promise.all([
+            agreementCollectionService.getCleanAgreementCollectionByScope(
+                orgName,
+                scopeId,
+                agColId,
+            ),
+            stateService.getStateById(stateId),
+        ]);
+        const { contract } = agreementVersionService.resolveAgreementVersionSelector(
+            collection!,
+            agreementVersion,
+        );
+
+        if (!state || !contract.signaturesId.some((id) => id.equals(state.signatureId)))
+            return next(
+                new NotFoundError(`State '${stateId}' not found in this agreement version`),
+            );
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const validateGetStateForAgreementVersion = [
+    stateIdValidation,
+    collectValidationErrors,
+    stateInAgreementVersion,
 ];
 
 // Evolutive endpoints share the consolidated date/range, policy and task contracts.
