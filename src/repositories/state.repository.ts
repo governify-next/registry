@@ -1,4 +1,4 @@
-import State, { IState } from '../models/state.model.js';
+import State, { IState, StateStatus } from '../models/state.model.js';
 import { StateUpdatedRange } from '../types/state.types.js';
 
 export const createState = async (data: Partial<IState>) => {
@@ -60,7 +60,11 @@ export const updateStateByIdAndGenerationId = async (
     generationId: string,
     data: Partial<IState>,
 ) => {
-    return await State.findOneAndUpdate({ _id: id, generationId }, data, { new: true });
+    return await State.findOneAndUpdate(
+        { _id: id, generationId, status: StateStatus.IN_PROGRESS },
+        data,
+        { new: true },
+    );
 };
 
 export const getStateById = async (id: string) => {
