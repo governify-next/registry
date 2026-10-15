@@ -15,6 +15,7 @@ import { getLogger } from '../utils/logger.js';
 import { ExistingStatePolicy, ITemporalContext, TemporalMode } from '../types/temporal.types.js';
 import { NotFoundError, ValidationError } from '../utils/customErrors.js';
 import { StateUpdatedRange } from '../types/state.types.js';
+import { publishState } from '../integrations/kafka.integration.js';
 
 type StatePointKind = 'consolidated' | 'evolutive';
 
@@ -81,7 +82,7 @@ export const generateState = async (
                 guarantee.threshold,
             );
         } catch (error) {
-            await stateRepository.updateStateByIdAndGenerationId(
+            const failedState = await stateRepository.updateStateByIdAndGenerationId(
                 initialState._id.toString(),
                 generationId,
                 {
@@ -90,6 +91,7 @@ export const generateState = async (
                     complianceStatus: ComplianceStatus.INDETERMINATE,
                 },
             );
+            if (failedState) await publishState(failedState);
             throw error;
         }
     };
@@ -201,6 +203,7 @@ export const evaluateState = async (
     });
 
     if (updatedState) {
+        await publishState(updatedState);
         return updatedState;
     }
 

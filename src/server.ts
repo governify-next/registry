@@ -3,6 +3,7 @@ import app from './app.js';
 import { getLogger } from './utils/logger.js';
 import { bootEnv } from './config/bootConfig.js';
 import { connectMongo } from './db/mongo.js';
+import { connectKafka } from './integrations/kafka.integration.js';
 import { fetchServiceToken } from './utils/serviceAuthentication.js';
 
 app.use(oasTelemetry());
@@ -11,7 +12,8 @@ const logger = getLogger().setTag('server.ts');
 const PORT = bootEnv.PORT;
 
 connectMongo()
-    .then(() => {
+    .then(async () => {
+        await connectKafka();
         app.listen(PORT, () => {
             fetchServiceToken();
             logger.log(`Server running on http://localhost:${PORT}`);
@@ -19,5 +21,6 @@ connectMongo()
         });
     })
     .catch((err) => {
-        logger.error('Failed to connect to MongoDB', err);
+        logger.error('Failed to start server', err);
+        process.exit(1);
     });
