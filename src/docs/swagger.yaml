@@ -895,7 +895,16 @@ paths:
                                           data:
                                               type: array
                                               items:
-                                                  $ref: '#/components/schemas/AgreementCollection'
+                                                  allOf:
+                                                      - $ref: '#/components/schemas/AgreementCollection'
+                                                      - type: object
+                                                        properties:
+                                                            autoTracking:
+                                                                type: boolean
+                                                                description: |
+                                                                    Whether the auditable version has at least one enabled
+                                                                    consolidated or evolutive state task in Director. Always
+                                                                    false when the collection has no auditable version.
                             example:
                                 success: true
                                 message: OK
@@ -922,6 +931,7 @@ paths:
                                       fields: []
                                       permissions: []
                                       __v: 0
+                                      autoTracking: true
                                 error: null
                 '404':
                     $ref: '#/components/responses/NotFound'
