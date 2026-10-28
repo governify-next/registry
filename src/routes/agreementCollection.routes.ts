@@ -3,6 +3,7 @@ import * as agreementCollectionController from '../controllers/agreementCollecti
 import {
     validateCreateAgreementCollection,
     validateUpdateAgreementCollection,
+    validateCountAgreementCollections,
     existingAgreementCollectionById,
 } from '../middlewares/agreementCollection.validator.js';
 import { existingScope } from '../middlewares/scope.validator.js';
@@ -14,6 +15,13 @@ import {
 import { anyOf } from '../middlewares/anyof.validator.js';
 
 export const agreementCollectionRoutes = Router();
+
+agreementCollectionRoutes.post(
+    '/agreementCollections/count',
+    checkServiceAuthentication,
+    validateCountAgreementCollections,
+    agreementCollectionController.countAgreementCollectionsByScopeIds,
+);
 
 agreementCollectionRoutes.get(
     '/organizations/:orgName/agreementCollections',

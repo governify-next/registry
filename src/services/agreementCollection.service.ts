@@ -1,14 +1,56 @@
 import { Types } from 'mongoose';
 import * as agreementCollectionRepository from '../repositories/agreementCollection.repository.js';
 import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
+import * as directorIntegration from '../integrations/director.integration.js';
 import { IAgreementCollection } from '../models/agreementCollection.model.js';
 import { assembleAgreementVersions } from './agreementVersion.service.js';
 import { deleteSignaturesByIds } from './signature.service.js';
 
+const getAutoTrackedAgreementVersions = async (orgName: string) => {
+    const stateTasks = await Promise.all(
+        (['generateConsolidatedStates', 'generateEvolutiveStates'] as const).map((script) =>
+            directorIntegration.getTasksByFilters({
+                script,
+                enabled: true,
+                inputArgs: { orgName },
+            }),
+        ),
+    );
+
+    return new Set(
+        stateTasks
+            .flat()
+            .map(
+                (task: {
+                    inputArgs: Pick<
+                        directorIntegration.IRecurringStateTaskInputArgs,
+                        'agColId' | 'agreementVersion'
+                    >;
+                }) => `${task.inputArgs.agColId}:${task.inputArgs.agreementVersion}`,
+            ),
+    );
+};
+
 export const getAgreementCollectionsByOrganization = async (orgName: string) => {
     const scopeIds = await scopeManagerIntegration.getScopeIdsByOrganization(orgName);
 
-    return await agreementCollectionRepository.getAgreementCollectionsByScopeIds(scopeIds);
+    const [collections, trackedVersions] = await Promise.all([
+        agreementCollectionRepository.getAgreementCollectionsByScopeIds(scopeIds),
+        getAutoTrackedAgreementVersions(orgName),
+    ]);
+
+    return collections.map((col) => ({
+        ...col.toObject(),
+        autoTracking:
+            col.auditableVersionNumber !== null &&
+            trackedVersions.has(
+                `${col._id}:${col.agreementVersions.findIndex((v) => v.versionNumber === col.auditableVersionNumber) + 1}`,
+            ),
+    }));
+};
+
+export const countAgreementCollectionsByScopeIds = async (scopeIds: string[]) => {
+    return await agreementCollectionRepository.countAgreementCollectionsByScopeIds(scopeIds);
 };
 
 export const getAgreementCollectionsByScope = async (
