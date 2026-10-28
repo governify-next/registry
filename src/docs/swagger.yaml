@@ -871,6 +871,67 @@ paths:
     # ──────────────────────────────────────────────
     # AgreementCollections
     # ──────────────────────────────────────────────
+    /api/v1/agreementCollections/count:
+        post:
+            tags:
+                - AgreementCollections
+            summary: Count agreement collections per scope
+            operationId: countAgreementCollectionsByScopeIds
+            description: |
+                Returns the number of agreement collections of each given scope. 
+                Scopes without agreement collections are omitted.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            additionalProperties: false
+                            required:
+                                - scopeIds
+                            properties:
+                                scopeIds:
+                                    type: array
+                                    items:
+                                        type: string
+                                        pattern: '^[a-fA-F0-9]{24}$'
+                        example:
+                            scopeIds:
+                                - 69cbdee759092b362376ca17
+                                - 69cbdee759092b362376ca18
+            responses:
+                '200':
+                    description: Agreement collection counts retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              type: array
+                                              items:
+                                                  type: object
+                                                  properties:
+                                                      scopeId:
+                                                          type: string
+                                                      collections:
+                                                          type: integer
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    - scopeId: 69cbdee759092b362376ca17
+                                      collections: 3
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
     /api/v1/organizations/{orgName}/agreementCollections:
         parameters:
             - $ref: '#/components/parameters/orgName'

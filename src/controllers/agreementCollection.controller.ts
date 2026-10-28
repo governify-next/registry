@@ -18,6 +18,21 @@ export const getAgreementCollectionsByOrganization = async (
     }
 };
 
+export const countAgreementCollectionsByScopeIds = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const counts = await agreementCollectionService.countAgreementCollectionsByScopeIds(
+            req.body.scopeIds,
+        );
+        return sendSuccess(res, { data: counts });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const getAgreementCollectionsByScope = async (
     req: Request,
     res: Response,

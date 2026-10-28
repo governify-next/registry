@@ -13,6 +13,14 @@ export const getAgreementCollectionsByScopeIds = async (scopeIds: string[]) => {
     return await AgreementCollection.find({ scopeId: { $in: scopeIds } });
 };
 
+export const countAgreementCollectionsByScopeIds = async (scopeIds: string[]) => {
+    return await AgreementCollection.aggregate<{ scopeId: Types.ObjectId; collections: number }>([
+        { $match: { scopeId: { $in: scopeIds.map((scopeId) => new Types.ObjectId(scopeId)) } } },
+        { $group: { _id: '$scopeId', collections: { $sum: 1 } } },
+        { $project: { _id: 0, scopeId: '$_id', collections: 1 } },
+    ]);
+};
+
 export const createAgreementCollectionByScope = async (
     data: Partial<IAgreementCollection>,
     scopeId: Types.ObjectId,

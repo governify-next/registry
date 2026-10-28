@@ -49,6 +49,10 @@ export const getAgreementCollectionsByOrganization = async (orgName: string) => 
     }));
 };
 
+export const countAgreementCollectionsByScopeIds = async (scopeIds: string[]) => {
+    return await agreementCollectionRepository.countAgreementCollectionsByScopeIds(scopeIds);
+};
+
 export const getAgreementCollectionsByScope = async (
     orgName: string,
     scopeId: string,
