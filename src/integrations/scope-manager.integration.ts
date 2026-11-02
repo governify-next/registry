@@ -58,3 +58,24 @@ export const getScopeIdsByOrganization = async (orgName: string) => {
 
     return result.data.map((scope: { _id: string }) => scope._id);
 };
+
+export const isUserOrganizationAdmin = async (orgName: string, authorization: string) => {
+    const response = await fetch(
+        `${SCOPE_MANAGER_SERVICE_URL}/api/v1/organizations/${orgName}/members/me/admin`,
+        {
+            method: 'GET',
+            headers: { Authorization: authorization },
+        },
+    );
+
+    const result = await response.json();
+
+    if (result.httpStatus === 403) return false;
+
+    if (!result.success)
+        throw new Error(
+            `Failed to check admin membership in organization '${orgName}' from scope-manager (status: ${response.status})`,
+        );
+
+    return result.data.isAdmin as boolean;
+};
