@@ -25,7 +25,7 @@ export const bootEnv = {
     // Optional, best-effort publication of terminal State generations.
     STATE_EVENTS_PUBLISH_ENABLED: process.env.STATE_EVENTS_PUBLISH_ENABLED === 'true',
     KAFKA_BOOTSTRAP_SERVERS: process.env.KAFKA_BOOTSTRAP_SERVERS || 'localhost:9092',
-    STATE_EVENTS_TOPIC: process.env.STATE_EVENTS_TOPIC || 'governify.states.finalized.v1',
+    STATE_EVENTS_TOPIC: process.env.STATE_EVENTS_TOPIC || 'governify.states.v1',
     STATE_EVENTS_DELIVERY_TIMEOUT_MS: Number(process.env.STATE_EVENTS_DELIVERY_TIMEOUT_MS || 30000),
 
     // JWT configuration

@@ -3010,8 +3010,8 @@ components:
             scheme: bearer
             bearerFormat: JWT
             description: |
-                Supply a JWT issued by the authenticator. Depending on the endpoint,
-                Registry requires a user token, a service token, or either.
+                JWT issued by Authenticator. Enter only the token, without the Bearer prefix.
+                Use a user or service token according to the operation's authentication requirements.
 
     # ── Parameters ────────────────────────────────
     parameters:
