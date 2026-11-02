@@ -230,3 +230,16 @@ export const validateUpdateAgreementCollection = [
     uniqueAgreementCollectionOnUpdate,
     validAuditableVersion,
 ];
+
+export const validateCountAgreementCollections = [
+    checkExact(
+        [
+            body('scopeIds').isArray().withMessage('scopeIds must be an array'),
+            body('scopeIds.*')
+                .isMongoId()
+                .withMessage('Every scopeIds entry must be a valid MongoDB ObjectId'),
+        ],
+        { locations: ['body'] },
+    ),
+    collectValidationErrors,
+];
