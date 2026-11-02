@@ -134,16 +134,7 @@ export const updateAgreementCollectionById = async (
     agColId: string,
     data: Partial<IAgreementCollection>,
 ) => {
-    const { name, displayName, description, auditableVersionNumber, fields, permissions } = data;
-
-    return await agreementCollectionRepository.updateAgreementCollectionByScope(agColId, {
-        name,
-        displayName,
-        description,
-        auditableVersionNumber,
-        fields,
-        permissions,
-    });
+    return await agreementCollectionRepository.updateAgreementCollectionByScope(agColId, data);
 };
 
 export const getAgreementCollectionsByScopeId = async (scopeId: Types.ObjectId) => {

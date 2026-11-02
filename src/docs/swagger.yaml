@@ -3390,7 +3390,6 @@ components:
                         displayName: TPA US PSG2 2526
                         description: Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                         fields: []
-                        permissions: []
 
         AgreementCollectionUpdateBody:
             description: Data to update the Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
@@ -3404,7 +3403,6 @@ components:
                         displayName: TPA US PSG2 2526 (actualizado)
                         description: Updated Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                         fields: []
-                        permissions: []
                         auditableVersionNumber: null
 
         AgreementVersionBody:
@@ -5684,7 +5682,6 @@ components:
                 - displayName
                 - description
                 - fields
-                - permissions
             properties:
                 name:
                     type: string
@@ -5705,10 +5702,6 @@ components:
                     type: array
                     items:
                         type: object
-                permissions:
-                    type: array
-                    items:
-                        type: object
 
         AgreementCollectionUpdateInput:
             type: object
@@ -5718,7 +5711,6 @@ components:
                 - displayName
                 - description
                 - fields
-                - permissions
                 - auditableVersionNumber
             properties:
                 name:
@@ -5737,10 +5729,6 @@ components:
                     maxLength: 500
                     example: Updated Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                 fields:
-                    type: array
-                    items:
-                        type: object
-                permissions:
                     type: array
                     items:
                         type: object

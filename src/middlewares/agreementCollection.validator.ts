@@ -38,10 +38,6 @@ const fieldsValidation = body('fields')
     .exists({ checkNull: true })
     .withMessage('fields is required');
 
-const permissionsValidation = body('permissions')
-    .exists({ checkNull: true })
-    .withMessage('permissions is required');
-
 const auditableVersionNumberValidation = body('auditableVersionNumber')
     .exists({ checkNull: false })
     .withMessage('auditableVersionNumber is required (use null if not applicable)')
@@ -58,7 +54,6 @@ const fieldValidations = [
     displayNameValidation,
     descriptionValidation,
     fieldsValidation,
-    permissionsValidation,
 ];
 
 const updateFieldValidations = [...fieldValidations, auditableVersionNumberValidation];
