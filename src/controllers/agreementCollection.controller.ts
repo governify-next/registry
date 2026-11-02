@@ -71,6 +71,21 @@ export const getAgreementCollectionById = async (
     }
 };
 
+export const getAgreementCollectionPermissionsById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const permissions = await agreementCollectionService.getAgreementCollectionPermissionsById(
+            req.params.agColId,
+        );
+        return sendSuccess(res, { data: permissions });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const createAgreementCollectionByScope = async (
     req: Request,
     res: Response,

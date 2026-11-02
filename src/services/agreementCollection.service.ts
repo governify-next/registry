@@ -118,16 +118,26 @@ export const getAgreementCollectionByScopeIdAndName = async (
     );
 };
 
+export const getAgreementCollectionPermissionsById = async (agColId: string) => {
+    const collection =
+        await agreementCollectionRepository.getAgreementCollectionPermissionsById(agColId);
+    return collection!.permissions;
+};
+
 export const createAgreementCollectionByScope = async (
     orgName: string,
     scopeId: string,
     data: Partial<IAgreementCollection>,
 ) => {
-    // TODO: validate in middleware that cannot pass x fields in post
     const scope = await scopeManagerIntegration.getScopeByOrgAndScopeId(orgName, scopeId);
 
-    // 3. Create the agreement collection
-    return await agreementCollectionRepository.createAgreementCollectionByScope(data, scope._id);
+    const collection = await agreementCollectionRepository.createAgreementCollectionByScope(
+        data,
+        scope._id,
+    );
+    return await agreementCollectionRepository.getAgreementCollectionById(
+        collection._id.toString(),
+    );
 };
 
 export const updateAgreementCollectionById = async (

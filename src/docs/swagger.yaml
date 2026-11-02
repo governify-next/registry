@@ -990,7 +990,6 @@ paths:
                                                     - 69cbea571d5009a043619276
                                             versionNumber: 1
                                       fields: []
-                                      permissions: []
                                       __v: 0
                                       autoTracking: true
                                 error: null
@@ -1058,7 +1057,6 @@ paths:
                                                   - 69cbea571d5009a043619276
                                           versionNumber: 1
                                     fields: []
-                                    permissions: []
                                     __v: 0
                                 error: null
                 '400':
@@ -1115,7 +1113,6 @@ paths:
                                                   - 69cbea571d5009a043619276
                                           versionNumber: 1
                                     fields: []
-                                    permissions: []
                                     __v: 0
                                     updatedAt: '2024-01-01T12:00:00.000Z'
                                 error: null
@@ -1150,6 +1147,58 @@ paths:
                                               example: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/agreementCollections/{agColId}/permissions:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/agColId'
+        get:
+            tags:
+                - AgreementCollections
+            summary: Get the permissions of an agreement collection
+            operationId: getAgreementCollectionPermissionsById
+            description: |
+                Returns the permissions of an agreement collection: for each action of the
+                catalog, the list of organization role ids allowed to perform it.
+                Only organization admins and SUPERADMIN users can access this endpoint.
+            responses:
+                '200':
+                    description: Agreement collection permissions found
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementCollectionPermissions'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    collection:view:
+                                        - 69cbdee759092b362376ca20
+                                        - 69cbdee759092b362376ca21
+                                    collection:auto-tracking: []
+                                    collection:track-period:
+                                        - 69cbdee759092b362376ca20
+                                    version:terminate: []
+                                    collection:edit: []
+                                    collection:view-evolutive:
+                                        - 69cbdee759092b362376ca20
+                                    collection:delete: []
+                                error: null
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
@@ -1216,7 +1265,6 @@ paths:
                                                     - 69cbea571d5009a043619276
                                             versionNumber: 1
                                       fields: []
-                                      permissions: []
                                       __v: 0
                                 error: null
                 '404':
@@ -1261,7 +1309,6 @@ paths:
                                     auditableVersionNumber: null
                                     agreementVersions: []
                                     fields: []
-                                    permissions: []
                                     __v: 0
                                 error: null
                 '400':
@@ -1676,7 +1723,6 @@ paths:
                                                   - 69cbf256cf7ba204e4725122
                                           versionNumber: 1
                                     fields: []
-                                    permissions: []
                                     __v: 0
                                 error: null
                 '400':
@@ -5647,11 +5693,6 @@ components:
                     description: Collection fields
                     items:
                         type: object
-                permissions:
-                    type: array
-                    description: Collection permissions
-                    items:
-                        type: object
                 __v:
                     type: integer
                     description: Mongoose version key
@@ -5673,6 +5714,61 @@ components:
                           type: array
                           items:
                               $ref: '#/components/schemas/AgreementVersionExpanded'
+
+        AgreementCollectionPermissions:
+            type: object
+            description: Role ids of the organization allowed to perform each action on the collection
+            required:
+                - 'collection:view'
+                - 'collection:auto-tracking'
+                - 'collection:track-period'
+                - 'version:terminate'
+                - 'collection:edit'
+                - 'collection:view-evolutive'
+                - 'collection:delete'
+            properties:
+                'collection:view':
+                    description: View the agreement collection, its versions and states
+                    type: array
+                    items:
+                        type: string
+                        description: ObjectId of an organization role
+                'collection:auto-tracking':
+                    description: Enable or disable the auto tracking of the collection
+                    type: array
+                    items:
+                        type: string
+                        description: ObjectId of an organization role
+                'collection:track-period':
+                    description: Generate the states of a period
+                    type: array
+                    items:
+                        type: string
+                        description: ObjectId of an organization role
+                'version:terminate':
+                    description: Terminate the active agreement version
+                    type: array
+                    items:
+                        type: string
+                        description: ObjectId of an organization role
+                'collection:edit':
+                    description: Edit the collection details
+                    type: array
+                    items:
+                        type: string
+                        description: ObjectId of an organization role
+                'collection:view-evolutive':
+                    description: View the evolutive points
+                    type: array
+                    items:
+                        type: string
+                        description: ObjectId of an organization role
+                'collection:delete':
+                    description: Delete the collection
+                    type: array
+                    items:
+                        type: string
+                        description: ObjectId of an organization role
 
         AgreementCollectionInput:
             type: object

@@ -5,6 +5,10 @@ export const getAgreementCollectionById = async (agColId: string) => {
     return await AgreementCollection.findById(agColId);
 };
 
+export const getAgreementCollectionPermissionsById = async (agColId: string) => {
+    return await AgreementCollection.findById(agColId).select('permissions');
+};
+
 export const getAgreementCollectionsByScope = async (scopeId: Types.ObjectId) => {
     return await AgreementCollection.find({ scopeId: scopeId });
 };

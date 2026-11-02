@@ -7,7 +7,10 @@ import {
     existingAgreementCollectionById,
 } from '../middlewares/agreementCollection.validator.js';
 import { existingScope } from '../middlewares/scope.validator.js';
-import { existingOrganization } from '../middlewares/organization.validator.js';
+import {
+    existingOrganization,
+    isOrganizationAdmin,
+} from '../middlewares/organization.validator.js';
 import {
     checkServiceAuthentication,
     checkUserAuthentication,
@@ -36,6 +39,15 @@ agreementCollectionRoutes.get(
     existingOrganization,
     existingAgreementCollectionById,
     agreementCollectionController.getAgreementCollectionById,
+);
+
+agreementCollectionRoutes.get(
+    '/organizations/:orgName/agreementCollections/:agColId/permissions',
+    checkUserAuthentication,
+    existingOrganization,
+    isOrganizationAdmin,
+    existingAgreementCollectionById,
+    agreementCollectionController.getAgreementCollectionPermissionsById,
 );
 
 agreementCollectionRoutes.put(
