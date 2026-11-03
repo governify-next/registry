@@ -5,6 +5,7 @@ import {
     validateUpdateAgreementCollection,
     validateCountAgreementCollections,
     validateUpdateAgreementCollectionPermissions,
+    validateRemoveRoleFromAgreementCollectionPermissions,
     existingAgreementCollectionById,
 } from '../middlewares/agreementCollection.validator.js';
 import { existingScope } from '../middlewares/scope.validator.js';
@@ -25,6 +26,13 @@ agreementCollectionRoutes.post(
     checkServiceAuthentication,
     validateCountAgreementCollections,
     agreementCollectionController.countAgreementCollectionsByScopeIds,
+);
+
+agreementCollectionRoutes.delete(
+    '/agreementCollections/permissions/roles/:roleId',
+    checkServiceAuthentication,
+    validateRemoveRoleFromAgreementCollectionPermissions,
+    agreementCollectionController.removeRoleFromAgreementCollectionPermissions,
 );
 
 agreementCollectionRoutes.get(

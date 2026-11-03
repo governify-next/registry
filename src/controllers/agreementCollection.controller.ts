@@ -106,6 +106,24 @@ export const updateAgreementCollectionPermissionsById = async (
     }
 };
 
+export const removeRoleFromAgreementCollectionPermissions = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        await agreementCollectionService.removeRoleFromAgreementCollectionPermissions(
+            req.params.roleId,
+        );
+        return sendSuccess(res, {
+            data: null,
+            message: 'Role removed from agreement collection permissions',
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const createAgreementCollectionByScope = async (
     req: Request,
     res: Response,

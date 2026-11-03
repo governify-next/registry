@@ -932,6 +932,38 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
+    /api/v1/agreementCollections/permissions/roles/{roleId}:
+        parameters:
+            - $ref: '#/components/parameters/roleId'
+        delete:
+            tags:
+                - AgreementCollections
+            summary: Remove a role from the permissions of every agreement collection
+            operationId: removeRoleFromAgreementCollectionPermissions
+            description: |
+                Removes the given role id from every permission of every agreement collection.
+                Called by scope-manager when a role of an organization is deleted.
+            responses:
+                '200':
+                    description: Role removed from agreement collection permissions
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SuccessResponse'
+                            example:
+                                success: true
+                                message: Role removed from agreement collection permissions
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data: null
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
     /api/v1/organizations/{orgName}/agreementCollections:
         parameters:
             - $ref: '#/components/parameters/orgName'
@@ -3145,6 +3177,15 @@ components:
             schema:
                 type: string
             example: member
+        roleId:
+            name: roleId
+            in: path
+            required: true
+            description: Id of the role within the organization
+            schema:
+                type: string
+                pattern: '^[a-fA-F0-9]{24}$'
+            example: 69cbdee759092b362376ca20
         elementFieldName:
             name: fieldName
             in: path

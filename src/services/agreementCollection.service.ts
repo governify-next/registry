@@ -135,6 +135,10 @@ export const updateAgreementCollectionPermissionsById = async (
     return collection!.permissions;
 };
 
+export const removeRoleFromAgreementCollectionPermissions = async (roleId: string) => {
+    return await agreementCollectionRepository.removeRoleFromAgreementCollectionPermissions(roleId);
+};
+
 export const createAgreementCollectionByScope = async (
     orgName: string,
     scopeId: string,

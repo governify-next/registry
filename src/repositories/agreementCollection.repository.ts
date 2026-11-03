@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import AgreementCollection, { IAgreementCollection } from '../models/agreementCollection.model.js';
+import { CollectionPermission } from '../types/collectionPermission.types.js';
 
 export const getAgreementCollectionById = async (agColId: string) => {
     return await AgreementCollection.findById(agColId);
@@ -18,6 +19,16 @@ export const updateAgreementCollectionPermissionsById = async (
         { permissions },
         { new: true },
     ).select('permissions');
+};
+
+export const removeRoleFromAgreementCollectionPermissions = async (roleId: string) => {
+    const permissionPaths = Object.values(CollectionPermission).map(
+        (permission) => `permissions.${permission}`,
+    );
+    return await AgreementCollection.updateMany(
+        { $or: permissionPaths.map((path) => ({ [path]: roleId })) },
+        { $pull: Object.fromEntries(permissionPaths.map((path) => [path, roleId])) },
+    );
 };
 
 export const getAgreementCollectionsByScope = async (scopeId: Types.ObjectId) => {

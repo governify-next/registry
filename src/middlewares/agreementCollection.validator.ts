@@ -1,4 +1,4 @@
-import { body, checkExact, validationResult } from 'express-validator';
+import { body, checkExact, param, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError, DuplicateKeyError, NotFoundError } from '../utils/customErrors.js';
 import * as agreementCollectionService from '../services/agreementCollection.service.js';
@@ -274,4 +274,9 @@ export const validateUpdateAgreementCollectionPermissions = [
     ),
     collectValidationErrors,
     validRolesInOrganization,
+];
+
+export const validateRemoveRoleFromAgreementCollectionPermissions = [
+    param('roleId').isMongoId().withMessage('roleId must be a valid MongoDB ObjectId'),
+    collectValidationErrors,
 ];
