@@ -4,6 +4,7 @@ import {
     validateCreateAgreementCollection,
     validateUpdateAgreementCollection,
     validateCountAgreementCollections,
+    validateUpdateAgreementCollectionPermissions,
     existingAgreementCollectionById,
 } from '../middlewares/agreementCollection.validator.js';
 import { existingScope } from '../middlewares/scope.validator.js';
@@ -48,6 +49,16 @@ agreementCollectionRoutes.get(
     isOrganizationAdmin,
     existingAgreementCollectionById,
     agreementCollectionController.getAgreementCollectionPermissionsById,
+);
+
+agreementCollectionRoutes.put(
+    '/organizations/:orgName/agreementCollections/:agColId/permissions',
+    checkUserAuthentication,
+    existingOrganization,
+    isOrganizationAdmin,
+    existingAgreementCollectionById,
+    validateUpdateAgreementCollectionPermissions,
+    agreementCollectionController.updateAgreementCollectionPermissionsById,
 );
 
 agreementCollectionRoutes.put(

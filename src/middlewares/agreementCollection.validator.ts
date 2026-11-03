@@ -3,6 +3,8 @@ import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError, DuplicateKeyError, NotFoundError } from '../utils/customErrors.js';
 import * as agreementCollectionService from '../services/agreementCollection.service.js';
 import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
+import { getOrganizationOrFail } from './organization.validator.js';
+import { CollectionPermission } from '../types/collectionPermission.types.js';
 
 // ─── Field validations ────────────────────────────
 
@@ -211,16 +213,37 @@ const validAuditableVersion = async (req: Request, res: Response, next: NextFunc
     }
 };
 
+const validRolesInOrganization = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organization = await getOrganizationOrFail(req.params.orgName);
+        const organizationRoleIds = organization.roles.map((role: { _id: string }) => role._id);
+        const invalidRoleIds = Object.values<string[]>(req.body)
+            .flat()
+            .filter((roleId) => !organizationRoleIds.includes(roleId));
+
+        if (invalidRoleIds.length > 0)
+            return next(
+                new ValidationError(
+                    `Some roles do not belong to organization '${req.params.orgName}'`,
+                    invalidRoleIds,
+                ),
+            );
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
 // ─── Middleware ────────────────────────────────────────────────────
 
 export const validateCreateAgreementCollection = [
-    checkExact(fieldValidations, { locations: ['body'] }), // TODO: follow this technique in the rest of the middlewares
+    checkExact(fieldValidations, { locations: ['body'] }),
     collectValidationErrors,
     uniqueAgreementCollectionInScope,
 ];
 
 export const validateUpdateAgreementCollection = [
-    checkExact(updateFieldValidations, { locations: ['body'] }), // any field not present in the validations will be rejected
+    checkExact(updateFieldValidations, { locations: ['body'] }),
     collectValidationErrors,
     uniqueAgreementCollectionOnUpdate,
     validAuditableVersion,
@@ -237,4 +260,18 @@ export const validateCountAgreementCollections = [
         { locations: ['body'] },
     ),
     collectValidationErrors,
+];
+
+export const validateUpdateAgreementCollectionPermissions = [
+    checkExact(
+        Object.values(CollectionPermission).flatMap((permission) => [
+            body(permission).isArray().withMessage(`${permission} must be an array`),
+            body(`${permission}.*`)
+                .isMongoId()
+                .withMessage(`Every ${permission} entry must be a valid MongoDB ObjectId`),
+        ]),
+        { locations: ['body'] },
+    ),
+    collectValidationErrors,
+    validRolesInOrganization,
 ];

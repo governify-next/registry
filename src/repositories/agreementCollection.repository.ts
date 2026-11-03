@@ -9,6 +9,17 @@ export const getAgreementCollectionPermissionsById = async (agColId: string) => 
     return await AgreementCollection.findById(agColId).select('permissions');
 };
 
+export const updateAgreementCollectionPermissionsById = async (
+    agColId: string,
+    permissions: IAgreementCollection['permissions'],
+) => {
+    return await AgreementCollection.findByIdAndUpdate(
+        agColId,
+        { permissions },
+        { new: true },
+    ).select('permissions');
+};
+
 export const getAgreementCollectionsByScope = async (scopeId: Types.ObjectId) => {
     return await AgreementCollection.find({ scopeId: scopeId });
 };

@@ -124,6 +124,17 @@ export const getAgreementCollectionPermissionsById = async (agColId: string) => 
     return collection!.permissions;
 };
 
+export const updateAgreementCollectionPermissionsById = async (
+    agColId: string,
+    permissions: IAgreementCollection['permissions'],
+) => {
+    const collection = await agreementCollectionRepository.updateAgreementCollectionPermissionsById(
+        agColId,
+        permissions,
+    );
+    return collection!.permissions;
+};
+
 export const createAgreementCollectionByScope = async (
     orgName: string,
     scopeId: string,

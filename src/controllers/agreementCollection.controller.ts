@@ -86,6 +86,26 @@ export const getAgreementCollectionPermissionsById = async (
     }
 };
 
+export const updateAgreementCollectionPermissionsById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const permissions =
+            await agreementCollectionService.updateAgreementCollectionPermissionsById(
+                req.params.agColId,
+                req.body,
+            );
+        return sendSuccess(res, {
+            data: permissions,
+            message: 'Agreement collection permissions updated',
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const createAgreementCollectionByScope = async (
     req: Request,
     res: Response,
