@@ -14,8 +14,8 @@ const PORT = bootEnv.PORT;
 connectMongo()
     .then(async () => {
         await connectKafka();
+        await fetchServiceToken();
         app.listen(PORT, () => {
-            fetchServiceToken();
             logger.log(`Server running on http://localhost:${PORT}`);
             logger.log(`Docs available at http://localhost:${PORT}/api-docs`);
         });
