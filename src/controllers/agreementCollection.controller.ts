@@ -11,6 +11,8 @@ export const getAgreementCollectionsByOrganization = async (
         const agreementCollections =
             await agreementCollectionService.getAgreementCollectionsByOrganization(
                 req.params.orgName,
+                req.headers.authorization!,
+                Boolean(req.serviceAuth),
             );
         return sendSuccess(res, { data: agreementCollections });
     } catch (err) {
@@ -61,10 +63,14 @@ export const getAgreementCollectionById = async (
     try {
         const expand = req.query.expand === 'true';
 
-        const agreementCollection = await agreementCollectionService.getAgreementCollectionById(
-            req.params.agColId,
-            expand,
-        );
+        const agreementCollection =
+            await agreementCollectionService.getAgreementCollectionWithActionsById(
+                req.params.orgName,
+                req.params.agColId,
+                expand,
+                req.headers.authorization!,
+                Boolean(req.serviceAuth),
+            );
         return sendSuccess(res, { data: agreementCollection });
     } catch (err) {
         next(err);

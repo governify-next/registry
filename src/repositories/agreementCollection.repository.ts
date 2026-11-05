@@ -6,6 +6,10 @@ export const getAgreementCollectionById = async (agColId: string) => {
     return await AgreementCollection.findById(agColId);
 };
 
+export const getAgreementCollectionWithPermissionsById = async (agColId: string) => {
+    return await AgreementCollection.findById(agColId).select('+permissions');
+};
+
 export const getAgreementCollectionPermissionsById = async (agColId: string) => {
     return await AgreementCollection.findById(agColId).select('permissions');
 };
@@ -36,7 +40,7 @@ export const getAgreementCollectionsByScope = async (scopeId: Types.ObjectId) =>
 };
 
 export const getAgreementCollectionsByScopeIds = async (scopeIds: string[]) => {
-    return await AgreementCollection.find({ scopeId: { $in: scopeIds } });
+    return await AgreementCollection.find({ scopeId: { $in: scopeIds } }).select('+permissions');
 };
 
 export const countAgreementCollectionsByScopeIds = async (scopeIds: string[]) => {

@@ -974,7 +974,8 @@ paths:
             operationId: getAgreementCollectionsByOrganization
             description: |
                 Returns every agreement collection belonging to any scope of the specified
-                organization.
+                organization. Each collection includes `allowedActions` with the actions the
+                requesting user can perform on it (all false when the caller is a service).
             responses:
                 '200':
                     description: List of agreement collections retrieved successfully
@@ -992,6 +993,8 @@ paths:
                                                       - $ref: '#/components/schemas/AgreementCollection'
                                                       - type: object
                                                         properties:
+                                                            allowedActions:
+                                                                $ref: '#/components/schemas/AgreementCollectionAllowedActions'
                                                             autoTracking:
                                                                 type: boolean
                                                                 description: |
@@ -1023,6 +1026,14 @@ paths:
                                             versionNumber: 1
                                       fields: []
                                       __v: 0
+                                      allowedActions:
+                                          'collection:view': true
+                                          'collection:auto-tracking': false
+                                          'collection:track-period': false
+                                          'version:terminate': false
+                                          'collection:edit': false
+                                          'collection:view-evolutive': false
+                                          'collection:delete': false
                                       autoTracking: true
                                 error: null
                 '404':
@@ -1044,6 +1055,8 @@ paths:
                 belongs to. The collection must belong to a scope of the specified organization.
                 Supports an optional `expand` query parameter to assemble version data
                 with resolved signatures, guarantees and metric configurations.
+                Includes `allowedActions` with the actions the requesting user can perform on
+                the collection (all false when the caller is a service).
             parameters:
                 - in: query
                   name: expand
@@ -1062,9 +1075,14 @@ paths:
                                     - type: object
                                       properties:
                                           data:
-                                              oneOf:
-                                                  - $ref: '#/components/schemas/AgreementCollection'
-                                                  - $ref: '#/components/schemas/AgreementCollectionExpanded'
+                                              allOf:
+                                                  - oneOf:
+                                                        - $ref: '#/components/schemas/AgreementCollection'
+                                                        - $ref: '#/components/schemas/AgreementCollectionExpanded'
+                                                  - type: object
+                                                    properties:
+                                                        allowedActions:
+                                                            $ref: '#/components/schemas/AgreementCollectionAllowedActions'
                             example:
                                 success: true
                                 message: OK
@@ -1090,6 +1108,14 @@ paths:
                                           versionNumber: 1
                                     fields: []
                                     __v: 0
+                                    allowedActions:
+                                        'collection:view': true
+                                        'collection:auto-tracking': false
+                                        'collection:track-period': false
+                                        'version:terminate': false
+                                        'collection:edit': false
+                                        'collection:view-evolutive': false
+                                        'collection:delete': false
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
@@ -5878,6 +5904,42 @@ components:
                     items:
                         type: string
                         description: ObjectId of an organization role
+
+        AgreementCollectionAllowedActions:
+            type: object
+            description: |
+                Whether the requesting user can perform each action on the collection.
+                All true for an organization admin or a SUPERADMIN, and all false when the caller is a service.
+            required:
+                - 'collection:view'
+                - 'collection:auto-tracking'
+                - 'collection:track-period'
+                - 'version:terminate'
+                - 'collection:edit'
+                - 'collection:view-evolutive'
+                - 'collection:delete'
+            properties:
+                'collection:view':
+                    description: View the agreement collection, its versions and states
+                    type: boolean
+                'collection:auto-tracking':
+                    description: Enable or disable the auto tracking of the collection
+                    type: boolean
+                'collection:track-period':
+                    description: Generate the states of a period
+                    type: boolean
+                'version:terminate':
+                    description: Terminate the active agreement version
+                    type: boolean
+                'collection:edit':
+                    description: Edit the collection details
+                    type: boolean
+                'collection:view-evolutive':
+                    description: View the evolutive points
+                    type: boolean
+                'collection:delete':
+                    description: Delete the collection
+                    type: boolean
 
         AgreementCollectionInput:
             type: object

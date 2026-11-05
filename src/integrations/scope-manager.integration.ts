@@ -24,10 +24,10 @@ export const getScopeByOrgAndScopeId = async (orgName: string, scopeId: string) 
     return result.data;
 };
 
-export const getOrganizationByName = async (orgName: string) => {
+export const getOrganizationByName = async (orgName: string, authorization?: string) => {
     const response = await fetch(`${SCOPE_MANAGER_SERVICE_URL}/api/v1/organizations/${orgName}`, {
         method: 'GET',
-        headers: getServiceHeaders(),
+        headers: authorization ? { Authorization: authorization } : getServiceHeaders(),
     });
 
     const result = await response.json();
@@ -70,12 +70,29 @@ export const isUserOrganizationAdmin = async (orgName: string, authorization: st
 
     const result = await response.json();
 
-    if (result.httpStatus === 403) return false;
-
     if (!result.success)
         throw new Error(
             `Failed to check admin membership in organization '${orgName}' from scope-manager (status: ${response.status})`,
         );
 
     return result.data.isAdmin as boolean;
+};
+
+export const getCurrentUserRoles = async (orgName: string, authorization: string) => {
+    const response = await fetch(
+        `${SCOPE_MANAGER_SERVICE_URL}/api/v1/organizations/${orgName}/roles/me`,
+        {
+            method: 'GET',
+            headers: { Authorization: authorization },
+        },
+    );
+
+    const result = await response.json();
+
+    if (!result.success)
+        throw new Error(
+            `Failed to fetch current user roles in organization '${orgName}' from scope-manager (status: ${response.status})`,
+        );
+
+    return result.data.rolesId as string[];
 };

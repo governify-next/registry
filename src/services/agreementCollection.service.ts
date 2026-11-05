@@ -5,6 +5,7 @@ import * as directorIntegration from '../integrations/director.integration.js';
 import { IAgreementCollection } from '../models/agreementCollection.model.js';
 import { assembleAgreementVersions } from './agreementVersion.service.js';
 import { deleteSignaturesByIds } from './signature.service.js';
+import { CollectionPermission } from '../types/collectionPermission.types.js';
 
 const getAutoTrackedAgreementVersions = async (orgName: string) => {
     const stateTasks = await Promise.all(
@@ -31,22 +32,62 @@ const getAutoTrackedAgreementVersions = async (orgName: string) => {
     );
 };
 
-export const getAgreementCollectionsByOrganization = async (orgName: string) => {
+export const hasCollectionPermission = (
+    permissions: IAgreementCollection['permissions'],
+    rolesId: string[],
+    permission: CollectionPermission,
+) => permissions[permission].some((roleId) => rolesId.includes(roleId.toString()));
+
+const getUserCollectionAccess = async (
+    orgName: string,
+    authorization: string,
+    isService: boolean,
+) => {
+    if (isService) return { isAdmin: false, rolesId: [] };
+
+    const [isAdmin, rolesId] = await Promise.all([
+        scopeManagerIntegration.isUserOrganizationAdmin(orgName, authorization),
+        scopeManagerIntegration.getCurrentUserRoles(orgName, authorization),
+    ]);
+    return { isAdmin, rolesId };
+};
+
+const getAllowedActions = (
+    permissions: IAgreementCollection['permissions'],
+    { isAdmin, rolesId }: { isAdmin: boolean; rolesId: string[] },
+) =>
+    Object.fromEntries(
+        Object.values(CollectionPermission).map((permission) => [
+            permission,
+            isAdmin || hasCollectionPermission(permissions, rolesId, permission),
+        ]),
+    ) as Record<CollectionPermission, boolean>;
+
+export const getAgreementCollectionsByOrganization = async (
+    orgName: string,
+    authorization: string,
+    isService: boolean,
+) => {
     const scopeIds = await scopeManagerIntegration.getScopeIdsByOrganization(orgName);
 
-    const [collections, trackedVersions] = await Promise.all([
+    const [collections, trackedVersions, userAccess] = await Promise.all([
         agreementCollectionRepository.getAgreementCollectionsByScopeIds(scopeIds),
         getAutoTrackedAgreementVersions(orgName),
+        getUserCollectionAccess(orgName, authorization, isService),
     ]);
 
-    return collections.map((col) => ({
-        ...col.toObject(),
-        autoTracking:
-            col.auditableVersionNumber !== null &&
-            trackedVersions.has(
-                `${col._id}:${col.agreementVersions.findIndex((v) => v.versionNumber === col.auditableVersionNumber) + 1}`,
-            ),
-    }));
+    return collections.map((col) => {
+        const { permissions, ...data } = col.toObject();
+        return {
+            ...data,
+            allowedActions: getAllowedActions(permissions, userAccess),
+            autoTracking:
+                col.auditableVersionNumber !== null &&
+                trackedVersions.has(
+                    `${col._id}:${col.agreementVersions.findIndex((v) => v.versionNumber === col.auditableVersionNumber) + 1}`,
+                ),
+        };
+    });
 };
 
 export const countAgreementCollectionsByScopeIds = async (scopeIds: string[]) => {
@@ -97,14 +138,29 @@ export const getAgreementCollectionByScopeAndName = async (
     );
 };
 
-export const getAgreementCollectionById = async (agColId: string, expand: boolean = false) => {
-    const collection = await agreementCollectionRepository.getAgreementCollectionById(agColId);
+export const getAgreementCollectionById = async (agColId: string) => {
+    return await agreementCollectionRepository.getAgreementCollectionById(agColId);
+};
 
-    if (!expand) return collection;
+export const getAgreementCollectionWithActionsById = async (
+    orgName: string,
+    agColId: string,
+    expand: boolean,
+    authorization: string,
+    isService: boolean,
+) => {
+    const [collection, userAccess] = await Promise.all([
+        agreementCollectionRepository.getAgreementCollectionWithPermissionsById(agColId),
+        getUserCollectionAccess(orgName, authorization, isService),
+    ]);
+    const { permissions, ...data } = collection!.toObject();
 
     return {
-        ...collection!.toObject(),
-        agreementVersions: await assembleAgreementVersions(collection!.agreementVersions),
+        ...data,
+        ...(expand && {
+            agreementVersions: await assembleAgreementVersions(collection!.agreementVersions),
+        }),
+        allowedActions: getAllowedActions(permissions, userAccess),
     };
 };
 
