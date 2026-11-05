@@ -3,7 +3,6 @@ import { type Request, type Response, type NextFunction } from 'express';
 import { ValidationError, DuplicateKeyError, NotFoundError } from '../utils/customErrors.js';
 import * as agreementCollectionService from '../services/agreementCollection.service.js';
 import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
-import { getOrganizationOrFail } from './organization.validator.js';
 import { CollectionPermission } from '../types/collectionPermission.types.js';
 
 // ─── Field validations ────────────────────────────
@@ -215,7 +214,10 @@ const validAuditableVersion = async (req: Request, res: Response, next: NextFunc
 
 const validRolesInOrganization = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const organization = await getOrganizationOrFail(req.params.orgName);
+        const organization = await scopeManagerIntegration.getOrganizationByName(
+            req.params.orgName,
+            req.headers.authorization,
+        );
         const organizationRoleIds = organization.roles.map((role: { _id: string }) => role._id);
         const invalidRoleIds = Object.values<string[]>(req.body)
             .flat()
