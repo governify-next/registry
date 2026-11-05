@@ -974,8 +974,9 @@ paths:
             operationId: getAgreementCollectionsByOrganization
             description: |
                 Returns every agreement collection belonging to any scope of the specified
-                organization. Each collection includes `allowedActions` with the actions the
-                requesting user can perform on it (all false when the caller is a service).
+                organization that the requesting user can view (`collection:view`). Each collection includes 
+                `allowedActions` with the actions the requesting user can perform on it (all true when the caller 
+                is a SERVICE, ADMIN of the organization or SUPERADMIN).
             responses:
                 '200':
                     description: List of agreement collections retrieved successfully
@@ -1056,7 +1057,8 @@ paths:
                 Supports an optional `expand` query parameter to assemble version data
                 with resolved signatures, guarantees and metric configurations.
                 Includes `allowedActions` with the actions the requesting user can perform on
-                the collection (all false when the caller is a service).
+                the collection (all true when the caller is a SERVICE, ADMIN of the organization
+                or SUPERADMIN).
             parameters:
                 - in: query
                   name: expand
@@ -5909,7 +5911,7 @@ components:
             type: object
             description: |
                 Whether the requesting user can perform each action on the collection.
-                All true for an organization admin or a SUPERADMIN, and all false when the caller is a service.
+                All true for an organization admin, a SUPERADMIN or a service.
             required:
                 - 'collection:view'
                 - 'collection:auto-tracking'

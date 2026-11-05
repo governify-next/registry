@@ -7,3 +7,5 @@ export enum CollectionPermission {
     VIEW_EVOLUTIVE = 'collection:view-evolutive',
     DELETE = 'collection:delete',
 }
+
+export type CollectionAccess = { isAdmin: boolean; rolesId: string[] };
