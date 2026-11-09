@@ -50,7 +50,7 @@ export const getAgreementCollectionsByOrganization = async (
 
     return collections
         .filter((col) =>
-            hasCollectionPermission(col.permissions, collectionAccess, CollectionPermission.VIEW),
+            isActionAllowed(col.permissions, collectionAccess, CollectionPermission.VIEW),
         )
         .map((col) => {
             const { permissions, ...data } = col.toObject();
@@ -173,10 +173,6 @@ export const updateAgreementCollectionById = async (
     return await agreementCollectionRepository.updateAgreementCollectionByScope(agColId, data);
 };
 
-export const getAgreementCollectionsByScopeId = async (scopeId: Types.ObjectId) => {
-    return await agreementCollectionRepository.getAgreementCollectionsByScope(scopeId);
-};
-
 export const deleteAgreementCollectionById = async (agColId: string) => {
     // Get the collection to extract the signatureIds of all versions
     const collection = await agreementCollectionRepository.getAgreementCollectionById(agColId);
@@ -189,11 +185,26 @@ export const deleteAgreementCollectionById = async (agColId: string) => {
 
 // ─── Permissions ────────────────────────────
 
-export const hasCollectionPermission = (
+export const isActionAllowed = (
     permissions: IAgreementCollection['permissions'],
     { isAdmin, rolesId }: CollectionAccess,
     permission: CollectionPermission,
 ) => isAdmin || permissions[permission].some((roleId) => rolesId.includes(roleId.toString()));
+
+export const isActionAllowedForUser = async (
+    orgName: string,
+    agColId: string,
+    authorization: string,
+    isService: boolean,
+    permission: CollectionPermission,
+) => {
+    const [collection, collectionAccess] = await Promise.all([
+        agreementCollectionRepository.getAgreementCollectionWithPermissionsById(agColId),
+        getCollectionAccess(orgName, authorization, isService),
+    ]);
+
+    return isActionAllowed(collection!.permissions, collectionAccess, permission);
+};
 
 const getCollectionAccess = async (
     orgName: string,
@@ -216,7 +227,7 @@ const getAllowedActions = (
     Object.fromEntries(
         Object.values(CollectionPermission).map((permission) => [
             permission,
-            hasCollectionPermission(permissions, collectionAccess, permission),
+            isActionAllowed(permissions, collectionAccess, permission),
         ]),
     ) as Record<CollectionPermission, boolean>;
 

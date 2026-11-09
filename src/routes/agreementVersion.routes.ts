@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import * as agreementVersionController from '../controllers/agreementVersion.controller.js';
 import { existingScope } from '../middlewares/scope.validator.js';
-import { existingAgreementCollection } from '../middlewares/agreementCollection.validator.js';
+import {
+    existingAgreementCollection,
+    hasCollectionPermission,
+} from '../middlewares/agreementCollection.validator.js';
+import { CollectionPermission } from '../types/collectionPermission.types.js';
 import {
     validateCreateAgreementVersion,
     validateTerminateVersion,
@@ -21,6 +25,7 @@ agreementVersionRoutes.get(
     anyOf(checkUserAuthentication, checkServiceAuthentication),
     existingScope,
     existingAgreementCollection,
+    hasCollectionPermission(CollectionPermission.VIEW),
     agreementVersionController.getAgreementVersionsByCollection,
 );
 
@@ -30,6 +35,7 @@ agreementVersionRoutes.get(
     existingScope,
     existingAgreementCollection,
     existingSelectedAgreementVersion,
+    hasCollectionPermission(CollectionPermission.VIEW),
     agreementVersionController.getAgreementVersionByCollection,
 );
 
@@ -57,6 +63,7 @@ agreementVersionRoutes.post(
     checkUserAuthentication,
     existingScope,
     existingAgreementCollection,
+    hasCollectionPermission(CollectionPermission.TERMINATE_VERSION),
     validateTerminateVersion,
     agreementVersionController.terminateActiveVersion,
 );

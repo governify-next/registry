@@ -7,7 +7,9 @@ import {
     validateUpdateAgreementCollectionPermissions,
     validateRemoveRoleFromAgreementCollectionPermissions,
     existingAgreementCollectionById,
+    hasCollectionPermission,
 } from '../middlewares/agreementCollection.validator.js';
+import { CollectionPermission } from '../types/collectionPermission.types.js';
 import { existingScope } from '../middlewares/scope.validator.js';
 import {
     existingOrganization,
@@ -47,6 +49,7 @@ agreementCollectionRoutes.get(
     anyOf(checkUserAuthentication, checkServiceAuthentication),
     existingOrganization,
     existingAgreementCollectionById,
+    hasCollectionPermission(CollectionPermission.VIEW),
     agreementCollectionController.getAgreementCollectionById,
 );
 
@@ -74,6 +77,7 @@ agreementCollectionRoutes.put(
     checkUserAuthentication,
     existingOrganization,
     existingAgreementCollectionById,
+    hasCollectionPermission(CollectionPermission.EDIT),
     validateUpdateAgreementCollection,
     agreementCollectionController.updateAgreementCollectionById,
 );
@@ -83,6 +87,7 @@ agreementCollectionRoutes.delete(
     checkServiceAuthentication,
     existingOrganization,
     existingAgreementCollectionById,
+    hasCollectionPermission(CollectionPermission.DELETE),
     agreementCollectionController.deleteAgreementCollectionById,
 );
 

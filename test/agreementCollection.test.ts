@@ -15,7 +15,6 @@ const baseBody = {
     displayName: 'Agreement Collection',
     description: 'Agreement collection description',
     fields: [],
-    permissions: [],
 };
 
 const createValidationApp = (

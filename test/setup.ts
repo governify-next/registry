@@ -10,6 +10,7 @@ beforeAll(async () => {
     mongo = await MongoMemoryServer.create();
     const uri = mongo.getUri();
     await mongoose.connect(uri);
+    await Promise.all(Object.values(mongoose.models).map((model) => model.init()));
 });
 
 afterAll(async () => {

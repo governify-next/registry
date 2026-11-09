@@ -1,6 +1,11 @@
 import { body, checkExact, param, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
-import { ValidationError, DuplicateKeyError, NotFoundError } from '../utils/customErrors.js';
+import {
+    ValidationError,
+    DuplicateKeyError,
+    NotFoundError,
+    ForbiddenError,
+} from '../utils/customErrors.js';
 import * as agreementCollectionService from '../services/agreementCollection.service.js';
 import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
 import { CollectionPermission } from '../types/collectionPermission.types.js';
@@ -176,6 +181,28 @@ export const existingAgreementCollectionById = async (
         next(err);
     }
 };
+
+export const hasCollectionPermission =
+    (permission: CollectionPermission) =>
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const allowed = await agreementCollectionService.isActionAllowedForUser(
+                req.params.orgName,
+                req.params.agColId,
+                req.headers.authorization!,
+                Boolean(req.serviceAuth),
+                permission,
+            );
+
+            if (!allowed)
+                return next(
+                    new ForbiddenError('You do not have permission to perform this action'),
+                );
+            next();
+        } catch (err) {
+            next(err);
+        }
+    };
 
 const validAuditableVersion = async (req: Request, res: Response, next: NextFunction) => {
     try {
