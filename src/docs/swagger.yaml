@@ -1058,7 +1058,7 @@ paths:
                 with resolved signatures, guarantees and metric configurations.
                 Includes `allowedActions` with the actions the requesting user can perform on
                 the collection (all true when the caller is a SERVICE, ADMIN of the organization
-                or SUPERADMIN).
+                or SUPERADMIN). Requires the `collection:view` permission on the agreement collection.
             parameters:
                 - in: query
                   name: expand
@@ -1121,6 +1121,8 @@ paths:
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
@@ -1134,7 +1136,7 @@ paths:
                 Updates an existing agreement collection identified by its id.
                 `description` is required and must contain between 3 and 500 characters.
                 The `auditableVersionNumber` can be changed to point to a different version
-                or set to `null` if no version should be auditable.
+                or set to `null` if no version should be auditable. Requires the `collection:edit` permission on the agreement collection..
             requestBody:
                 $ref: '#/components/requestBodies/AgreementCollectionUpdateBody'
             responses:
@@ -1178,6 +1180,8 @@ paths:
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '409':
@@ -1191,6 +1195,9 @@ paths:
             operationId: deleteAgreementCollectionById
             description: |
                 Deletes an agreement collection and all its associated versions and signatures.
+
+                Requires the `collection:delete` permission on the agreement collection.
+                Organization admins, SUPERADMIN users and services are always allowed.
             responses:
                 '200':
                     description: Agreement collection deleted successfully
@@ -1207,6 +1214,8 @@ paths:
                                               example: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
@@ -1464,7 +1473,7 @@ paths:
             description: |
                 Returns all agreement versions within the specified collection.
                 Supports an optional `expand` query parameter to assemble version data
-                with resolved signatures, guarantees and metric configurations.
+                with resolved signatures, guarantees and metric configurations. Requires the `collection:view` permission on the agreement collection.
             parameters:
                 - in: query
                   name: expand
@@ -1569,6 +1578,8 @@ paths:
                                                           columns:
                                                               - In Progress
                                 error: null
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
@@ -1644,7 +1655,7 @@ paths:
                 Returns the agreement version selected by `agreementVersion`. A numeric selector is
                 one-based: `1` selects `agreementVersions[0]`, `2` selects
                 `agreementVersions[1]`, and so on. `auditableVersion` resolves the collection's
-                current auditable version and returns `404` when none is configured.
+                current auditable version and returns `404` when none is configured. Requires the `collection:view` permission on the agreement collection.
             parameters:
                 - in: query
                   name: expand
@@ -1749,6 +1760,8 @@ paths:
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
@@ -1798,7 +1811,8 @@ paths:
                 Terminates the currently auditable version by setting its `earlyTermination`
                 to the provided date and setting `auditableVersionNumber` to null.
                 The `earlyTermination` date must be after `validity.initial` and before `validity.end`.
-                Returns 404 if there is no auditable version.
+                Before terminating, disables the consolidated and evolutive State generation tasks.
+                Returns 404 if there is no auditable version. Requires the `version:terminate` permission on the agreement collection.
             requestBody:
                 required: true
                 content:
@@ -1855,6 +1869,8 @@ paths:
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
@@ -1962,7 +1978,7 @@ paths:
             summary: Get a state
             operationId: getStateForAgreementVersion
             description: |
-                Returns a state of the selected agreement version. If the state does not exist or belongs to another version, a `404` is returned.
+                Returns a state of the selected agreement version. If the state does not exist or belongs to another version, a `404` is returned. Requires the `collection:view` permission on the agreement collection.
             responses:
                 '200':
                     description: State retrieved successfully
@@ -2014,6 +2030,8 @@ paths:
                     $ref: '#/components/responses/ValidationError'
                 '401':
                     $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
@@ -2281,7 +2299,7 @@ paths:
                 Both `temporalMode` and `ifExists` are required in the request body.
                 Optional `signatureIds` uses the same all-or-nothing selection rules as regular
                 state generation. Signatures are filtered before assembly and before consolidation
-                dates are calculated.
+                dates are calculated. Requires the `collection:track-period` permission on the agreement collection.
             parameters:
                 - $ref: '#/components/parameters/orgName'
                 - $ref: '#/components/parameters/scopeId'
@@ -2499,6 +2517,8 @@ paths:
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
@@ -2524,7 +2544,7 @@ paths:
                 Registry restricts the Director search by `script`, the agreement collection id stored
                 in each task (`inputArgs.agColId`), and the resolved numeric `inputArgs.agreementVersion`.
                 Tasks for fetchers, other agreement collections, or other agreement versions are not
-                returned. When there are no matching tasks, `data` is an empty array.
+                returned. When there are no matching tasks, `data` is an empty array. Requires the `collection:view` permission on the agreement collection.
             responses:
                 '200':
                     description: Consolidation state tasks retrieved successfully
@@ -2563,6 +2583,8 @@ paths:
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -2601,7 +2623,7 @@ paths:
                 Task creation requests are sent in parallel. If Director rejects one of them,
                 Registry returns `422`; tasks already accepted by Director are not rolled back.
                 Director deduplicates equivalent task definitions. Repeating the same request
-                returns the existing tasks without scheduling additional executions.
+                returns the existing tasks without scheduling additional executions. Requires the `collection:auto-tracking` permission on the agreement collection.
             parameters:
                 - in: query
                   name: enabled
@@ -2673,6 +2695,8 @@ paths:
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -2839,7 +2863,7 @@ paths:
                 - States
             summary: 'Get recurring evolutive-state tasks for an agreement version'
             operationId: getEvolutiveStateTasksForAgreementVersion
-            description: 'Lists only generateEvolutiveStates tasks for the selected collection and resolved version. Consolidated tasks are not affected.'
+            description: 'Lists only generateEvolutiveStates tasks for the selected collection and resolved version. Consolidated tasks are not affected. Requires the `collection:view` permission on the agreement collection.'
             responses:
                 '200':
                     description: 'Evolutive state tasks retrieved successfully'
@@ -2856,6 +2880,8 @@ paths:
                                                   $ref: '#/components/schemas/RecurringStateTask'
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -2867,7 +2893,7 @@ paths:
                 - States
             summary: 'Create recurring evolutive-state tasks per signature'
             operationId: createEvolutiveStateTasksForAgreementVersion
-            description: 'Creates a recurring generateEvolutiveStates task for each selected signature with a non-null evolutiveWindow. Uses its period as interval and its anchorDate + period as the first tick. Agreement validity and earlyTermination bound the schedule. Resolves auditableVersion to the current numeric selector. Director sends scheduledAt with CAPTURE, KEEP and isAsync=true for that signature. Consolidated instants succeed without generating evolutive states. Null-only selections return []; invalid selections fail before creating tasks. Equivalent definitions are deduplicated. Parallel creation failures do not roll back tasks already accepted. enabled defaults to true.'
+            description: 'Creates a recurring generateEvolutiveStates task for each selected signature with a non-null evolutiveWindow. Uses its period as interval and its anchorDate + period as the first tick. Agreement validity and earlyTermination bound the schedule. Resolves auditableVersion to the current numeric selector. Director sends scheduledAt with CAPTURE, KEEP and isAsync=true for that signature. Consolidated instants succeed without generating evolutive states. Null-only selections return []; invalid selections fail before creating tasks. Equivalent definitions are deduplicated. Parallel creation failures do not roll back tasks already accepted. enabled defaults to true. Requires the `collection:auto-tracking` permission on the agreement collection.'
             parameters:
                 - in: query
                   name: enabled
@@ -2907,6 +2933,8 @@ paths:
                                                   $ref: '#/components/schemas/RecurringStateTask'
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':

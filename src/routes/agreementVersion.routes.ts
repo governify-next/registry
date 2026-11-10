@@ -12,6 +12,7 @@ import {
     existingSelectedAgreementVersion,
 } from '../middlewares/agreementVersion.validator.js';
 import { validateComputerHealth } from '../middlewares/computer.validator.js';
+import { validateDirectorHealth } from '../middlewares/director.validator.js';
 import {
     checkServiceAuthentication,
     checkUserAuthentication,
@@ -61,6 +62,7 @@ agreementVersionRoutes.post(
 agreementVersionRoutes.post(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/activeVersion/terminate',
     checkUserAuthentication,
+    validateDirectorHealth,
     existingScope,
     existingAgreementCollection,
     hasCollectionPermission(CollectionPermission.TERMINATE_VERSION),
