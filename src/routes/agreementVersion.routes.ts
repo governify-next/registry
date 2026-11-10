@@ -1,13 +1,18 @@
 import { Router } from 'express';
 import * as agreementVersionController from '../controllers/agreementVersion.controller.js';
 import { existingScope } from '../middlewares/scope.validator.js';
-import { existingAgreementCollection } from '../middlewares/agreementCollection.validator.js';
+import {
+    existingAgreementCollection,
+    hasCollectionPermission,
+} from '../middlewares/agreementCollection.validator.js';
+import { CollectionPermission } from '../types/collectionPermission.types.js';
 import {
     validateCreateAgreementVersion,
     validateTerminateVersion,
     existingSelectedAgreementVersion,
 } from '../middlewares/agreementVersion.validator.js';
 import { validateComputerHealth } from '../middlewares/computer.validator.js';
+import { validateDirectorHealth } from '../middlewares/director.validator.js';
 import {
     checkServiceAuthentication,
     checkUserAuthentication,
@@ -21,6 +26,7 @@ agreementVersionRoutes.get(
     anyOf(checkUserAuthentication, checkServiceAuthentication),
     existingScope,
     existingAgreementCollection,
+    hasCollectionPermission(CollectionPermission.VIEW),
     agreementVersionController.getAgreementVersionsByCollection,
 );
 
@@ -30,6 +36,7 @@ agreementVersionRoutes.get(
     existingScope,
     existingAgreementCollection,
     existingSelectedAgreementVersion,
+    hasCollectionPermission(CollectionPermission.VIEW),
     agreementVersionController.getAgreementVersionByCollection,
 );
 
@@ -55,8 +62,10 @@ agreementVersionRoutes.post(
 agreementVersionRoutes.post(
     '/organizations/:orgName/scopes/:scopeId/agreementCollections/:agColId/agreementVersions/activeVersion/terminate',
     checkUserAuthentication,
+    validateDirectorHealth,
     existingScope,
     existingAgreementCollection,
+    hasCollectionPermission(CollectionPermission.TERMINATE_VERSION),
     validateTerminateVersion,
     agreementVersionController.terminateActiveVersion,
 );

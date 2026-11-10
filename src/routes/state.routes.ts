@@ -2,7 +2,11 @@ import { Router } from 'express';
 import * as stateController from '../controllers/state.controller.js';
 import { validateComputerHealth } from '../middlewares/computer.validator.js';
 import { existingScope } from '../middlewares/scope.validator.js';
-import { existingAgreementCollection } from '../middlewares/agreementCollection.validator.js';
+import {
+    existingAgreementCollection,
+    hasCollectionPermission,
+} from '../middlewares/agreementCollection.validator.js';
+import { CollectionPermission } from '../types/collectionPermission.types.js';
 import { existingSelectedAgreementVersion } from '../middlewares/agreementVersion.validator.js';
 import {
     validateCreateEvolutiveStateTasksRequest,
@@ -49,6 +53,7 @@ stateRoutes.post(
     existingScope,
     existingAgreementCollection,
     existingSelectedAgreementVersion,
+    hasCollectionPermission(CollectionPermission.TRACK_PERIOD),
     validateGenerateConsolidatedStatesBody,
     stateController.generateConsolidatedStatesForAgreementVersion,
 );
@@ -80,6 +85,7 @@ stateRoutes.get(
     existingScope,
     existingAgreementCollection,
     existingSelectedAgreementVersion,
+    hasCollectionPermission(CollectionPermission.VIEW),
     validateGetStateForAgreementVersion,
     stateController.getStateForAgreementVersion,
 );
@@ -91,6 +97,7 @@ stateRoutes.post(
     existingScope,
     existingAgreementCollection,
     existingSelectedAgreementVersion,
+    hasCollectionPermission(CollectionPermission.AUTO_TRACKING),
     validateCreateConsolidationStateTasksRequest,
     stateController.createConsolidationStateTasksForAgreementVersion,
 );
@@ -102,6 +109,7 @@ stateRoutes.get(
     existingScope,
     existingAgreementCollection,
     existingSelectedAgreementVersion,
+    hasCollectionPermission(CollectionPermission.VIEW),
     stateController.getConsolidationStateTasksForAgreementVersion,
 );
 
@@ -122,6 +130,7 @@ stateRoutes.post(
     existingScope,
     existingAgreementCollection,
     existingSelectedAgreementVersion,
+    hasCollectionPermission(CollectionPermission.AUTO_TRACKING),
     validateCreateEvolutiveStateTasksRequest,
     stateController.createEvolutiveStateTasksForAgreementVersion,
 );
@@ -133,6 +142,7 @@ stateRoutes.get(
     existingScope,
     existingAgreementCollection,
     existingSelectedAgreementVersion,
+    hasCollectionPermission(CollectionPermission.VIEW),
     stateController.getEvolutiveStateTasksForAgreementVersion,
 );
 

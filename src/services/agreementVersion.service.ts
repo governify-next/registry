@@ -4,6 +4,7 @@ import { IAgreementVersionPayload } from '../types/agreementVersion.types.js';
 import { getCleanAgreementCollectionByScope } from './agreementCollection.service.js';
 import { getCleanAgreementTemplateByOrganization } from './agreementTemplate.service.js';
 import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
+import * as stateService from './state.service.js';
 import {
     assembleBySignature,
     createSignaturesByVersion,
@@ -205,6 +206,23 @@ export const terminateActiveVersion = async (
     const version = agreementCollection!.agreementVersions.find(
         (v) => v.versionNumber === agreementCollection!.auditableVersionNumber,
     );
+
+    await Promise.all([
+        stateService.createConsolidationStateTasksForAgreementVersion(
+            orgName,
+            scopeId,
+            agColId,
+            'auditableVersion',
+            false,
+        ),
+        stateService.createEvolutiveStateTasksForAgreementVersion(
+            orgName,
+            scopeId,
+            agColId,
+            'auditableVersion',
+            false,
+        ),
+    ]);
 
     return await agreementVersionRepository.terminateActiveVersion(
         agreementCollection!._id,

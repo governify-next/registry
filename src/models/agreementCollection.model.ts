@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
+import { CollectionPermission } from '../types/collectionPermission.types.js';
 
 export interface IAgreementVersion {
     versionNumber: number;
@@ -21,7 +22,7 @@ export interface IAgreementCollection extends Document {
     scopeId: Types.ObjectId;
     auditableVersionNumber: number | null;
     fields: Record<string, unknown>;
-    permissions: Record<string, unknown>;
+    permissions: Record<CollectionPermission, Types.ObjectId[]>;
     agreementVersions: IAgreementVersion[];
 }
 
@@ -54,7 +55,19 @@ const agreementCollectionSchema = new Schema<IAgreementCollection>(
         scopeId: { type: Schema.Types.ObjectId, ref: 'Scope', required: true },
         auditableVersionNumber: { type: Number, default: null },
         fields: { type: Schema.Types.Mixed, required: true },
-        permissions: { type: Schema.Types.Mixed, required: true },
+        permissions: {
+            type: new Schema(
+                Object.fromEntries(
+                    Object.values(CollectionPermission).map((permission) => [
+                        permission,
+                        [Schema.Types.ObjectId],
+                    ]),
+                ),
+                { _id: false },
+            ),
+            default: () => ({}),
+            select: false,
+        },
         agreementVersions: { type: [agreementVersionSchema], default: [] },
     },
     {

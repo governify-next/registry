@@ -2,12 +2,12 @@ import { body, validationResult } from 'express-validator';
 import { type Request, type Response, type NextFunction } from 'express';
 import * as agreementTemplateService from '../services/agreementTemplate.service.js';
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
-import { getOrganizationOrFail } from './organization.validator.js';
 import { DuplicateKeyError, ValidationError, NotFoundError } from '../utils/customErrors.js';
 import { validateGuaranteeWindow } from './window.validator.js';
 import { fromPeriodToMilliseconds } from '../utils/window.util.js';
 import type { IAgreementTemplateGuaranteeInput } from '../types/agreementTemplate.types.js';
 import { comparators } from '../types/comparator.types.js';
+import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
 
 // ─── Field validations ────────────────────────────
 
@@ -130,7 +130,10 @@ const uniqueAgreementTemplateInOrganization = async (
     next: NextFunction,
 ) => {
     try {
-        const organization = await getOrganizationOrFail(req.params.orgName);
+        const organization = await scopeManagerIntegration.getOrganizationByName(
+            req.params.orgName,
+            req.headers.authorization,
+        );
 
         // If there is a param it is an update -> no conflict if the param name equals the body one
         if (req.params.agreementTemplateName && req.params.agreementTemplateName === req.body.name)
@@ -175,7 +178,10 @@ const noDuplicateGuaranteeTemplateNames = (req: Request, res: Response, next: Ne
 export const existingAgreementTemplate = (getTemplateName: (req: Request) => string) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const organization = await getOrganizationOrFail(req.params.orgName);
+            const organization = await scopeManagerIntegration.getOrganizationByName(
+                req.params.orgName,
+                req.headers.authorization,
+            );
 
             const agreementTemplate =
                 await agreementTemplateService.getCleanAgreementTemplateByOrganization(

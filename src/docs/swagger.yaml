@@ -932,6 +932,38 @@ paths:
                 '500':
                     $ref: '#/components/responses/InternalError'
 
+    /api/v1/agreementCollections/permissions/roles/{roleId}:
+        parameters:
+            - $ref: '#/components/parameters/roleId'
+        delete:
+            tags:
+                - AgreementCollections
+            summary: Remove a role from the permissions of every agreement collection
+            operationId: removeRoleFromAgreementCollectionPermissions
+            description: |
+                Removes the given role id from every permission of every agreement collection.
+                Called by scope-manager when a role of an organization is deleted.
+            responses:
+                '200':
+                    description: Role removed from agreement collection permissions
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SuccessResponse'
+                            example:
+                                success: true
+                                message: Role removed from agreement collection permissions
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data: null
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
     /api/v1/organizations/{orgName}/agreementCollections:
         parameters:
             - $ref: '#/components/parameters/orgName'
@@ -942,7 +974,9 @@ paths:
             operationId: getAgreementCollectionsByOrganization
             description: |
                 Returns every agreement collection belonging to any scope of the specified
-                organization.
+                organization that the requesting user can view (`collection:view`). Each collection includes 
+                `allowedActions` with the actions the requesting user can perform on it (all true when the caller 
+                is a SERVICE, ADMIN of the organization or SUPERADMIN).
             responses:
                 '200':
                     description: List of agreement collections retrieved successfully
@@ -960,6 +994,8 @@ paths:
                                                       - $ref: '#/components/schemas/AgreementCollection'
                                                       - type: object
                                                         properties:
+                                                            allowedActions:
+                                                                $ref: '#/components/schemas/AgreementCollectionAllowedActions'
                                                             autoTracking:
                                                                 type: boolean
                                                                 description: |
@@ -990,8 +1026,15 @@ paths:
                                                     - 69cbea571d5009a043619276
                                             versionNumber: 1
                                       fields: []
-                                      permissions: []
                                       __v: 0
+                                      allowedActions:
+                                          'collection:view': true
+                                          'collection:auto-tracking': false
+                                          'collection:track-period': false
+                                          'version:terminate': false
+                                          'collection:edit': false
+                                          'collection:view-evolutive': false
+                                          'collection:delete': false
                                       autoTracking: true
                                 error: null
                 '404':
@@ -1013,6 +1056,9 @@ paths:
                 belongs to. The collection must belong to a scope of the specified organization.
                 Supports an optional `expand` query parameter to assemble version data
                 with resolved signatures, guarantees and metric configurations.
+                Includes `allowedActions` with the actions the requesting user can perform on
+                the collection (all true when the caller is a SERVICE, ADMIN of the organization
+                or SUPERADMIN). Requires the `collection:view` permission on the agreement collection.
             parameters:
                 - in: query
                   name: expand
@@ -1031,9 +1077,14 @@ paths:
                                     - type: object
                                       properties:
                                           data:
-                                              oneOf:
-                                                  - $ref: '#/components/schemas/AgreementCollection'
-                                                  - $ref: '#/components/schemas/AgreementCollectionExpanded'
+                                              allOf:
+                                                  - oneOf:
+                                                        - $ref: '#/components/schemas/AgreementCollection'
+                                                        - $ref: '#/components/schemas/AgreementCollectionExpanded'
+                                                  - type: object
+                                                    properties:
+                                                        allowedActions:
+                                                            $ref: '#/components/schemas/AgreementCollectionAllowedActions'
                             example:
                                 success: true
                                 message: OK
@@ -1058,11 +1109,20 @@ paths:
                                                   - 69cbea571d5009a043619276
                                           versionNumber: 1
                                     fields: []
-                                    permissions: []
                                     __v: 0
+                                    allowedActions:
+                                        'collection:view': true
+                                        'collection:auto-tracking': false
+                                        'collection:track-period': false
+                                        'version:terminate': false
+                                        'collection:edit': false
+                                        'collection:view-evolutive': false
+                                        'collection:delete': false
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
@@ -1076,7 +1136,7 @@ paths:
                 Updates an existing agreement collection identified by its id.
                 `description` is required and must contain between 3 and 500 characters.
                 The `auditableVersionNumber` can be changed to point to a different version
-                or set to `null` if no version should be auditable.
+                or set to `null` if no version should be auditable. Requires the `collection:edit` permission on the agreement collection..
             requestBody:
                 $ref: '#/components/requestBodies/AgreementCollectionUpdateBody'
             responses:
@@ -1115,12 +1175,13 @@ paths:
                                                   - 69cbea571d5009a043619276
                                           versionNumber: 1
                                     fields: []
-                                    permissions: []
                                     __v: 0
                                     updatedAt: '2024-01-01T12:00:00.000Z'
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '409':
@@ -1134,6 +1195,9 @@ paths:
             operationId: deleteAgreementCollectionById
             description: |
                 Deletes an agreement collection and all its associated versions and signatures.
+
+                Requires the `collection:delete` permission on the agreement collection.
+                Organization admins, SUPERADMIN users and services are always allowed.
             responses:
                 '200':
                     description: Agreement collection deleted successfully
@@ -1150,6 +1214,128 @@ paths:
                                               example: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+
+    /api/v1/organizations/{orgName}/agreementCollections/{agColId}/permissions:
+        parameters:
+            - $ref: '#/components/parameters/orgName'
+            - $ref: '#/components/parameters/agColId'
+        get:
+            tags:
+                - AgreementCollections
+            summary: Get the permissions of an agreement collection
+            operationId: getAgreementCollectionPermissionsById
+            description: |
+                Returns the permissions of an agreement collection: for each action of the
+                catalog, the list of organization role ids allowed to perform it.
+                Only organization admins and SUPERADMIN users can access this endpoint.
+            responses:
+                '200':
+                    description: Agreement collection permissions found
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementCollectionPermissions'
+                            example:
+                                success: true
+                                message: OK
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    collection:view:
+                                        - 69cbdee759092b362376ca20
+                                        - 69cbdee759092b362376ca21
+                                    collection:auto-tracking: []
+                                    collection:track-period:
+                                        - 69cbdee759092b362376ca20
+                                    version:terminate: []
+                                    collection:edit: []
+                                    collection:view-evolutive:
+                                        - 69cbdee759092b362376ca20
+                                    collection:delete: []
+                                error: null
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalError'
+        put:
+            tags:
+                - AgreementCollections
+            summary: Replace the permissions of an agreement collection
+            operationId: updateAgreementCollectionPermissionsById
+            description: |
+                Replaces the whole permissions of an agreement collection.
+                Every action of the catalog must be present and no other key is accepted.
+                Each value must be an array of role ids that belong to the organization.
+                Only organization admins and SUPERADMIN users can access this endpoint.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AgreementCollectionPermissions'
+                        example:
+                            collection:view:
+                                - 69cbdee759092b362376ca20
+                                - 69cbdee759092b362376ca21
+                            collection:auto-tracking: []
+                            collection:track-period:
+                                - 69cbdee759092b362376ca20
+                            version:terminate: []
+                            collection:edit: []
+                            collection:view-evolutive:
+                                - 69cbdee759092b362376ca20
+                            collection:delete: []
+            responses:
+                '200':
+                    description: Agreement collection permissions updated
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/SuccessResponse'
+                                    - type: object
+                                      properties:
+                                          data:
+                                              $ref: '#/components/schemas/AgreementCollectionPermissions'
+                            example:
+                                success: true
+                                message: Agreement collection permissions updated
+                                httpStatus: 200
+                                appCode: SUCCESS
+                                data:
+                                    collection:view:
+                                        - 69cbdee759092b362376ca20
+                                        - 69cbdee759092b362376ca21
+                                    collection:auto-tracking: []
+                                    collection:track-period:
+                                        - 69cbdee759092b362376ca20
+                                    version:terminate: []
+                                    collection:edit: []
+                                    collection:view-evolutive:
+                                        - 69cbdee759092b362376ca20
+                                    collection:delete: []
+                                error: null
+                '400':
+                    $ref: '#/components/responses/ValidationError'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
@@ -1216,7 +1402,6 @@ paths:
                                                     - 69cbea571d5009a043619276
                                             versionNumber: 1
                                       fields: []
-                                      permissions: []
                                       __v: 0
                                 error: null
                 '404':
@@ -1261,7 +1446,6 @@ paths:
                                     auditableVersionNumber: null
                                     agreementVersions: []
                                     fields: []
-                                    permissions: []
                                     __v: 0
                                 error: null
                 '400':
@@ -1289,7 +1473,7 @@ paths:
             description: |
                 Returns all agreement versions within the specified collection.
                 Supports an optional `expand` query parameter to assemble version data
-                with resolved signatures, guarantees and metric configurations.
+                with resolved signatures, guarantees and metric configurations. Requires the `collection:view` permission on the agreement collection.
             parameters:
                 - in: query
                   name: expand
@@ -1394,6 +1578,8 @@ paths:
                                                           columns:
                                                               - In Progress
                                 error: null
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
@@ -1469,7 +1655,7 @@ paths:
                 Returns the agreement version selected by `agreementVersion`. A numeric selector is
                 one-based: `1` selects `agreementVersions[0]`, `2` selects
                 `agreementVersions[1]`, and so on. `auditableVersion` resolves the collection's
-                current auditable version and returns `404` when none is configured.
+                current auditable version and returns `404` when none is configured. Requires the `collection:view` permission on the agreement collection.
             parameters:
                 - in: query
                   name: expand
@@ -1574,6 +1760,8 @@ paths:
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
@@ -1623,7 +1811,8 @@ paths:
                 Terminates the currently auditable version by setting its `earlyTermination`
                 to the provided date and setting `auditableVersionNumber` to null.
                 The `earlyTermination` date must be after `validity.initial` and before `validity.end`.
-                Returns 404 if there is no auditable version.
+                Before terminating, disables the consolidated and evolutive State generation tasks.
+                Returns 404 if there is no auditable version. Requires the `version:terminate` permission on the agreement collection.
             requestBody:
                 required: true
                 content:
@@ -1676,11 +1865,12 @@ paths:
                                                   - 69cbf256cf7ba204e4725122
                                           versionNumber: 1
                                     fields: []
-                                    permissions: []
                                     __v: 0
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
@@ -1788,7 +1978,7 @@ paths:
             summary: Get a state
             operationId: getStateForAgreementVersion
             description: |
-                Returns a state of the selected agreement version. If the state does not exist or belongs to another version, a `404` is returned.
+                Returns a state of the selected agreement version. If the state does not exist or belongs to another version, a `404` is returned. Requires the `collection:view` permission on the agreement collection.
             responses:
                 '200':
                     description: State retrieved successfully
@@ -1840,6 +2030,8 @@ paths:
                     $ref: '#/components/responses/ValidationError'
                 '401':
                     $ref: '#/components/responses/Unauthorized'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
@@ -2107,7 +2299,7 @@ paths:
                 Both `temporalMode` and `ifExists` are required in the request body.
                 Optional `signatureIds` uses the same all-or-nothing selection rules as regular
                 state generation. Signatures are filtered before assembly and before consolidation
-                dates are calculated.
+                dates are calculated. Requires the `collection:track-period` permission on the agreement collection.
             parameters:
                 - $ref: '#/components/parameters/orgName'
                 - $ref: '#/components/parameters/scopeId'
@@ -2325,6 +2517,8 @@ paths:
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '500':
@@ -2350,7 +2544,7 @@ paths:
                 Registry restricts the Director search by `script`, the agreement collection id stored
                 in each task (`inputArgs.agColId`), and the resolved numeric `inputArgs.agreementVersion`.
                 Tasks for fetchers, other agreement collections, or other agreement versions are not
-                returned. When there are no matching tasks, `data` is an empty array.
+                returned. When there are no matching tasks, `data` is an empty array. Requires the `collection:view` permission on the agreement collection.
             responses:
                 '200':
                     description: Consolidation state tasks retrieved successfully
@@ -2389,6 +2583,8 @@ paths:
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -2427,7 +2623,7 @@ paths:
                 Task creation requests are sent in parallel. If Director rejects one of them,
                 Registry returns `422`; tasks already accepted by Director are not rolled back.
                 Director deduplicates equivalent task definitions. Repeating the same request
-                returns the existing tasks without scheduling additional executions.
+                returns the existing tasks without scheduling additional executions. Requires the `collection:auto-tracking` permission on the agreement collection.
             parameters:
                 - in: query
                   name: enabled
@@ -2499,6 +2695,8 @@ paths:
                                 error: null
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -2665,7 +2863,7 @@ paths:
                 - States
             summary: 'Get recurring evolutive-state tasks for an agreement version'
             operationId: getEvolutiveStateTasksForAgreementVersion
-            description: 'Lists only generateEvolutiveStates tasks for the selected collection and resolved version. Consolidated tasks are not affected.'
+            description: 'Lists only generateEvolutiveStates tasks for the selected collection and resolved version. Consolidated tasks are not affected. Requires the `collection:view` permission on the agreement collection.'
             responses:
                 '200':
                     description: 'Evolutive state tasks retrieved successfully'
@@ -2682,6 +2880,8 @@ paths:
                                                   $ref: '#/components/schemas/RecurringStateTask'
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -2693,7 +2893,7 @@ paths:
                 - States
             summary: 'Create recurring evolutive-state tasks per signature'
             operationId: createEvolutiveStateTasksForAgreementVersion
-            description: 'Creates a recurring generateEvolutiveStates task for each selected signature with a non-null evolutiveWindow. Uses its period as interval and its anchorDate + period as the first tick. Agreement validity and earlyTermination bound the schedule. Resolves auditableVersion to the current numeric selector. Director sends scheduledAt with CAPTURE, KEEP and isAsync=true for that signature. Consolidated instants succeed without generating evolutive states. Null-only selections return []; invalid selections fail before creating tasks. Equivalent definitions are deduplicated. Parallel creation failures do not roll back tasks already accepted. enabled defaults to true.'
+            description: 'Creates a recurring generateEvolutiveStates task for each selected signature with a non-null evolutiveWindow. Uses its period as interval and its anchorDate + period as the first tick. Agreement validity and earlyTermination bound the schedule. Resolves auditableVersion to the current numeric selector. Director sends scheduledAt with CAPTURE, KEEP and isAsync=true for that signature. Consolidated instants succeed without generating evolutive states. Null-only selections return []; invalid selections fail before creating tasks. Equivalent definitions are deduplicated. Parallel creation failures do not roll back tasks already accepted. enabled defaults to true. Requires the `collection:auto-tracking` permission on the agreement collection.'
             parameters:
                 - in: query
                   name: enabled
@@ -2733,6 +2933,8 @@ paths:
                                                   $ref: '#/components/schemas/RecurringStateTask'
                 '400':
                     $ref: '#/components/responses/ValidationError'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -3031,6 +3233,15 @@ components:
             schema:
                 type: string
             example: member
+        roleId:
+            name: roleId
+            in: path
+            required: true
+            description: Id of the role within the organization
+            schema:
+                type: string
+                pattern: '^[a-fA-F0-9]{24}$'
+            example: 69cbdee759092b362376ca20
         elementFieldName:
             name: fieldName
             in: path
@@ -3390,7 +3601,6 @@ components:
                         displayName: TPA US PSG2 2526
                         description: Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                         fields: []
-                        permissions: []
 
         AgreementCollectionUpdateBody:
             description: Data to update the Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
@@ -3404,7 +3614,6 @@ components:
                         displayName: TPA US PSG2 2526 (actualizado)
                         description: Updated Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                         fields: []
-                        permissions: []
                         auditableVersionNumber: null
 
         AgreementVersionBody:
@@ -5649,11 +5858,6 @@ components:
                     description: Collection fields
                     items:
                         type: object
-                permissions:
-                    type: array
-                    description: Collection permissions
-                    items:
-                        type: object
                 __v:
                     type: integer
                     description: Mongoose version key
@@ -5676,6 +5880,97 @@ components:
                           items:
                               $ref: '#/components/schemas/AgreementVersionExpanded'
 
+        AgreementCollectionPermissions:
+            type: object
+            description: Role ids of the organization allowed to perform each action on the collection
+            required:
+                - 'collection:view'
+                - 'collection:auto-tracking'
+                - 'collection:track-period'
+                - 'version:terminate'
+                - 'collection:edit'
+                - 'collection:view-evolutive'
+                - 'collection:delete'
+            properties:
+                'collection:view':
+                    description: View the agreement collection, its versions and states
+                    type: array
+                    items:
+                        type: string
+                        description: ObjectId of an organization role
+                'collection:auto-tracking':
+                    description: Enable or disable the auto tracking of the collection
+                    type: array
+                    items:
+                        type: string
+                        description: ObjectId of an organization role
+                'collection:track-period':
+                    description: Generate the states of a period
+                    type: array
+                    items:
+                        type: string
+                        description: ObjectId of an organization role
+                'version:terminate':
+                    description: Terminate the active agreement version
+                    type: array
+                    items:
+                        type: string
+                        description: ObjectId of an organization role
+                'collection:edit':
+                    description: Edit the collection details
+                    type: array
+                    items:
+                        type: string
+                        description: ObjectId of an organization role
+                'collection:view-evolutive':
+                    description: View the evolutive points
+                    type: array
+                    items:
+                        type: string
+                        description: ObjectId of an organization role
+                'collection:delete':
+                    description: Delete the collection
+                    type: array
+                    items:
+                        type: string
+                        description: ObjectId of an organization role
+
+        AgreementCollectionAllowedActions:
+            type: object
+            description: |
+                Whether the requesting user can perform each action on the collection.
+                All true for an organization admin, a SUPERADMIN or a service.
+            required:
+                - 'collection:view'
+                - 'collection:auto-tracking'
+                - 'collection:track-period'
+                - 'version:terminate'
+                - 'collection:edit'
+                - 'collection:view-evolutive'
+                - 'collection:delete'
+            properties:
+                'collection:view':
+                    description: View the agreement collection, its versions and states
+                    type: boolean
+                'collection:auto-tracking':
+                    description: Enable or disable the auto tracking of the collection
+                    type: boolean
+                'collection:track-period':
+                    description: Generate the states of a period
+                    type: boolean
+                'version:terminate':
+                    description: Terminate the active agreement version
+                    type: boolean
+                'collection:edit':
+                    description: Edit the collection details
+                    type: boolean
+                'collection:view-evolutive':
+                    description: View the evolutive points
+                    type: boolean
+                'collection:delete':
+                    description: Delete the collection
+                    type: boolean
+
         AgreementCollectionInput:
             type: object
             description: Payload for creating an agreement collection
@@ -5684,7 +5979,6 @@ components:
                 - displayName
                 - description
                 - fields
-                - permissions
             properties:
                 name:
                     type: string
@@ -5705,10 +5999,6 @@ components:
                     type: array
                     items:
                         type: object
-                permissions:
-                    type: array
-                    items:
-                        type: object
 
         AgreementCollectionUpdateInput:
             type: object
@@ -5718,7 +6008,6 @@ components:
                 - displayName
                 - description
                 - fields
-                - permissions
                 - auditableVersionNumber
             properties:
                 name:
@@ -5737,10 +6026,6 @@ components:
                     maxLength: 500
                     example: Updated Team Practices Agreement collection for Universidad de Sevilla PSG2 2025-2026
                 fields:
-                    type: array
-                    items:
-                        type: object
-                permissions:
                     type: array
                     items:
                         type: object

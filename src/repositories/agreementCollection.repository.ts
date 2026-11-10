@@ -1,8 +1,38 @@
 import { Types } from 'mongoose';
 import AgreementCollection, { IAgreementCollection } from '../models/agreementCollection.model.js';
+import { CollectionPermission } from '../types/collectionPermission.types.js';
 
 export const getAgreementCollectionById = async (agColId: string) => {
     return await AgreementCollection.findById(agColId);
+};
+
+export const getAgreementCollectionWithPermissionsById = async (agColId: string) => {
+    return await AgreementCollection.findById(agColId).select('+permissions');
+};
+
+export const getAgreementCollectionPermissionsById = async (agColId: string) => {
+    return await AgreementCollection.findById(agColId).select('permissions');
+};
+
+export const updateAgreementCollectionPermissionsById = async (
+    agColId: string,
+    permissions: IAgreementCollection['permissions'],
+) => {
+    return await AgreementCollection.findByIdAndUpdate(
+        agColId,
+        { permissions },
+        { new: true },
+    ).select('permissions');
+};
+
+export const removeRoleFromAgreementCollectionPermissions = async (roleId: string) => {
+    const permissionPaths = Object.values(CollectionPermission).map(
+        (permission) => `permissions.${permission}`,
+    );
+    return await AgreementCollection.updateMany(
+        { $or: permissionPaths.map((path) => ({ [path]: roleId })) },
+        { $pull: Object.fromEntries(permissionPaths.map((path) => [path, roleId])) },
+    );
 };
 
 export const getAgreementCollectionsByScope = async (scopeId: Types.ObjectId) => {
@@ -10,7 +40,7 @@ export const getAgreementCollectionsByScope = async (scopeId: Types.ObjectId) =>
 };
 
 export const getAgreementCollectionsByScopeIds = async (scopeIds: string[]) => {
-    return await AgreementCollection.find({ scopeId: { $in: scopeIds } });
+    return await AgreementCollection.find({ scopeId: { $in: scopeIds } }).select('+permissions');
 };
 
 export const countAgreementCollectionsByScopeIds = async (scopeIds: string[]) => {

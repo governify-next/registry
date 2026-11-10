@@ -11,6 +11,8 @@ export const getAgreementCollectionsByOrganization = async (
         const agreementCollections =
             await agreementCollectionService.getAgreementCollectionsByOrganization(
                 req.params.orgName,
+                req.headers.authorization!,
+                Boolean(req.serviceAuth),
             );
         return sendSuccess(res, { data: agreementCollections });
     } catch (err) {
@@ -61,11 +63,68 @@ export const getAgreementCollectionById = async (
     try {
         const expand = req.query.expand === 'true';
 
-        const agreementCollection = await agreementCollectionService.getAgreementCollectionById(
-            req.params.agColId,
-            expand,
-        );
+        const agreementCollection =
+            await agreementCollectionService.getAgreementCollectionWithActionsById(
+                req.params.orgName,
+                req.params.agColId,
+                expand,
+                req.headers.authorization!,
+                Boolean(req.serviceAuth),
+            );
         return sendSuccess(res, { data: agreementCollection });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getAgreementCollectionPermissionsById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const permissions = await agreementCollectionService.getAgreementCollectionPermissionsById(
+            req.params.agColId,
+        );
+        return sendSuccess(res, { data: permissions });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const updateAgreementCollectionPermissionsById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const permissions =
+            await agreementCollectionService.updateAgreementCollectionPermissionsById(
+                req.params.agColId,
+                req.body,
+            );
+        return sendSuccess(res, {
+            data: permissions,
+            message: 'Agreement collection permissions updated',
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const removeRoleFromAgreementCollectionPermissions = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        await agreementCollectionService.removeRoleFromAgreementCollectionPermissions(
+            req.params.roleId,
+        );
+        return sendSuccess(res, {
+            data: null,
+            message: 'Role removed from agreement collection permissions',
+        });
     } catch (err) {
         next(err);
     }

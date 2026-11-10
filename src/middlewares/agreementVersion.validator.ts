@@ -7,7 +7,7 @@ import { validateEventConfig } from '../integrations/computer.integration.js';
 import * as guaranteeTemplateService from '../services/guaranteeTemplate.service.js';
 import * as agreementTemplateService from '../services/agreementTemplate.service.js';
 import * as guaranteeService from '../services/guarantee.service.js';
-import { getOrganizationOrFail } from './organization.validator.js';
+import * as scopeManagerIntegration from '../integrations/scope-manager.integration.js';
 
 // ─── Field validations ────────────────────────────
 
@@ -162,7 +162,10 @@ export const validateSignaturesAgainstAgreementTemplate = async (
                 ),
             ),
         ];
-        const organization = await getOrganizationOrFail(req.params.orgName);
+        const organization = await scopeManagerIntegration.getOrganizationByName(
+            req.params.orgName,
+            req.headers.authorization,
+        );
         const agreementTemplate =
             await agreementTemplateService.getCleanAgreementTemplateByOrganization(
                 organization._id,

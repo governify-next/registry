@@ -26,6 +26,7 @@ beforeEach(() => {
     vi.spyOn(collections, 'getCleanAgreementCollectionByScope').mockResolvedValue({
         agreementVersions: [{ versionNumber: 1 }],
     } as never);
+    vi.spyOn(collections, 'isActionAllowedForUser').mockResolvedValue(true);
 });
 afterEach(() => vi.restoreAllMocks());
 

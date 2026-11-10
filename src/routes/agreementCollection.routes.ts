@@ -4,10 +4,17 @@ import {
     validateCreateAgreementCollection,
     validateUpdateAgreementCollection,
     validateCountAgreementCollections,
+    validateUpdateAgreementCollectionPermissions,
+    validateRemoveRoleFromAgreementCollectionPermissions,
     existingAgreementCollectionById,
+    hasCollectionPermission,
 } from '../middlewares/agreementCollection.validator.js';
+import { CollectionPermission } from '../types/collectionPermission.types.js';
 import { existingScope } from '../middlewares/scope.validator.js';
-import { existingOrganization } from '../middlewares/organization.validator.js';
+import {
+    existingOrganization,
+    isOrganizationAdmin,
+} from '../middlewares/organization.validator.js';
 import {
     checkServiceAuthentication,
     checkUserAuthentication,
@@ -23,6 +30,13 @@ agreementCollectionRoutes.post(
     agreementCollectionController.countAgreementCollectionsByScopeIds,
 );
 
+agreementCollectionRoutes.delete(
+    '/agreementCollections/permissions/roles/:roleId',
+    checkServiceAuthentication,
+    validateRemoveRoleFromAgreementCollectionPermissions,
+    agreementCollectionController.removeRoleFromAgreementCollectionPermissions,
+);
+
 agreementCollectionRoutes.get(
     '/organizations/:orgName/agreementCollections',
     anyOf(checkUserAuthentication, checkServiceAuthentication),
@@ -35,7 +49,27 @@ agreementCollectionRoutes.get(
     anyOf(checkUserAuthentication, checkServiceAuthentication),
     existingOrganization,
     existingAgreementCollectionById,
+    hasCollectionPermission(CollectionPermission.VIEW),
     agreementCollectionController.getAgreementCollectionById,
+);
+
+agreementCollectionRoutes.get(
+    '/organizations/:orgName/agreementCollections/:agColId/permissions',
+    checkUserAuthentication,
+    existingOrganization,
+    isOrganizationAdmin,
+    existingAgreementCollectionById,
+    agreementCollectionController.getAgreementCollectionPermissionsById,
+);
+
+agreementCollectionRoutes.put(
+    '/organizations/:orgName/agreementCollections/:agColId/permissions',
+    checkUserAuthentication,
+    existingOrganization,
+    isOrganizationAdmin,
+    existingAgreementCollectionById,
+    validateUpdateAgreementCollectionPermissions,
+    agreementCollectionController.updateAgreementCollectionPermissionsById,
 );
 
 agreementCollectionRoutes.put(
@@ -43,6 +77,7 @@ agreementCollectionRoutes.put(
     checkUserAuthentication,
     existingOrganization,
     existingAgreementCollectionById,
+    hasCollectionPermission(CollectionPermission.EDIT),
     validateUpdateAgreementCollection,
     agreementCollectionController.updateAgreementCollectionById,
 );
@@ -52,6 +87,7 @@ agreementCollectionRoutes.delete(
     checkServiceAuthentication,
     existingOrganization,
     existingAgreementCollectionById,
+    hasCollectionPermission(CollectionPermission.DELETE),
     agreementCollectionController.deleteAgreementCollectionById,
 );
 
