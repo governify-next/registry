@@ -38,7 +38,7 @@ describe('consolidation fetch tasks', () => {
                                             event: {
                                                 fetcherConfigs: [
                                                     {
-                                                        fetcherId: 'FT_GQL_ZENHUB_ISSUES',
+                                                        fetcherId: 'FT_SNAP_GQL_ZENHUB_ISSUES',
                                                         fetcherConfig: {
                                                             workspaceId: 'workspace-id',
                                                         },
@@ -84,7 +84,7 @@ describe('consolidation fetch tasks', () => {
         expect(scopeSpy).toHaveBeenCalledWith('organization-name', scopeId.toString());
         expect(createTaskSpy).toHaveBeenCalledWith(
             {
-                fetcherId: 'FT_GQL_ZENHUB_ISSUES',
+                fetcherId: 'FT_SNAP_GQL_ZENHUB_ISSUES',
                 fetcherConfig: { workspaceId: 'workspace-id' },
                 orgId: orgId.toString(),
                 scopeId: scopeId.toString(),

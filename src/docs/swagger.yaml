@@ -107,11 +107,11 @@ paths:
                                           - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                             metricConfig:
                                                 event:
-                                                    eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                                    eventId: EV_SNAP_GQL_ZENHUB_SNAP_GQL_GITHUB_ISSUES_WITH_BRANCHES_BY_COLUMN
                                                     fetcherConfigs:
-                                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                           fetcherConfig: null
-                                                        - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                        - fetcherId: FT_SNAP_GQL_GITHUB_ISSUES
                                                           fetcherConfig: null
                                                     processConfig: null
                                                 aggregation:
@@ -120,9 +120,9 @@ paths:
                                           - metricName: COUNT_INPROGRESS_ISSUES
                                             metricConfig:
                                                 event:
-                                                    eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                                    eventId: EV_SNAP_GQL_ZENHUB_ISSUES_BY_COLUMN_CREATED_AFTER_DATE_ASSIGNED_TO_MEMBER
                                                     fetcherConfigs:
-                                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                           fetcherConfig: null
                                                     processConfig: null
                                                 aggregation:
@@ -178,11 +178,11 @@ paths:
                                         - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                           metricConfig:
                                               event:
-                                                  eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                                  eventId: EV_SNAP_GQL_ZENHUB_SNAP_GQL_GITHUB_ISSUES_WITH_BRANCHES_BY_COLUMN
                                                   fetcherConfigs:
-                                                      - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                      - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                         fetcherConfig: null
-                                                      - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                      - fetcherId: FT_SNAP_GQL_GITHUB_ISSUES
                                                         fetcherConfig: null
                                                   processConfig: null
                                               aggregation:
@@ -191,9 +191,9 @@ paths:
                                         - metricName: COUNT_INPROGRESS_ISSUES
                                           metricConfig:
                                               event:
-                                                  eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                                  eventId: EV_SNAP_GQL_ZENHUB_ISSUES_BY_COLUMN_CREATED_AFTER_DATE_ASSIGNED_TO_MEMBER
                                                   fetcherConfigs:
-                                                      - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                      - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                         fetcherConfig: null
                                                   processConfig: null
                                               aggregation:
@@ -280,11 +280,11 @@ paths:
                                         - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                           metricConfig:
                                               event:
-                                                  eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                                  eventId: EV_SNAP_GQL_ZENHUB_SNAP_GQL_GITHUB_ISSUES_WITH_BRANCHES_BY_COLUMN
                                                   fetcherConfigs:
-                                                      - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                      - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                         fetcherConfig: null
-                                                      - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                      - fetcherId: FT_SNAP_GQL_GITHUB_ISSUES
                                                         fetcherConfig: null
                                                   processConfig: null
                                               aggregation:
@@ -293,9 +293,9 @@ paths:
                                         - metricName: COUNT_INPROGRESS_ISSUES
                                           metricConfig:
                                               event:
-                                                  eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                                  eventId: EV_SNAP_GQL_ZENHUB_ISSUES_BY_COLUMN_CREATED_AFTER_DATE_ASSIGNED_TO_MEMBER
                                                   fetcherConfigs:
-                                                      - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                      - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                         fetcherConfig: null
                                                   processConfig: null
                                               aggregation:
@@ -1532,11 +1532,11 @@ paths:
                                                         - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                                           metricConfig:
                                                               event:
-                                                                  eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                                                  eventId: EV_SNAP_GQL_ZENHUB_SNAP_GQL_GITHUB_ISSUES_WITH_BRANCHES_BY_COLUMN
                                                                   fetcherConfigs:
-                                                                      - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                                      - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                                         fetcherConfig: null
-                                                                      - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                                      - fetcherId: FT_SNAP_GQL_GITHUB_ISSUES
                                                                         fetcherConfig: null
                                                                   processConfig: null
                                                               aggregation:
@@ -1545,9 +1545,9 @@ paths:
                                                         - metricName: COUNT_INPROGRESS_ISSUES
                                                           metricConfig:
                                                               event:
-                                                                  eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                                                  eventId: EV_SNAP_GQL_ZENHUB_ISSUES_BY_COLUMN_CREATED_AFTER_DATE_ASSIGNED_TO_MEMBER
                                                                   fetcherConfigs:
-                                                                      - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                                      - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                                         fetcherConfig: null
                                                                   processConfig: null
                                                               aggregation:
@@ -1556,11 +1556,11 @@ paths:
                                                 metrics:
                                                     - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                                       fetcherConfigs:
-                                                          - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                          - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                             fetcherConfig:
                                                                 workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                                                 token: YOUR_ZENHUB_TOKEN
-                                                          - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                          - fetcherId: FT_SNAP_GQL_GITHUB_ISSUES
                                                             fetcherConfig:
                                                                 owner: universidad-sevilla
                                                                 repository: L1-01-project
@@ -1570,7 +1570,7 @@ paths:
                                                               - In Progress
                                                     - metricName: COUNT_INPROGRESS_ISSUES
                                                       fetcherConfigs:
-                                                          - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                          - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                             fetcherConfig:
                                                                 workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                                                 token: YOUR_ZENHUB_TOKEN
@@ -1712,11 +1712,11 @@ paths:
                                                       - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                                         metricConfig:
                                                             event:
-                                                                eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                                                eventId: EV_SNAP_GQL_ZENHUB_SNAP_GQL_GITHUB_ISSUES_WITH_BRANCHES_BY_COLUMN
                                                                 fetcherConfigs:
-                                                                    - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                                    - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                                       fetcherConfig: null
-                                                                    - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                                    - fetcherId: FT_SNAP_GQL_GITHUB_ISSUES
                                                                       fetcherConfig: null
                                                                 processConfig: null
                                                             aggregation:
@@ -1725,9 +1725,9 @@ paths:
                                                       - metricName: COUNT_INPROGRESS_ISSUES
                                                         metricConfig:
                                                             event:
-                                                                eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                                                eventId: EV_SNAP_GQL_ZENHUB_ISSUES_BY_COLUMN_CREATED_AFTER_DATE_ASSIGNED_TO_MEMBER
                                                                 fetcherConfigs:
-                                                                    - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                                    - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                                       fetcherConfig: null
                                                                 processConfig: null
                                                             aggregation:
@@ -1736,11 +1736,11 @@ paths:
                                               metrics:
                                                   - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                                     fetcherConfigs:
-                                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                           fetcherConfig:
                                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                                               token: YOUR_ZENHUB_TOKEN
-                                                        - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                        - fetcherId: FT_SNAP_GQL_GITHUB_ISSUES
                                                           fetcherConfig:
                                                               owner: universidad-sevilla
                                                               repository: L1-01-project
@@ -1750,7 +1750,7 @@ paths:
                                                             - In Progress
                                                   - metricName: COUNT_INPROGRESS_ISSUES
                                                     fetcherConfigs:
-                                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                           fetcherConfig:
                                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                                               token: YOUR_ZENHUB_TOKEN
@@ -2230,9 +2230,9 @@ paths:
                                             errorMessage: null
                                             metricConfig:
                                                 event:
-                                                    eventId: EV_ZENHUB_ISSUES_BY_COLUMN_FILTERED_BY_UPDATED_AT_DATE_ASSOCIATED_TO_MEMBER
+                                                    eventId: EV_SNAP_GQL_ZENHUB_ISSUES_UPDATED_IN_PERIOD_BY_COLUMN_ASSIGNED_TO_MEMBER
                                                     fetcherConfigs:
-                                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                           fetcherConfig:
                                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                                           fetchResult:
@@ -2431,9 +2431,9 @@ paths:
                                             errorMessage: null
                                             metricConfig:
                                                 event:
-                                                    eventId: EV_ZENHUB_ISSUES_BY_COLUMN_FILTERED_BY_UPDATED_AT_DATE_ASSOCIATED_TO_MEMBER
+                                                    eventId: EV_SNAP_GQL_ZENHUB_ISSUES_UPDATED_IN_PERIOD_BY_COLUMN_ASSIGNED_TO_MEMBER
                                                     fetcherConfigs:
-                                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                           fetcherConfig:
                                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                                           fetchResult:
@@ -2498,9 +2498,9 @@ paths:
                                             errorMessage: null
                                             metricConfig:
                                                 event:
-                                                    eventId: EV_ZENHUB_ISSUES_BY_COLUMN_FILTERED_BY_UPDATED_AT_DATE_ASSOCIATED_TO_MEMBER
+                                                    eventId: EV_SNAP_GQL_ZENHUB_ISSUES_UPDATED_IN_PERIOD_BY_COLUMN_ASSIGNED_TO_MEMBER
                                                     fetcherConfigs:
-                                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                           fetcherConfig:
                                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                                           fetchResult:
@@ -3101,7 +3101,7 @@ paths:
                                 httpStatus: 200
                                 appCode: SUCCESS
                                 data:
-                                    - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                    - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                       fetcherConfig:
                                           workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                       consolidationDates:
@@ -3179,7 +3179,7 @@ paths:
                                     - _id: 665e5f6a7b8c9d0e1f2a3b5a
                                       script: fetchFetcher
                                       inputArgs:
-                                          fetcherId: FT_GQL_ZENHUB_ISSUES
+                                          fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                           fetcherConfig:
                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                           orgId: 665e5f6a7b8c9d0e1f2a3b40
@@ -3637,11 +3637,11 @@ components:
                               metrics:
                                   - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                           fetcherConfig:
                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                               token: YOUR_ZENHUB_TOKEN
-                                        - fetcherId: FT_GQL_GITHUB_ISSUES
+                                        - fetcherId: FT_SNAP_GQL_GITHUB_ISSUES
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3651,7 +3651,7 @@ components:
                                             - In Progress
                                   - metricName: COUNT_INPROGRESS_ISSUES
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                           fetcherConfig:
                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                               token: YOUR_ZENHUB_TOKEN
@@ -3664,11 +3664,11 @@ components:
                               metrics:
                                   - metricName: COUNT_BRANCHES_ASSOCIATED_TO_INPROGRESS_ISSUES
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                           fetcherConfig:
                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                               token: YOUR_ZENHUB_TOKEN
-                                        - fetcherId: FT_GQL_GITHUB_ISSUES
+                                        - fetcherId: FT_SNAP_GQL_GITHUB_ISSUES
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3678,7 +3678,7 @@ components:
                                             - In Progress
                                   - metricName: COUNT_INPROGRESS_ISSUES
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                           fetcherConfig:
                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                               token: YOUR_ZENHUB_TOKEN
@@ -3691,11 +3691,11 @@ components:
                               metrics:
                                   - metricName: COUNT_INREVIEW_ISSUES_WITH_ASSOCIATED_OPEN_PR
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                           fetcherConfig:
                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                               token: YOUR_ZENHUB_TOKEN
-                                        - fetcherId: FT_GQL_GITHUB_ISSUES
+                                        - fetcherId: FT_SNAP_GQL_GITHUB_ISSUES
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3706,7 +3706,7 @@ components:
                                         status: OPEN
                                   - metricName: COUNT_INREVIEW_ISSUES
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                           fetcherConfig:
                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                               token: YOUR_ZENHUB_TOKEN
@@ -3719,11 +3719,11 @@ components:
                               metrics:
                                   - metricName: COUNT_DONE_ISSUES_WITH_ASSOCIATED_CLOSED_PR
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                           fetcherConfig:
                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                               token: YOUR_ZENHUB_TOKEN
-                                        - fetcherId: FT_GQL_GITHUB_ISSUES
+                                        - fetcherId: FT_SNAP_GQL_GITHUB_ISSUES
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3735,7 +3735,7 @@ components:
                                         status: MERGED
                                   - metricName: COUNT_DONE_ISSUES
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                           fetcherConfig:
                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                               token: YOUR_ZENHUB_TOKEN
@@ -3749,7 +3749,7 @@ components:
                               metrics:
                                   - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_TEAM
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                        - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3758,7 +3758,7 @@ components:
                                         reviewState: APPROVED
                                   - metricName: COUNT_PR_MERGED_TEAM
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                        - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3770,7 +3770,7 @@ components:
                               metrics:
                                   - metricName: COUNT_INPROGRESSISSUES_MEMBER
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                           fetcherConfig:
                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                               token: YOUR_ZENHUB_TOKEN
@@ -3784,7 +3784,7 @@ components:
                               metrics:
                                   - metricName: COUNT_INPROGRESSISSUES_MEMBER
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                           fetcherConfig:
                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                               token: YOUR_ZENHUB_TOKEN
@@ -3798,7 +3798,7 @@ components:
                               metrics:
                                   - metricName: COUNT_DONEISSUES_MEMBER
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                           fetcherConfig:
                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                               token: YOUR_ZENHUB_TOKEN
@@ -3813,7 +3813,7 @@ components:
                               metrics:
                                   - metricName: COUNT_DONEISSUES_MEMBER
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                        - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                           fetcherConfig:
                                               workspaceId: YOUR_ZENHUB_WORKSPACE_ID
                                               token: YOUR_ZENHUB_TOKEN
@@ -3828,7 +3828,7 @@ components:
                               metrics:
                                   - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                        - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3838,7 +3838,7 @@ components:
                                         username: member1
                                   - metricName: COUNT_PR_MERGED_MEMBER
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                        - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3851,7 +3851,7 @@ components:
                               metrics:
                                   - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                        - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3861,7 +3861,7 @@ components:
                                         username: member2
                                   - metricName: COUNT_PR_MERGED_MEMBER
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                        - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3874,7 +3874,7 @@ components:
                               metrics:
                                   - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                        - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3888,7 +3888,7 @@ components:
                               metrics:
                                   - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                        - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3902,7 +3902,7 @@ components:
                               metrics:
                                   - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                        - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3911,7 +3911,7 @@ components:
                                         username: member1
                                   - metricName: COUNT_PR
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                        - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3924,7 +3924,7 @@ components:
                               metrics:
                                   - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                        - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3933,7 +3933,7 @@ components:
                                         username: member2
                                   - metricName: COUNT_PR
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                        - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3946,7 +3946,7 @@ components:
                               metrics:
                                   - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                        - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3959,7 +3959,7 @@ components:
                               metrics:
                                   - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
                                     fetcherConfigs:
-                                        - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                        - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                           fetcherConfig:
                                               owner: universidad-sevilla
                                               repository: L1-01-project
@@ -3991,11 +3991,11 @@ components:
                                     - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                                       metricConfig:
                                           event:
-                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                              eventId: EV_SNAP_GQL_ZENHUB_SNAP_GQL_GITHUB_ISSUES_WITH_BRANCHES_BY_COLUMN
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                  - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                     fetcherConfig: null
-                                                  - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                  - fetcherId: FT_SNAP_GQL_GITHUB_ISSUES
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4004,9 +4004,9 @@ components:
                                     - metricName: COUNT_INPROGRESS_ISSUES
                                       metricConfig:
                                           event:
-                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                              eventId: EV_SNAP_GQL_ZENHUB_ISSUES_BY_COLUMN_CREATED_AFTER_DATE_ASSIGNED_TO_MEMBER
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                  - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4028,11 +4028,11 @@ components:
                                     - metricName: COUNT_BRANCHES_ASSOCIATED_TO_INPROGRESS_ISSUES
                                       metricConfig:
                                           event:
-                                              eventId: EV_ZENHUB_ISSUES_WITH_DIFFERENT_BRANCHES_BY_COLUMN
+                                              eventId: EV_SNAP_GQL_ZENHUB_SNAP_GQL_GITHUB_ISSUES_WITH_DIFFERENT_BRANCHES_BY_COLUMN
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                  - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                     fetcherConfig: null
-                                                  - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                  - fetcherId: FT_SNAP_GQL_GITHUB_ISSUES
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4041,9 +4041,9 @@ components:
                                     - metricName: COUNT_INPROGRESS_ISSUES
                                       metricConfig:
                                           event:
-                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                              eventId: EV_SNAP_GQL_ZENHUB_ISSUES_BY_COLUMN_CREATED_AFTER_DATE_ASSIGNED_TO_MEMBER
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                  - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4065,11 +4065,11 @@ components:
                                     - metricName: COUNT_INREVIEW_ISSUES_WITH_ASSOCIATED_OPEN_PR
                                       metricConfig:
                                           event:
-                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_PULL_REQUESTS_BY_STATUS
+                                              eventId: EV_SNAP_GQL_ZENHUB_SNAP_GQL_GITHUB_ISSUES_WITH_PULL_REQUESTS_BY_STATUS_BY_COLUMN_CREATED_AFTER_DATE
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                  - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                     fetcherConfig: null
-                                                  - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                  - fetcherId: FT_SNAP_GQL_GITHUB_ISSUES
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4078,9 +4078,9 @@ components:
                                     - metricName: COUNT_INREVIEW_ISSUES
                                       metricConfig:
                                           event:
-                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                              eventId: EV_SNAP_GQL_ZENHUB_ISSUES_BY_COLUMN_CREATED_AFTER_DATE_ASSIGNED_TO_MEMBER
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                  - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4102,11 +4102,11 @@ components:
                                     - metricName: COUNT_DONE_ISSUES_WITH_ASSOCIATED_CLOSED_PR
                                       metricConfig:
                                           event:
-                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_PULL_REQUESTS_BY_STATUS
+                                              eventId: EV_SNAP_GQL_ZENHUB_SNAP_GQL_GITHUB_ISSUES_WITH_PULL_REQUESTS_BY_STATUS_BY_COLUMN_CREATED_AFTER_DATE
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                  - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                     fetcherConfig: null
-                                                  - fetcherId: FT_GQL_GITHUB_ISSUES
+                                                  - fetcherId: FT_SNAP_GQL_GITHUB_ISSUES
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4115,9 +4115,9 @@ components:
                                     - metricName: COUNT_DONE_ISSUES
                                       metricConfig:
                                           event:
-                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                              eventId: EV_SNAP_GQL_ZENHUB_ISSUES_BY_COLUMN_CREATED_AFTER_DATE_ASSIGNED_TO_MEMBER
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                  - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4139,9 +4139,9 @@ components:
                                     - metricName: COUNT_INPROGRESSISSUES_MEMBER
                                       metricConfig:
                                           event:
-                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                              eventId: EV_SNAP_GQL_ZENHUB_ISSUES_BY_COLUMN_CREATED_AFTER_DATE_ASSIGNED_TO_MEMBER
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                  - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4163,9 +4163,9 @@ components:
                                     - metricName: COUNT_DONEISSUES_MEMBER
                                       metricConfig:
                                           event:
-                                              eventId: EV_ZENHUB_ISSUES_BY_COLUMN_FILTERED_BY_UPDATED_AT_DATE_ASSOCIATED_TO_MEMBER
+                                              eventId: EV_SNAP_GQL_ZENHUB_ISSUES_UPDATED_IN_PERIOD_BY_COLUMN_ASSIGNED_TO_MEMBER
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                                  - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4187,9 +4187,9 @@ components:
                                     - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_TEAM
                                       metricConfig:
                                           event:
-                                              eventId: EV_GITHUB_MERGED_PR_BY_REVIEW_STATE
+                                              eventId: EV_HIST_GQL_GITHUB_MERGED_PULL_REQUESTS_WITH_REVIEWS_BY_STATE_MERGED_BY_MEMBER
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                  - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4198,9 +4198,9 @@ components:
                                     - metricName: COUNT_PR_MERGED_TEAM
                                       metricConfig:
                                           event:
-                                              eventId: EV_GITHUB_PR_MERGED
+                                              eventId: EV_HIST_GQL_GITHUB_MERGED_PULL_REQUESTS_MERGED_BY_MEMBER
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                  - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4222,9 +4222,9 @@ components:
                                     - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
                                       metricConfig:
                                           event:
-                                              eventId: EV_GITHUB_MERGED_PR_BY_REVIEW_STATE
+                                              eventId: EV_HIST_GQL_GITHUB_MERGED_PULL_REQUESTS_WITH_REVIEWS_BY_STATE_MERGED_BY_MEMBER
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                  - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4233,9 +4233,9 @@ components:
                                     - metricName: COUNT_PR_MERGED_MEMBER
                                       metricConfig:
                                           event:
-                                              eventId: EV_GITHUB_PR_MERGED
+                                              eventId: EV_HIST_GQL_GITHUB_MERGED_PULL_REQUESTS_MERGED_BY_MEMBER
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                  - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4257,9 +4257,9 @@ components:
                                     - metricName: COUNT_MERGED_PR_WITH_POSITIVE_REVIEWS_MEMBER
                                       metricConfig:
                                           event:
-                                              eventId: EV_GITHUB_MERGED_PR_BY_REVIEW_STATE
+                                              eventId: EV_HIST_GQL_GITHUB_MERGED_PULL_REQUESTS_WITH_REVIEWS_BY_STATE_MERGED_BY_MEMBER
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                  - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4281,9 +4281,9 @@ components:
                                     - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
                                       metricConfig:
                                           event:
-                                              eventId: EV_GITHUB_PRS_WITH_COMMENT_OR_REVIEW_BY_MEMBER
+                                              eventId: EV_HIST_GQL_GITHUB_REVIEWABLE_PULL_REQUESTS_COMMENTED_OR_REVIEWED_BY_MEMBER
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                  - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4292,9 +4292,9 @@ components:
                                     - metricName: COUNT_PR
                                       metricConfig:
                                           event:
-                                              eventId: EV_GITHUB_PRS_FROM_OTHERS
+                                              eventId: EV_HIST_GQL_GITHUB_REVIEWABLE_PULL_REQUESTS_NOT_AUTHORED_BY_MEMBER
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                  - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4316,9 +4316,9 @@ components:
                                     - metricName: COUNT_PRS_WITH_AT_LEAST_ONE_COMMENT_OR_ONE_REVIEW_COMMENT_BY_MEMBER
                                       metricConfig:
                                           event:
-                                              eventId: EV_GITHUB_PRS_WITH_COMMENT_OR_REVIEW_BY_MEMBER
+                                              eventId: EV_HIST_GQL_GITHUB_REVIEWABLE_PULL_REQUESTS_COMMENTED_OR_REVIEWED_BY_MEMBER
                                               fetcherConfigs:
-                                                  - fetcherId: FT_GQL_GITHUB_PULL_REQUESTS
+                                                  - fetcherId: FT_HIST_GQL_GITHUB_PULL_REQUESTS
                                                     fetcherConfig: null
                                               processConfig: null
                                           aggregation:
@@ -4343,11 +4343,11 @@ components:
                             - metricName: COUNT_INPROGRESS_ISSUES_WITH_ASSOCIATED_BRANCHES
                               metricConfig:
                                   event:
-                                      eventId: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                      eventId: EV_SNAP_GQL_ZENHUB_SNAP_GQL_GITHUB_ISSUES_WITH_BRANCHES_BY_COLUMN
                                       fetcherConfigs:
-                                          - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                          - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                             fetcherConfig: null
-                                          - fetcherId: FT_GQL_GITHUB_ISSUES
+                                          - fetcherId: FT_SNAP_GQL_GITHUB_ISSUES
                                             fetcherConfig: null
                                       processConfig: null
                                   aggregation:
@@ -4356,9 +4356,9 @@ components:
                             - metricName: COUNT_INPROGRESS_ISSUES
                               metricConfig:
                                   event:
-                                      eventId: EV_ZENHUB_ISSUES_BY_COLUMN
+                                      eventId: EV_SNAP_GQL_ZENHUB_ISSUES_BY_COLUMN_CREATED_AFTER_DATE_ASSIGNED_TO_MEMBER
                                       fetcherConfigs:
-                                          - fetcherId: FT_GQL_ZENHUB_ISSUES
+                                          - fetcherId: FT_SNAP_GQL_ZENHUB_ISSUES
                                             fetcherConfig: null
                                       processConfig: null
                                   aggregation:
@@ -5663,7 +5663,7 @@ components:
                                 eventId:
                                     type: string
                                     description: Event ID registered in the computer
-                                    example: EV_ZENHUB_ISSUES_BY_COLUMN_WITH_ASSOCIATED_BRANCHES
+                                    example: EV_SNAP_GQL_ZENHUB_SNAP_GQL_GITHUB_ISSUES_WITH_BRANCHES_BY_COLUMN
                                 fetcherConfigs:
                                     type: array
                                     minItems: 1
@@ -5675,7 +5675,7 @@ components:
                                             fetcherId:
                                                 type: string
                                                 description: Fetcher ID registered in the fetcher
-                                                example: FT_GQL_ZENHUB_ISSUES
+                                                example: FT_SNAP_GQL_ZENHUB_ISSUES
                                             fetcherConfig:
                                                 type: object
                                                 nullable: true
@@ -5790,7 +5790,7 @@ components:
                         properties:
                             fetcherId:
                                 type: string
-                                example: FT_GQL_ZENHUB_ISSUES
+                                example: FT_SNAP_GQL_ZENHUB_ISSUES
                             fetcherConfig:
                                 type: object
                                 description: Full fetcher configuration (credentials, repository, etc.)
@@ -6218,7 +6218,7 @@ components:
                             properties:
                                 eventId:
                                     type: string
-                                    example: EV_ZENHUB_ISSUES_BY_COLUMN_FILTERED_BY_UPDATED_AT_DATE_ASSOCIATED_TO_MEMBER
+                                    example: EV_SNAP_GQL_ZENHUB_ISSUES_UPDATED_IN_PERIOD_BY_COLUMN_ASSIGNED_TO_MEMBER
                                 fetcherConfigs:
                                     type: array
                                     items:
@@ -6226,7 +6226,7 @@ components:
                                         properties:
                                             fetcherId:
                                                 type: string
-                                                example: FT_GQL_ZENHUB_ISSUES
+                                                example: FT_SNAP_GQL_ZENHUB_ISSUES
                                             fetcherConfig:
                                                 type: object
                                                 nullable: true
@@ -6342,7 +6342,7 @@ components:
             properties:
                 fetcherId:
                     type: string
-                    example: FT_GQL_ZENHUB_ISSUES
+                    example: FT_SNAP_GQL_ZENHUB_ISSUES
                 fetcherConfig:
                     type: object
                     additionalProperties: true
@@ -6406,7 +6406,7 @@ components:
             properties:
                 fetcherId:
                     type: string
-                    example: FT_GQL_ZENHUB_ISSUES
+                    example: FT_SNAP_GQL_ZENHUB_ISSUES
                 fetcherConfig:
                     type: object
                     additionalProperties: true
